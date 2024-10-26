@@ -118,13 +118,6 @@ CREATE TABLE IF NOT EXISTS meal_diet_day_admin (
                                                    meal_id INT REFERENCES meals(meal_id) ON DELETE CASCADE
 );
 
-
--- Таблица категорий упражнений
-CREATE TABLE IF NOT EXISTS exercise_categories (
-                                                   exercise_category_id SERIAL PRIMARY KEY,
-                                                   category_name VARCHAR NOT NULL
-);
-
 -- Таблица дней диеты пользователя
 CREATE TABLE IF NOT EXISTS diet_day_user (
                                              diet_day_user_id SERIAL PRIMARY KEY,
