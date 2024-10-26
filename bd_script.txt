@@ -1,119 +1,129 @@
 CREATE TABLE users (
-    user_id SERIAL PRIMARY KEY,
-    login VARCHAR(20) NOT NULL,
-    password VARCHAR(20) NOT NULL,
-    registration_date DATE,
-    age INT CHECK (age > 0),
-    height REAL CHECK (height > 0),
-    goal VARCHAR,
-    fitness_level INT CHECK (fitness_level BETWEEN 1 AND 3),
-    available_days INT CHECK (available_days BETWEEN 1 AND 7),
-    role VARCHAR NOT NULL
+                       user_id SERIAL PRIMARY KEY,
+                       login VARCHAR(20) NOT NULL,
+                       password VARCHAR(20) NOT NULL,
+                       registration_date DATE,
+                       age INT CHECK (age > 0),
+                       height REAL CHECK (height > 0),
+                       goal VARCHAR,
+                       fitness_level INT CHECK (fitness_level BETWEEN 1 AND 3),
+                       available_days INT CHECK (available_days BETWEEN 1 AND 7),
+                       role VARCHAR NOT NULL
 );
 
 CREATE TABLE weight_journal (
-    weight_journal_id SERIAL PRIMARY KEY,
-    user_id REFERENCES users(user_id),
-    weight REAL NOT NULL CHECK (wegith > 0),
-    weight_date DATE
+                                weight_journal_id SERIAL PRIMARY KEY,
+                                user_id INT REFERENCES users(user_id),
+                                weight REAL NOT NULL CHECK (weight > 0),
+                                weight_date DATE
 );
 
 CREATE TABLE achievement (
-    achievement_id SERIAL PRIMARY KEY,
-    created_by INT REFERENCES user(user_id),
-    name VARHCAR NOT NULL,
-    description VARCHAR,
-    when_created DATE
+                             achievement_id SERIAL PRIMARY KEY,
+                             created_by INT REFERENCES users(user_id),
+                             name VARCHAR NOT NULL,
+                             description VARCHAR,
+                             when_created DATE
 );
 
 CREATE TABLE user_achievement (
-    user_achievement SERIAL PRIMARY KEY,
-    user_id INT REFERENCES user(user_id),
-    achievement_id INT REFERENCES achievement(achievement_id)
+                                  user_achievement SERIAL PRIMARY KEY,
+                                  user_id INT REFERENCES users(user_id),
+                                  achievement_id INT REFERENCES achievement(achievement_id)
 );
 
 CREATE TABLE exercises (
-    exercise_id SERIAL PRIMARY KEY,
-    created_by INT REFERENCES users(user_id),
-    when_created DATE,
-    name VARCHAR NOT NULL,
-    muscle_group VARCHAR NOT NULL,
-    description VARCHAR
+                           exercise_id SERIAL PRIMARY KEY,
+                           created_by INT REFERENCES users(user_id),
+                           when_created DATE,
+                           name VARCHAR NOT NULL,
+                           muscle_group VARCHAR NOT NULL,
+                           description VARCHAR
 );
 
 CREATE TABLE exercise_working_weight (
-    exercise_working_weight_id SERIAL PRIMARY KEY,
-    exercise_id INT REFERENCES exercises(exercise_id),
-    weight REAL CHECK (weight > 0),
-    weight_date DATE
+                                         exercise_working_weight_id SERIAL PRIMARY KEY,
+                                         exercise_id INT REFERENCES exercises(exercise_id),
+                                         weight REAL CHECK (weight > 0),
+                                         weight_date DATE
 );
 
 CREATE TABLE training_day (
-    training_day_id SERIAL PRIMARY KEY,
-    user_id INT REFERENCES users(user_id),
-    training_date DATE
+                              training_day_id SERIAL PRIMARY KEY,
+                              user_id INT REFERENCES users(user_id),
+                              training_date DATE
 );
 
 CREATE TABLE exercise_training_day (
-    exercise_training_day SERIAL PRIMARY KEY,
-    training_day_id INT REFERENCES training_day(training_day_id),
-    exercise_id INT REFERENCES exercise(exercise_id)
+                                       exercise_training_day SERIAL PRIMARY KEY,
+                                       training_day_id INT REFERENCES training_day(training_day_id),
+                                       exercise_id INT REFERENCES exercise(exercise_id)
 );
+
+
 
 -- Таблица питания
 CREATE TABLE meals (
-    meal_id SERIAL PRIMARY KEY,
-    created_by INT REFERENCES users(user_id),
-    when_created DATE,
-    name VARCHAR NOT NULL,
-    calories REAL,
-    protein REAL,
-    fats REAL,
-    carbs REAL
+                       meal_id SERIAL PRIMARY KEY,
+                       created_by INT REFERENCES users(user_id),
+                       when_created DATE DEFAULT CURRENT_DATE,
+                       name VARCHAR NOT NULL,
+                       calories REAL CHECK (calories > 0),  -- Калории должны быть больше 0
+                       protein REAL CHECK (protein >= 0),  -- Белок должен быть неотрицательным
+                       fats REAL CHECK (fats >= 0),  -- Жиры должны быть неотрицательными
+                       carbs REAL CHECK (carbs >= 0)  -- Углеводы должны быть неотрицательными
 );
 
 -- Таблица дней диеты пользователя
 CREATE TABLE diet_day_user (
-    diet_day_user_id SERIAL PRIMARY KEY,
-    diet_day_id INT,
-    user_id INT REFERENCES users(user_id),
-    rate REAL,
-    day_date DATE
+                               diet_day_user_id SERIAL PRIMARY KEY,
+                               diet_day_id INT REFERENCES diet_day_admin(diet_day_admin_id),
+                               user_id INT REFERENCES users(user_id),
+                               rate REAL CHECK (rate BETWEEN 0 AND 1),  -- Коэффициент должен быть в пределах от 0 до 1
+                               day_date DATE DEFAULT CURRENT_DATE  -- Дата по умолчанию - текущая дата
 );
-
-
 
 -- Таблица аллергий
 CREATE TABLE allergies (
-    allergy_id SERIAL PRIMARY KEY,
-    allergy_name VARCHAR NOT NULL
+                           allergy_id SERIAL PRIMARY KEY,
+                           created_by INT REFERENCES users(user_id),
+                           when_created DATE DEFAULT CURRENT_DATE,
+                           name VARCHAR NOT NULL UNIQUE  -- Название аллергии должно быть уникальным
 );
 
--- Связь аллергий и еды
-CREATE TABLE meal_allergies (
-    meal_allergy_id SERIAL PRIMARY KEY,
-    meal_id INT REFERENCES meals(meal_id),
-    allergy_id INT REFERENCES allergies(allergy_id)
+-- Таблица пользовательских аллергий
+CREATE TABLE user_allergy (
+                              user_allergy_id SERIAL PRIMARY KEY,
+                              user_id INT REFERENCES users(user_id) ON DELETE CASCADE,
+                              allergy_id INT REFERENCES allergies(allergy_id) ON DELETE CASCADE
 );
 
--- Таблица диетических планов
-CREATE TABLE diet_plans (
-    diet_plan_id SERIAL PRIMARY KEY,
-    user_id INT REFERENCES users(user_id),
-    start_date DATE,
-    end_date DATE
+-- Таблица связей аллергии и блюда
+CREATE TABLE allergy_meal (
+                              allergy_meal_id SERIAL PRIMARY KEY,
+                              meal_id INT REFERENCES meals(meal_id) ON DELETE CASCADE,
+                              allergy_id INT REFERENCES allergies(allergy_id) ON DELETE CASCADE
 );
 
--- Таблица приемов пищи в диетическом плане
-CREATE TABLE diet_plan_meals (
-    diet_plan_meal_id SERIAL PRIMARY KEY,
-    diet_plan_id INT REFERENCES diet_plans(diet_plan_id),
-    meal_id INT REFERENCES meals(meal_id),
-    portion_size REAL
+-- Таблица блюд для диетических дней админа
+CREATE TABLE meal_diet_day_admin (
+                                     meal_diet_day_admin_id SERIAL PRIMARY KEY,
+                                     diet_day_admin_id INT REFERENCES diet_day_admin(diet_day_admin_id) ON DELETE CASCADE,
+                                     meal_id INT REFERENCES meals(meal_id) ON DELETE CASCADE
+);
+
+-- Таблица диетических дней для админа
+CREATE TABLE diet_day_admin (
+                                diet_day_admin_id SERIAL PRIMARY KEY,
+                                created_by INT REFERENCES users(user_id),  -- Только администратор может создать
+                                when_created DATE DEFAULT CURRENT_DATE,
+                                name VARCHAR NOT NULL,
+                                calories REAL NOT NULL CHECK (calories > 0),  -- Калории больше 0
+                                portion_size REAL CHECK (portion_size > 0)  -- Размер порции больше 0
 );
 
 -- Таблица категорий упражнений
 CREATE TABLE exercise_categories (
-    exercise_category_id SERIAL PRIMARY KEY,
-    category_name VARCHAR NOT NULL
+                                     exercise_category_id SERIAL PRIMARY KEY,
+                                     category_name VARCHAR NOT NULL
 );
