@@ -1,18 +1,37 @@
--- Таблица пользователей
 CREATE TABLE users (
     user_id SERIAL PRIMARY KEY,
     login VARCHAR(20) NOT NULL,
     password VARCHAR(20) NOT NULL,
     registration_date DATE,
-    age INT,
-    height REAL,
+    age INT CHECK (age > 0),
+    height REAL CHECK (height > 0),
     goal VARCHAR,
-    fitness_level INT,
-    available_days INT,
+    fitness_level INT CHECK (fitness_level BETWEEN 1 AND 3),
+    available_days INT CHECK (available_days BETWEEN 1 AND 7),
     role VARCHAR NOT NULL
 );
 
--- Таблица упражнений
+CREATE TABLE weight_journal (
+    weight_journal_id SERIAL PRIMARY KEY,
+    user_id REFERENCES users(user_id),
+    weight REAL NOT NULL CHECK (wegith > 0),
+    weight_date DATE
+);
+
+CREATE TABLE achievement (
+    achievement_id SERIAL PRIMARY KEY,
+    created_by INT REFERENCES user(user_id),
+    name VARHCAR NOT NULL,
+    description VARCHAR,
+    when_created DATE
+);
+
+CREATE TABLE user_achievement (
+    user_achievement SERIAL PRIMARY KEY,
+    user_id INT REFERENCES user(user_id),
+    achievement_id INT REFERENCES achievement(achievement_id)
+);
+
 CREATE TABLE exercises (
     exercise_id SERIAL PRIMARY KEY,
     created_by INT REFERENCES users(user_id),
@@ -22,11 +41,23 @@ CREATE TABLE exercises (
     description VARCHAR
 );
 
--- Таблица тренировочных дней
-CREATE TABLE training_days (
+CREATE TABLE exercise_working_weight (
+    exercise_working_weight_id SERIAL PRIMARY KEY,
+    exercise_id INT REFERENCES exercises(exercise_id),
+    weight REAL CHECK (weight > 0),
+    weight_date DATE
+);
+
+CREATE TABLE training_day (
     training_day_id SERIAL PRIMARY KEY,
     user_id INT REFERENCES users(user_id),
     training_date DATE
+);
+
+CREATE TABLE exercise_training_day (
+    exercise_training_day SERIAL PRIMARY KEY,
+    training_day_id INT REFERENCES training_day(training_day_id),
+    exercise_id INT REFERENCES exercise(exercise_id)
 );
 
 -- Таблица питания
@@ -50,44 +81,7 @@ CREATE TABLE diet_day_user (
     day_date DATE
 );
 
--- Таблица веса для работы с упражнениями
-CREATE TABLE exercise_working_weight (
-    exercise_working_weight_id SERIAL PRIMARY KEY,
-    exercise_id INT REFERENCES exercises(exercise_id),
-    weight REAL,
-    date DATE
-);
 
--- Таблица планов тренировок
-CREATE TABLE workout_plans (
-    workout_plan_id SERIAL PRIMARY KEY,
-    user_id INT REFERENCES users(user_id),
-    plan_name VARCHAR NOT NULL,
-    description VARCHAR,
-    created_date DATE
-);
-
--- Таблица упражнений в тренировочном плане
-CREATE TABLE workout_plan_exercises (
-    workout_plan_exercise_id SERIAL PRIMARY KEY,
-    workout_plan_id INT REFERENCES workout_plans(workout_plan_id),
-    exercise_id INT REFERENCES exercises(exercise_id),
-    reps INT,
-    sets INT
-);
-
--- Таблица дней в диете
-CREATE TABLE diet_days (
-    diet_day_id SERIAL PRIMARY KEY,
-    user_id INT REFERENCES users(user_id),
-    day_date DATE
-);
-
--- Таблица типа пищи (для учета аллергий)
-CREATE TABLE meal_types (
-    meal_type_id SERIAL PRIMARY KEY,
-    type_name VARCHAR NOT NULL
-);
 
 -- Таблица аллергий
 CREATE TABLE allergies (
