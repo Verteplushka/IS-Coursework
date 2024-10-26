@@ -1,0 +1,125 @@
+-- Таблица пользователей
+CREATE TABLE users (
+    user_id SERIAL PRIMARY KEY,
+    login VARCHAR(20) NOT NULL,
+    password VARCHAR(20) NOT NULL,
+    registration_date DATE,
+    age INT,
+    height REAL,
+    goal VARCHAR,
+    fitness_level INT,
+    available_days INT,
+    role VARCHAR NOT NULL
+);
+
+-- Таблица упражнений
+CREATE TABLE exercises (
+    exercise_id SERIAL PRIMARY KEY,
+    created_by INT REFERENCES users(user_id),
+    when_created DATE,
+    name VARCHAR NOT NULL,
+    muscle_group VARCHAR NOT NULL,
+    description VARCHAR
+);
+
+-- Таблица тренировочных дней
+CREATE TABLE training_days (
+    training_day_id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(user_id),
+    training_date DATE
+);
+
+-- Таблица питания
+CREATE TABLE meals (
+    meal_id SERIAL PRIMARY KEY,
+    created_by INT REFERENCES users(user_id),
+    when_created DATE,
+    name VARCHAR NOT NULL,
+    calories REAL,
+    protein REAL,
+    fats REAL,
+    carbs REAL
+);
+
+-- Таблица дней диеты пользователя
+CREATE TABLE diet_day_user (
+    diet_day_user_id SERIAL PRIMARY KEY,
+    diet_day_id INT,
+    user_id INT REFERENCES users(user_id),
+    rate REAL,
+    day_date DATE
+);
+
+-- Таблица веса для работы с упражнениями
+CREATE TABLE exercise_working_weight (
+    exercise_working_weight_id SERIAL PRIMARY KEY,
+    exercise_id INT REFERENCES exercises(exercise_id),
+    weight REAL,
+    date DATE
+);
+
+-- Таблица планов тренировок
+CREATE TABLE workout_plans (
+    workout_plan_id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(user_id),
+    plan_name VARCHAR NOT NULL,
+    description VARCHAR,
+    created_date DATE
+);
+
+-- Таблица упражнений в тренировочном плане
+CREATE TABLE workout_plan_exercises (
+    workout_plan_exercise_id SERIAL PRIMARY KEY,
+    workout_plan_id INT REFERENCES workout_plans(workout_plan_id),
+    exercise_id INT REFERENCES exercises(exercise_id),
+    reps INT,
+    sets INT
+);
+
+-- Таблица дней в диете
+CREATE TABLE diet_days (
+    diet_day_id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(user_id),
+    day_date DATE
+);
+
+-- Таблица типа пищи (для учета аллергий)
+CREATE TABLE meal_types (
+    meal_type_id SERIAL PRIMARY KEY,
+    type_name VARCHAR NOT NULL
+);
+
+-- Таблица аллергий
+CREATE TABLE allergies (
+    allergy_id SERIAL PRIMARY KEY,
+    allergy_name VARCHAR NOT NULL
+);
+
+-- Связь аллергий и еды
+CREATE TABLE meal_allergies (
+    meal_allergy_id SERIAL PRIMARY KEY,
+    meal_id INT REFERENCES meals(meal_id),
+    allergy_id INT REFERENCES allergies(allergy_id)
+);
+
+-- Таблица диетических планов
+CREATE TABLE diet_plans (
+    diet_plan_id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(user_id),
+    start_date DATE,
+    end_date DATE
+);
+
+-- Таблица приемов пищи в диетическом плане
+CREATE TABLE diet_plan_meals (
+    diet_plan_meal_id SERIAL PRIMARY KEY,
+    diet_plan_id INT REFERENCES diet_plans(diet_plan_id),
+    meal_id INT REFERENCES meals(meal_id),
+    portion_size REAL
+);
+
+-- Таблица категорий упражнений
+CREATE TABLE exercise_categories (
+    exercise_category_id SERIAL PRIMARY KEY,
+    category_name VARCHAR NOT NULL
+);
