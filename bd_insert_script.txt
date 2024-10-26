@@ -1,0 +1,107 @@
+-- Вставка данных в таблицу пользователей
+INSERT INTO users (login, password, registration_date, age, height, goal, fitness_level, available_days, role)
+VALUES
+    ('user1', 'password123', '2023-01-01', 25, 175.5, 'gain muscle', 2, 4, 'member'),
+    ('user2', 'password456', '2023-02-15', 30, 180.2, 'lose weight', 3, 3, 'admin'),
+    ('user3', 'pass7890', '2023-03-01', 22, 165.0, 'increase endurance', 1, 5, 'member'),
+    ('user4', 'securepass', '2023-04-10', 28, 170.3, 'build strength', 2, 3, 'admin'),
+    ('user5', 'mypassword', '2023-05-20', 35, 160.7, 'improve mobility', 1, 7, 'member'),
+    ('user6', 'passwordabc', '2023-06-15', 40, 175.0, 'weight loss', 3, 6, 'member'),
+    ('user7', 'passwordxyz', '2023-07-01', 27, 180.4, 'muscle toning', 2, 4, 'member'),
+    ('user8', 'safe4567', '2023-08-18', 33, 185.0, 'cardio improvement', 1, 5, 'admin'),
+    ('user9', 'qwerty123', '2023-09-05', 29, 177.0, 'strength gain', 2, 4, 'member'),
+    ('user10', 'zxcvbnm456', '2023-10-12', 26, 169.5, 'general fitness', 1, 5, 'admin');
+
+-- Вставка данных в таблицу журнала веса
+INSERT INTO weight_journal (user_id, weight, weight_date)
+VALUES
+    (1, 80.5, '2023-01-10'), (2, 85.0, '2023-02-18'), (3, 78.2, '2023-03-22'),
+    (4, 82.4, '2023-04-15'), (5, 90.3, '2023-05-19'), (6, 88.5, '2023-06-12'),
+    (7, 75.8, '2023-07-25'), (8, 83.1, '2023-08-18'), (9, 79.6, '2023-09-10'),
+    (10, 85.7, '2023-10-05');
+
+-- Вставка данных в таблицу достижений
+INSERT INTO achievement (created_by, name, description, when_created)
+VALUES
+    (2, 'First Workout', 'Completed the first workout', '2023-01-05'),
+    (4, 'Level 1 Achiever', 'Reached fitness level 1', '2023-02-10'),
+    (8, 'Marathon Runner', 'Completed a marathon', '2023-03-15'),
+    (10, 'Strength Master', 'Bench pressed 100 kg', '2023-04-20'),
+    (1, 'Perfect Attendance', 'No missed workouts for a month', '2023-05-25'),
+    (3, 'Healthy Diet', 'Followed diet plan strictly', '2023-06-30'),
+    (5, 'Weight Loss Goal', 'Lost 5 kg', '2023-07-05'),
+    (6, 'High Intensity', 'Completed 10 HIIT sessions', '2023-08-10'),
+    (7, 'Endurance Goal', 'Increased running distance by 5 km', '2023-09-15'),
+    (9, 'Flexibility Achiever', 'Improved flexibility scores', '2023-10-20');
+
+-- Вставка данных в таблицу достижений пользователя
+INSERT INTO user_achievement (user_id, achievement_id)
+VALUES
+    (1, 1), (2, 2), (3, 3), (4, 4), (5, 5),
+    (6, 6), (7, 7), (8, 8), (9, 9), (10, 10);
+
+-- Вставка данных в таблицу упражнений
+INSERT INTO exercises (created_by, when_created, name, muscle_group, description)
+VALUES
+    (2, '2023-01-02', 'Squat', 'Legs', 'Basic lower body exercise'),
+    (4, '2023-02-10', 'Bench Press', 'Chest', 'Upper body strength exercise'),
+    (6, '2023-03-05', 'Deadlift', 'Back', 'Compound strength exercise'),
+    (8, '2023-04-08', 'Push Up', 'Chest', 'Bodyweight pushing exercise'),
+    (10, '2023-05-15', 'Pull Up', 'Back', 'Bodyweight pulling exercise'),
+    (1, '2023-06-18', 'Lunge', 'Legs', 'Bodyweight leg exercise'),
+    (3, '2023-07-12', 'Bicep Curl', 'Arms', 'Isolated arm exercise'),
+    (5, '2023-08-04', 'Tricep Dip', 'Arms', 'Isolated tricep exercise'),
+    (7, '2023-09-15', 'Leg Press', 'Legs', 'Machine leg exercise'),
+    (9, '2023-10-20', 'Shoulder Press', 'Shoulders', 'Upper body pushing exercise');
+
+-- Вставка данных в таблицу рабочих весов для упражнений
+INSERT INTO exercise_working_weight (exercise_id, weight, weight_date)
+VALUES
+    (1, 50.0, '2023-01-02'), (2, 60.0, '2023-02-15'), (3, 70.0, '2023-03-10'),
+    (4, 20.0, '2023-04-05'), (5, 30.0, '2023-05-18'), (6, 25.0, '2023-06-22'),
+    (7, 40.0, '2023-07-30'), (8, 35.0, '2023-08-20'), (9, 45.0, '2023-09-15'),
+    (10, 55.0, '2023-10-10');
+
+-- Вставка данных в таблицу тренировочных дней
+INSERT INTO training_day (user_id, training_date)
+VALUES
+    (1, '2023-01-10'), (2, '2023-02-15'), (3, '2023-03-12'), (4, '2023-04-18'),
+    (5, '2023-05-22'), (6, '2023-06-30'), (7, '2023-07-05'), (8, '2023-08-15'),
+    (9, '2023-09-25'), (10, '2023-10-20');
+
+-- Вставка данных в таблицу связей упражнений и тренировочных дней
+INSERT INTO exercise_training_day (training_day_id, exercise_id)
+VALUES
+    (1, 1), (2, 2), (3, 3), (4, 4), (5, 5),
+    (6, 6), (7, 7), (8, 8), (9, 9), (10, 10);
+
+-- Вставка данных в таблицу питания
+INSERT INTO meals (created_by, name, calories, protein, fats, carbs)
+VALUES
+    (1, 'Chicken Salad', 350, 30, 15, 20),
+    (2, 'Protein Shake', 200, 20, 5, 10),
+    (3, 'Grilled Fish', 300, 25, 10, 0),
+    (4, 'Steak', 400, 35, 20, 5),
+    (5, 'Greek Yogurt', 150, 15, 5, 10),
+    (6, 'Fruit Smoothie', 250, 5, 5, 40),
+    (7, 'Oatmeal', 200, 10, 5, 30),
+    (8, 'Chicken Breast', 300, 40, 5, 0),
+    (9, 'Salmon', 350, 30, 20, 0),
+    (10, 'Brown Rice', 200, 5, 2, 45);
+
+-- Вставка данных в таблицу аллергий
+INSERT INTO allergies (created_by, name)
+VALUES
+    (1, 'Nuts'), (2, 'Dairy'), (3, 'Gluten'), (4, 'Seafood'),
+    (5, 'Eggs'), (6, 'Soy'), (7, 'Shellfish'), (8, 'Peanuts'),
+    (9, 'Sesame'), (10, 'Wheat');
+
+-- Вставка данных в таблицу пользовательских аллергий
+INSERT INTO user_allergy (user_id, allergy_id)
+VALUES
+    (1, 1), (1, 2), (2, 3);
+
+
+INSERT INTO allergy_meal (meal_id, allergy_id)
+VALUES
+    (1, 1);
