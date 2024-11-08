@@ -1,19 +1,75 @@
-CREATE OR REPLACE FUNCTION register_user(
+CREATE FUNCTION add_user(
     p_login VARCHAR,
     p_password VARCHAR,
     p_age INT,
     p_height REAL,
     p_goal VARCHAR,
     p_fitness_level INT,
-    p_available_days INT,
-    p_role VARCHAR
+    p_available_days INT
 ) RETURNS INT AS $$
 DECLARE
     new_user_id INT;
 BEGIN
-    INSERT INTO users (login, password, age, height, goal, fitness_level, available_days, role)
-    VALUES (p_login, p_password, p_age, p_height, p_goal, p_fitness_level, p_available_days, p_role)
-    RETURNING user_id INTO new_user_id;
+    INSERT INTO users (
+        login, password, age, height, goal, fitness_level, available_days, role
+    ) VALUES (
+        p_login, p_password, p_age, p_height, p_goal, p_fitness_level, p_available_days, 'user'
+    ) RETURNING user_id INTO new_user_id;
+
     RETURN new_user_id;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE FUNCTION add_admin(
+    p_login VARCHAR,
+    p_password VARCHAR
+) RETURNS INT AS $$
+DECLARE
+    new_admin_id INT;
+BEGIN
+    INSERT INTO users (
+        login, password, role
+    ) VALUES (
+        p_login, p_password, 'admin'
+    ) RETURNING user_id INTO new_admin_id;
+
+    RETURN new_admin_id;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE FUNCTION add_exercise(
+    p_created_by INT,
+    p_name VARCHAR,
+    p_muscle_group VARCHAR,
+    p_description VARCHAR
+) RETURNS INT AS $$
+DECLARE
+    new_exercise_id INT;
+BEGIN
+    INSERT INTO exercises (
+        created_by, when_created, name, muscle_group, description
+    ) VALUES (
+        p_created_by, CURRENT_DATE, p_name, p_muscle_group, p_description
+    ) RETURNING exercise_id INTO new_exercise_id;
+
+    RETURN new_exercise_id;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE FUNCTION add_exercise_working_weight(
+    p_exercise_id INT,
+    p_user_id VARCHAR,
+    p_weight INT
+) RETURNS INT AS $$
+DECLARE
+    new_exercise_working_weight_id INT;
+BEGIN
+    INSERT INTO exercise_working_weight (
+        exercise_id, user_id, weight, weight_date
+    ) VALUES (
+        p_exercise_id, p_user_id, p_weight, CURRENT_DATE
+    ) RETURNING exercise_id INTO new_exercise_working_weight_id;
+
+    RETURN new_exercise_working_weight_id;
 END;
 $$ LANGUAGE plpgsql;
