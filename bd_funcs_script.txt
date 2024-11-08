@@ -165,3 +165,26 @@ BEGIN
     RETURN new_achievement_id;
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION get_exercises_for_training_day(
+    p_training_day_id INT
+) RETURNS TABLE (
+    exercise_id INT,
+    exercise_name VARCHAR,
+    muscle_group VARCHAR,
+    description VARCHAR
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        e.exercise_id,
+        e.name AS exercise_name,
+        e.muscle_group,
+        e.description
+    FROM
+        exercise_training_day etd
+    JOIN exercises e ON etd.exercise_id = e.exercise_id
+    WHERE
+        etd.training_day_id = p_training_day_id;
+END;
+$$ LANGUAGE plpgsql;
