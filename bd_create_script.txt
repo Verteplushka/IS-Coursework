@@ -127,3 +127,4 @@ CREATE TABLE IF NOT EXISTS diet_day_user (
                                              day_date DATE DEFAULT CURRENT_DATE
 );
 
+
