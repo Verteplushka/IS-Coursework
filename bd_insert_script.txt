@@ -1,16 +1,15 @@
--- Вставка данных в таблицу пользователей
 INSERT INTO users (login, password, registration_date, age, height, goal, fitness_level, available_days, role)
 VALUES
-    ('user1', 'password123', '2023-01-01', 25, 175.5, 'gain muscle', 2, 4, 'member'),
-    ('user2', 'password456', '2023-02-15', 30, 180.2, 'lose weight', 3, 3, 'admin'),
-    ('user3', 'pass7890', '2023-03-01', 22, 165.0, 'increase endurance', 1, 5, 'member'),
-    ('user4', 'securepass', '2023-04-10', 28, 170.3, 'build strength', 2, 3, 'admin'),
-    ('user5', 'mypassword', '2023-05-20', 35, 160.7, 'improve mobility', 1, 7, 'member'),
-    ('user6', 'passwordabc', '2023-06-15', 40, 175.0, 'weight loss', 3, 6, 'member'),
-    ('user7', 'passwordxyz', '2023-07-01', 27, 180.4, 'muscle toning', 2, 4, 'member'),
-    ('user8', 'safe4567', '2023-08-18', 33, 185.0, 'cardio improvement', 1, 5, 'admin'),
-    ('user9', 'qwerty123', '2023-09-05', 29, 177.0, 'strength gain', 2, 4, 'member'),
-    ('user10', 'zxcvbnm456', '2023-10-12', 26, 169.5, 'general fitness', 1, 5, 'admin');
+    ('user1', 'password123', '2023-01-01', 25, 175.5, 'gain muscle', 2, 4, 'user'),
+    ('user2', 'password456', NULL, NULL, NULL, NULL, NULL, NULL, 'admin'),
+    ('user3', 'pass7890', '2023-03-01', 22, 165.0, 'increase endurance', 1, 5, 'user'),
+    ('user4', 'securepass', NULL, NULL, NULL, NULL, NULL, NULL, 'admin'),
+    ('user5', 'mypassword', '2023-05-20', 35, 160.7, 'improve mobility', 1, 7, 'user'),
+    ('user6', 'passwordabc', '2023-06-15', 40, 175.0, 'weight loss', 3, 6, 'user'),
+    ('user7', 'passwordxyz', '2023-07-01', 27, 180.4, 'muscle toning', 2, 4, 'user'),
+    ('user8', 'safe4567', NULL, NULL, NULL, NULL, NULL, NULL, 'admin'),
+    ('user9', 'qwerty123', '2023-09-05', 29, 177.0, 'strength gain', 2, 4, 'user'),
+    ('user10', 'zxcvbnm456', NULL, NULL, NULL, NULL, NULL, NULL, 'admin');
 
 -- Вставка данных в таблицу журнала веса
 INSERT INTO weight_journal (user_id, weight, weight_date)
