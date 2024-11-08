@@ -90,4 +90,61 @@ BEGIN
     RETURN new_weight_journal_id;
 END;
 $$ LANGUAGE plpgsql;
+CREATE OR REPLACE FUNCTION add_meal(
+    p_created_by INT,
+    p_name VARCHAR,
+    p_calories REAL,
+    p_protein REAL,
+    p_fats REAL,
+    p_carbs REAL
+) RETURNS INT AS $$
+DECLARE
+    new_meal_id INT;
+BEGIN
+    INSERT INTO meals (
+        created_by, when_created, name, calories, protein, fats, carbs
+    ) VALUES (
+        p_created_by, CURRENT_DATE, p_name, p_calories, p_protein, p_fats, p_carbs
+    ) RETURNING meal_id INTO new_meal_id;
+
+    RETURN new_meal_id;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION add_allergy(
+    p_created_by INT,
+    p_name VARCHAR
+) RETURNS INT AS $$
+DECLARE
+    new_allergy_id INT;
+BEGIN
+    INSERT INTO allergies (
+        created_by, when_created, name
+    ) VALUES (
+        p_created_by, CURRENT_DATE, p_name
+    ) RETURNING allergy_id INTO new_allergy_id;
+
+    RETURN new_allergy_id;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION add_diet_day_admin(
+    p_created_by INT,
+    p_name VARCHAR,
+    p_calories REAL,
+    p_portion_size REAL
+) RETURNS INT AS $$
+DECLARE
+    new_diet_day_admin_id INT;
+BEGIN
+    INSERT INTO diet_day_admin (
+        created_by, when_created, name, calories, portion_size
+    ) VALUES (
+        p_created_by, CURRENT_DATE, p_name, p_calories, p_portion_size
+    ) RETURNING diet_day_admin_id INTO new_diet_day_admin_id;
+
+    RETURN new_diet_day_admin_id;
+END;
+$$ LANGUAGE plpgsql;
+
 
