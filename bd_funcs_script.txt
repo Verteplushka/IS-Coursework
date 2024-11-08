@@ -90,6 +90,25 @@ BEGIN
     RETURN new_weight_journal_id;
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE FUNCTION add_achievement(
+    p_created_by INT,
+    p_name VARCHAR,
+    p_description VARCHAR
+) RETURNS INT AS $$
+DECLARE
+    new_achievement_id INT;
+BEGIN
+    INSERT INTO achievement (
+        created_by, name, description, when_created
+    ) VALUES (
+        p_created_by, p_name, p_description, CURRENT_DATE
+    ) RETURNING achievement_id INTO new_achievement_id;
+
+    RETURN new_achievement_id;
+END;
+$$ LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION add_meal(
     p_created_by INT,
     p_name VARCHAR,
@@ -148,20 +167,18 @@ END;
 $$ LANGUAGE plpgsql;
 
 
-CREATE FUNCTION add_achievement(
-    p_created_by INT,
-    p_name VARCHAR,
-    p_description VARCHAR
-) RETURNS INT AS $$
-DECLARE
-    new_achievement_id INT;
+CREATE FUNCTION get_user_achievements(p_user_id INT) 
+RETURNS TABLE (
+    achievement_id INT,
+    name VARCHAR,
+    description VARCHAR,
+    when_created DATE
+) AS $$
 BEGIN
-    INSERT INTO achievement (
-        created_by, name, description, when_created
-    ) VALUES (
-        p_created_by, p_name, p_description, CURRENT_DATE
-    ) RETURNING achievement_id INTO new_achievement_id;
-
-    RETURN new_achievement_id;
+    RETURN QUERY
+    SELECT a.achievement_id, a.name, a.description, a.when_created
+    FROM user_achievement ua
+    JOIN achievement a ON ua.achievement_id = a.achievement_id
+    WHERE ua.user_id = p_user_id;
 END;
 $$ LANGUAGE plpgsql;
