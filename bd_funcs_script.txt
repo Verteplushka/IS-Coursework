@@ -91,3 +91,20 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE FUNCTION add_achievement(
+    p_created_by INT,
+    p_name VARCHAR,
+    p_description VARCHAR
+) RETURNS INT AS $$
+DECLARE
+    new_achievement_id INT;
+BEGIN
+    INSERT INTO achievement (
+        created_by, name, description, when_created
+    ) VALUES (
+        p_created_by, p_name, p_description, CURRENT_DATE
+    ) RETURNING achievement_id INTO new_achievement_id;
+
+    RETURN new_achievement_id;
+END;
+$$ LANGUAGE plpgsql;
