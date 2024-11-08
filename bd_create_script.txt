@@ -52,6 +52,7 @@ CREATE TABLE IF NOT EXISTS exercises (
 CREATE TABLE IF NOT EXISTS exercise_working_weight (
                                                        exercise_working_weight_id SERIAL PRIMARY KEY,
                                                        exercise_id INT REFERENCES exercises(exercise_id),
+                                                       user_id INT REFERENCES users(user_id),
                                                        weight REAL CHECK (weight > 0),
                                                        weight_date DATE
 );
