@@ -58,7 +58,7 @@ $$ LANGUAGE plpgsql;
 
 CREATE FUNCTION add_exercise_working_weight(
     p_exercise_id INT,
-    p_user_id VARCHAR,
+    p_user_id INT,
     p_weight INT
 ) RETURNS INT AS $$
 DECLARE
@@ -68,8 +68,26 @@ BEGIN
         exercise_id, user_id, weight, weight_date
     ) VALUES (
         p_exercise_id, p_user_id, p_weight, CURRENT_DATE
-    ) RETURNING exercise_id INTO new_exercise_working_weight_id;
+    ) RETURNING exercise_working_weight_id INTO new_exercise_working_weight_id;
 
     RETURN new_exercise_working_weight_id;
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE FUNCTION add_weight_journal(
+    p_user_id INT,
+    p_weight REAL
+) RETURNS INT AS $$
+DECLARE
+    new_weight_journal_id INT;
+BEGIN
+    INSERT INTO weight_journal (
+        user_id, weight, weight_date
+    ) VALUES (
+        p_user_id, p_weight, CURRENT_DATE
+    ) RETURNING weight_journal_id INTO new_weight_journal_id;
+
+    RETURN new_weight_journal_id;
+END;
+$$ LANGUAGE plpgsql;
+
