@@ -3,3 +3,6 @@ SELECT add_exercise_working_weight(
     2,                  -- p_user_id (ID пользователя, который выполняет упражнение, должен быть в таблице users)
     80                  -- p_weight (рабочий вес в килограммах или другой единице измерения)
 );
+SELECT add_meal(2, 'Chicken Salad', 300, 25, 10, 30);
+SELECT add_allergy(2, 'Chocolate');
+SELECT add_diet_day_admin(2, 'Chocolate cake day', 1488, 200);
