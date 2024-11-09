@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS users (
                                      height REAL CHECK (height > 0),
                                      goal VARCHAR,
                                      fitness_level INT CHECK (fitness_level BETWEEN 1 AND 3),
+                                     activity_level INT CHECK (activity_level BETWEEN 1 AND 5),
                                      available_days INT CHECK (available_days BETWEEN 1 AND 7),
                                      role VARCHAR NOT NULL
 );
