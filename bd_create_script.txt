@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS weight_journal (
                                               weight_journal_id SERIAL PRIMARY KEY,
                                               user_id INT REFERENCES users(user_id) ON DELETE CASCADE,
-                                              weight REAL NOT NULL CHECK (weight > 0),
+                                              weight REAL NOT NULL CHECK (weight BETWEEN 0 AND 400),
                                               weight_date DATE DEFAULT CURRENT_DATE
 );
 
@@ -26,8 +26,8 @@ CREATE TABLE IF NOT EXISTS weight_journal (
 CREATE TABLE IF NOT EXISTS achievement (
                                            achievement_id SERIAL PRIMARY KEY,
                                            created_by INT REFERENCES users(user_id) ON DELETE CASCADE,
-                                           name VARCHAR NOT NULL,
-                                           description VARCHAR,
+                                           name VARCHAR(50) NOT NULL,
+                                           description VARCHAR(200),
                                            when_created DATE DEFAULT CURRENT_DATE
 );
 
@@ -43,9 +43,9 @@ CREATE TABLE IF NOT EXISTS exercises (
                                          exercise_id SERIAL PRIMARY KEY,
                                          created_by INT REFERENCES users(user_id) ON DELETE CASCADE,
                                          when_created DATE DEFAULT CURRENT_DATE,
-                                         name VARCHAR NOT NULL,
-                                         muscle_group VARCHAR NOT NULL,
-                                         description VARCHAR
+                                         name VARCHAR(50) NOT NULL,
+                                         muscle_group VARCHAR(50) NOT NULL,
+                                         description VARCHAR(200)
 );
 
 -- Таблица рабочих весов для упражнений
@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS exercise_working_weight (
                                                        exercise_working_weight_id SERIAL PRIMARY KEY,
                                                        exercise_id INT REFERENCES exercises(exercise_id) ON DELETE CASCADE,
                                                        user_id INT REFERENCES users(user_id) ON DELETE CASCADE,
-                                                       weight REAL CHECK (weight > 0),
+                                                       weight REAL CHECK (weight BETWEEN 0 AND 1000),
                                                        weight_date DATE DEFAULT CURRENT_DATE
 );
 
@@ -76,41 +76,41 @@ CREATE TABLE IF NOT EXISTS meals (
                                      meal_id SERIAL PRIMARY KEY,
                                      created_by INT REFERENCES users(user_id) ON DELETE CASCADE,
                                      when_created DATE DEFAULT CURRENT_DATE,
-                                     name VARCHAR NOT NULL,
-                                     calories REAL CHECK (calories > 0),
-                                     protein REAL CHECK (protein >= 0),
-                                     fats REAL CHECK (fats >= 0),
-                                     carbs REAL CHECK (carbs >= 0)
+                                     name VARCHAR(50) NOT NULL,
+                                     calories REAL CHECK (calories BETWEEN 0 AND 1000),
+                                     protein REAL CHECK (protein BETWEEN 0 AND 100),
+                                     fats REAL CHECK (fats BETWEEN 0 AND 100),
+                                     carbs REAL CHECK (carbs BETWEEN 0 AND 100)
 );
 -- Таблица аллергий
 CREATE TABLE IF NOT EXISTS allergies (
                                          allergy_id SERIAL PRIMARY KEY,
                                          created_by INT REFERENCES users(user_id) ON DELETE CASCADE,
                                          when_created DATE DEFAULT CURRENT_DATE,
-                                         name VARCHAR NOT NULL UNIQUE
+                                         name VARCHAR(50) NOT NULL UNIQUE
 );
 
 -- Таблица пользовательских аллергий
 CREATE TABLE IF NOT EXISTS user_allergy (
                                             user_allergy_id SERIAL PRIMARY KEY,
-                                            user_id INT REFERENCES users(user_id) ON DELETE CASCADE ON DELETE CASCADE,
-                                            allergy_id INT REFERENCES allergies(allergy_id) ON DELETE CASCADE ON DELETE CASCADE
+                                            user_id INT REFERENCES users(user_id) ON DELETE CASCADE,
+                                            allergy_id INT REFERENCES allergies(allergy_id) ON DELETE CASCADE
 );
 
 -- Таблица связей аллергии и блюда
 CREATE TABLE IF NOT EXISTS allergy_meal (
                                             allergy_meal_id SERIAL PRIMARY KEY,
-                                            meal_id INT REFERENCES meals(meal_id) ON DELETE CASCADE ON DELETE CASCADE,
-                                            allergy_id INT REFERENCES allergies(allergy_id) ON DELETE CASCADE ON DELETE CASCADE
+                                            meal_id INT REFERENCES meals(meal_id) ON DELETE CASCADE,
+                                            allergy_id INT REFERENCES allergies(allergy_id) ON DELETE CASCADE
 );
 -- Таблица диетических дней для админа
 CREATE TABLE IF NOT EXISTS diet_day_admin (
                                               diet_day_admin_id SERIAL PRIMARY KEY,
                                               created_by INT REFERENCES users(user_id) ON DELETE CASCADE,
                                               when_created DATE DEFAULT CURRENT_DATE,
-                                              name VARCHAR NOT NULL,
-                                              calories REAL NOT NULL CHECK (calories > 0),
-                                              portion_size REAL CHECK (portion_size > 0)
+                                              name VARCHAR(50) NOT NULL,
+                                              calories REAL NOT NULL CHECK (calories BETWEEN 0 AND 5000),
+                                              portion_size REAL CHECK (portion_size BETWEEN 0 AND 1000)
 );
 -- Таблица блюд для диетических дней админа
 CREATE TABLE IF NOT EXISTS meal_diet_day_admin (
@@ -124,7 +124,7 @@ CREATE TABLE IF NOT EXISTS diet_day_user (
                                              diet_day_user_id SERIAL PRIMARY KEY,
                                              diet_day_id INT REFERENCES diet_day_admin(diet_day_admin_id) ON DELETE CASCADE,
                                              user_id INT REFERENCES users(user_id) ON DELETE CASCADE,
-                                             rate REAL CHECK (rate BETWEEN 0 AND 1),
+                                             rate REAL CHECK (rate BETWEEN 0 AND 100),
                                              day_date DATE DEFAULT CURRENT_DATE
 );
 
