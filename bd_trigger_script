@@ -21,3 +21,34 @@ CREATE TRIGGER calories_update_trigger
 AFTER INSERT OR UPDATE OR DELETE ON meal_diet_day_admin
 FOR EACH ROW
 EXECUTE FUNCTION update_calories_in_diet_day();
+
+-- Функция для проверки аллергий у пользователя на блюда в diet_day_user
+CREATE OR REPLACE FUNCTION check_allergies_in_diet_day()
+    RETURNS TRIGGER AS $$
+DECLARE
+    allergy_count INT;
+BEGIN
+    -- Подсчет количества аллергенов, на которые у пользователя есть аллергия в данном диетическом дне
+    SELECT COUNT(*)
+    INTO allergy_count
+    FROM meal_diet_day_admin md
+             JOIN allergy_meal am ON md.meal_id = am.meal_id
+             JOIN user_allergy ua ON am.allergy_id = ua.allergy_id
+    WHERE md.diet_day_admin_id = NEW.diet_day_id
+      AND ua.user_id = NEW.user_id;
+
+    -- Если есть аллергены, предотвращаем добавление diet_day_user
+    IF allergy_count > 0 THEN
+        RAISE EXCEPTION 'Диетический день содержит блюда, на которые у пользователя есть аллергия';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Триггер для проверки аллергий при добавлении нового diet_day_user
+CREATE TRIGGER check_allergies_trigger
+    BEFORE INSERT ON diet_day_user
+    FOR EACH ROW
+EXECUTE FUNCTION check_allergies_in_diet_day();
+
