@@ -2,7 +2,7 @@
 CREATE INDEX idx_users_login ON users (login);
 
 -- Индекс на exercise_id для ускорения поиска упражнения
-CREATE INDEX idx_exercise_id ON exercise (exercise_id);
+CREATE INDEX idx_exercise_id ON exercises (exercise_id);
 
 -- Индекс на user_id для ускорения поиска веса конкретного пользователя
 CREATE INDEX idx_weight_journal_user_id ON weight_journal (user_id);
