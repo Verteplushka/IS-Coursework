@@ -224,4 +224,27 @@ BEGIN
     INSERT INTO exercise_training_day (training_day_id, exercise_id)
     VALUES (p_training_day_id, p_exercise_id);
 END;
+
 $$ LANGUAGE plpgsql;
+CREATE OR REPLACE PROCEDURE delete_user_and_related_data(
+    p_user_id INT
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    -- Удаляем все достижения пользователя
+    DELETE FROM user_achievement WHERE user_id = p_user_id;
+    
+    -- Удаляем записи о весе пользователя
+    DELETE FROM weight_journal WHERE user_id = p_user_id;
+
+    -- Удаляем тренировки пользователя
+    DELETE FROM training_day WHERE user_id = p_user_id;
+    
+    -- Удаляем все аллергии пользователя
+    DELETE FROM user_allergy WHERE user_id = p_user_id;
+
+    -- Удаляем пользователя
+    DELETE FROM users WHERE user_id = p_user_id;
+    
+END;
+$$;
