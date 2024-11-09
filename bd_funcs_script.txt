@@ -1,7 +1,7 @@
 CREATE FUNCTION add_user(
     p_login VARCHAR,
     p_password VARCHAR,
-    p_age INT,
+    p_birth_date INT,
     p_height REAL,
     p_goal VARCHAR,
     p_fitness_level INT,
@@ -11,9 +11,9 @@ DECLARE
     new_user_id INT;
 BEGIN
     INSERT INTO users (
-        login, password, age, height, goal, fitness_level, available_days, role
+        login, password, birth_date, height, goal, fitness_level, available_days, role
     ) VALUES (
-        p_login, p_password, p_age, p_height, p_goal, p_fitness_level, p_available_days, 'user'
+        p_login, p_password, p_birth_date, p_height, p_goal, p_fitness_level, p_available_days, 'user'
     ) RETURNING user_id INTO new_user_id;
 
     RETURN new_user_id;

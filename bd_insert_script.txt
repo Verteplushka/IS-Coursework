@@ -1,4 +1,4 @@
-INSERT INTO users (login, password, registration_date, age, height, goal, fitness_level, available_days, role)
+INSERT INTO users (login, password, registration_date, birth_date, height, goal, fitness_level, available_days, role)
 VALUES
     ('user1', 'password123', '2023-01-01', 25, 175.5, 'gain muscle', 2, 4, 'user'),
     ('user2', 'password456', NULL, NULL, NULL, NULL, NULL, NULL, 'admin'),
