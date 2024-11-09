@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS weight_journal (
                                               weight_journal_id SERIAL PRIMARY KEY,
                                               user_id INT REFERENCES users(user_id) ON DELETE CASCADE,
                                               weight REAL NOT NULL CHECK (weight > 0),
-                                              weight_date DATE
+                                              weight_date DATE DEFAULT CURRENT_DATE
 );
 
 -- Таблица достижений
@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS exercise_working_weight (
                                                        exercise_id INT REFERENCES exercises(exercise_id) ON DELETE CASCADE,
                                                        user_id INT REFERENCES users(user_id) ON DELETE CASCADE,
                                                        weight REAL CHECK (weight > 0),
-                                                       weight_date DATE
+                                                       weight_date DATE DEFAULT CURRENT_DATE
 );
 
 -- Таблица тренировочных дней
