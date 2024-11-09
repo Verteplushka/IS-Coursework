@@ -205,3 +205,23 @@ BEGIN
         etd.training_day_id = p_training_day_id;
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION add_meal_to_diet_day(
+    p_diet_day_admin_id INT,
+    p_meal_id INT
+) RETURNS VOID AS $$
+BEGIN
+    INSERT INTO meal_diet_day_admin (diet_day_admin_id, meal_id)
+    VALUES (p_diet_day_admin_id, p_meal_id);
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION add_exercise_to_training_day(
+    p_training_day_id INT,
+    p_exercise_id INT
+) RETURNS VOID AS $$
+BEGIN
+    INSERT INTO exercise_training_day (training_day_id, exercise_id)
+    VALUES (p_training_day_id, p_exercise_id);
+END;
+$$ LANGUAGE plpgsql;

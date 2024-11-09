@@ -7,3 +7,9 @@ SELECT add_meal(2, 'Chicken Salad', 300, 25, 10, 30);
 SELECT add_allergy(2, 'Chocolate');
 SELECT add_diet_day_admin(2, 'Chocolate cake day', 1488, 200);
 SELECT * FROM get_exercises_for_training_day(1);
+SELECT add_meal_to_diet_day(1, 2);
+SELECT * FROM get_meals_for_diet_day(1);
+SELECT add_exercise_to_training_day(1, 2);
+SELECT * FROM get_exercises_for_training_day(1);
+
+
