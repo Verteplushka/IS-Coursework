@@ -1,14 +1,14 @@
 INSERT INTO users (login, password, registration_date, birth_date, height, goal, fitness_level, available_days, role)
 VALUES
-    ('user1', 'password123', '2023-01-01', 25, 175.5, 'gain muscle', 2, 4, 'user'),
+    ('user1', 'password123', '2023-01-01', '1998-07-15', 175.5, 'gain muscle', 2, 4, 'user'),
     ('user2', 'password456', NULL, NULL, NULL, NULL, NULL, NULL, 'admin'),
-    ('user3', 'pass7890', '2023-03-01', 22, 165.0, 'increase endurance', 1, 5, 'user'),
+    ('user3', 'pass7890', '2023-03-01', '2001-05-21', 165.0, 'increase endurance', 1, 5, 'user'),
     ('user4', 'securepass', NULL, NULL, NULL, NULL, NULL, NULL, 'admin'),
-    ('user5', 'mypassword', '2023-05-20', 35, 160.7, 'improve mobility', 1, 7, 'user'),
-    ('user6', 'passwordabc', '2023-06-15', 40, 175.0, 'weight loss', 3, 6, 'user'),
-    ('user7', 'passwordxyz', '2023-07-01', 27, 180.4, 'muscle toning', 2, 4, 'user'),
+    ('user5', 'mypassword', '2023-05-20', '1988-10-10', 160.7, 'improve mobility', 1, 7, 'user'),
+    ('user6', 'passwordabc', '2023-06-15', '1983-08-25', 175.0, 'weight loss', 3, 6, 'user'),
+    ('user7', 'passwordxyz', '2023-07-01', '1996-03-12', 180.4, 'muscle toning', 2, 4, 'user'),
     ('user8', 'safe4567', NULL, NULL, NULL, NULL, NULL, NULL, 'admin'),
-    ('user9', 'qwerty123', '2023-09-05', 29, 177.0, 'strength gain', 2, 4, 'user'),
+    ('user9', 'qwerty123', '2023-09-05', '1994-11-18', 177.0, 'strength gain', 2, 4, 'user'),
     ('user10', 'zxcvbnm456', NULL, NULL, NULL, NULL, NULL, NULL, 'admin');
 
 -- Вставка данных в таблицу журнала веса
@@ -104,3 +104,18 @@ VALUES
 INSERT INTO allergy_meal (meal_id, allergy_id)
 VALUES
     (1, 1);
+
+INSERT INTO diet_day_admin (created_by, name, calories)
+VALUES
+(1, 'Low Carb Day', 1500),
+(1, 'High Protein Day', 2000);
+
+INSERT INTO meal_diet_day_admin (diet_day_admin_id, meal_id, portion_size)
+VALUES
+(1, 1, 300), -- Chicken Salad on Low Carb Day
+(2, 2, 150); -- Oatmeal on High Protein Day
+
+INSERT INTO diet_day_user (diet_day_id, user_id, rate, day_date)
+VALUES
+(1, 2, 75, '2023-06-01'), -- User 2 follows 75% of Low Carb Day plan
+(2, 2, 85, '2023-06-02'); -- User 2 follows 85% of High Protein Day plan
