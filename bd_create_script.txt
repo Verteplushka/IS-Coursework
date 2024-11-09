@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS users (
 -- Таблица журнала веса
 CREATE TABLE IF NOT EXISTS weight_journal (
                                               weight_journal_id SERIAL PRIMARY KEY,
-                                              user_id INT REFERENCES users(user_id),
+                                              user_id INT REFERENCES users(user_id) ON DELETE CASCADE,
                                               weight REAL NOT NULL CHECK (weight > 0),
                                               weight_date DATE
 );
@@ -25,24 +25,24 @@ CREATE TABLE IF NOT EXISTS weight_journal (
 -- Таблица достижений
 CREATE TABLE IF NOT EXISTS achievement (
                                            achievement_id SERIAL PRIMARY KEY,
-                                           created_by INT REFERENCES users(user_id),
+                                           created_by INT REFERENCES users(user_id) ON DELETE CASCADE,
                                            name VARCHAR NOT NULL,
                                            description VARCHAR,
-                                           when_created DATE
+                                           when_created DATE DEFAULT CURRENT_DATE
 );
 
 -- Таблица достижений пользователя
 CREATE TABLE IF NOT EXISTS user_achievement (
                                                 user_achievement_id SERIAL PRIMARY KEY,
-                                                user_id INT REFERENCES users(user_id),
+                                                user_id INT REFERENCES users(user_id) ON DELETE CASCADE,
                                                 achievement_id INT REFERENCES achievement(achievement_id)
 );
 
 -- Таблица упражнений
 CREATE TABLE IF NOT EXISTS exercises (
                                          exercise_id SERIAL PRIMARY KEY,
-                                         created_by INT REFERENCES users(user_id),
-                                         when_created DATE,
+                                         created_by INT REFERENCES users(user_id) ON DELETE CASCADE,
+                                         when_created DATE DEFAULT CURRENT_DATE,
                                          name VARCHAR NOT NULL,
                                          muscle_group VARCHAR NOT NULL,
                                          description VARCHAR
@@ -51,8 +51,8 @@ CREATE TABLE IF NOT EXISTS exercises (
 -- Таблица рабочих весов для упражнений
 CREATE TABLE IF NOT EXISTS exercise_working_weight (
                                                        exercise_working_weight_id SERIAL PRIMARY KEY,
-                                                       exercise_id INT REFERENCES exercises(exercise_id),
-                                                       user_id INT REFERENCES users(user_id),
+                                                       exercise_id INT REFERENCES exercises(exercise_id) ON DELETE CASCADE,
+                                                       user_id INT REFERENCES users(user_id) ON DELETE CASCADE,
                                                        weight REAL CHECK (weight > 0),
                                                        weight_date DATE
 );
@@ -60,21 +60,21 @@ CREATE TABLE IF NOT EXISTS exercise_working_weight (
 -- Таблица тренировочных дней
 CREATE TABLE IF NOT EXISTS training_day (
                                             training_day_id SERIAL PRIMARY KEY,
-                                            user_id INT REFERENCES users(user_id),
+                                            user_id INT REFERENCES users(user_id) ON DELETE CASCADE,
                                             training_date DATE
 );
 
 -- Таблица связей упражнений и тренировочных дней
 CREATE TABLE IF NOT EXISTS exercise_training_day (
                                                      exercise_training_day_id SERIAL PRIMARY KEY,
-                                                     training_day_id INT REFERENCES training_day(training_day_id),
-                                                     exercise_id INT REFERENCES exercises(exercise_id)
+                                                     training_day_id INT REFERENCES training_day(training_day_id) ON DELETE CASCADE,
+                                                     exercise_id INT REFERENCES exercises(exercise_id) ON DELETE CASCADE
 );
 
 -- Таблица питания
 CREATE TABLE IF NOT EXISTS meals (
                                      meal_id SERIAL PRIMARY KEY,
-                                     created_by INT REFERENCES users(user_id),
+                                     created_by INT REFERENCES users(user_id) ON DELETE CASCADE,
                                      when_created DATE DEFAULT CURRENT_DATE,
                                      name VARCHAR NOT NULL,
                                      calories REAL CHECK (calories > 0),
@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS meals (
 -- Таблица аллергий
 CREATE TABLE IF NOT EXISTS allergies (
                                          allergy_id SERIAL PRIMARY KEY,
-                                         created_by INT REFERENCES users(user_id),
+                                         created_by INT REFERENCES users(user_id) ON DELETE CASCADE,
                                          when_created DATE DEFAULT CURRENT_DATE,
                                          name VARCHAR NOT NULL UNIQUE
 );
@@ -93,20 +93,20 @@ CREATE TABLE IF NOT EXISTS allergies (
 -- Таблица пользовательских аллергий
 CREATE TABLE IF NOT EXISTS user_allergy (
                                             user_allergy_id SERIAL PRIMARY KEY,
-                                            user_id INT REFERENCES users(user_id) ON DELETE CASCADE,
-                                            allergy_id INT REFERENCES allergies(allergy_id) ON DELETE CASCADE
+                                            user_id INT REFERENCES users(user_id) ON DELETE CASCADE ON DELETE CASCADE,
+                                            allergy_id INT REFERENCES allergies(allergy_id) ON DELETE CASCADE ON DELETE CASCADE
 );
 
 -- Таблица связей аллергии и блюда
 CREATE TABLE IF NOT EXISTS allergy_meal (
                                             allergy_meal_id SERIAL PRIMARY KEY,
-                                            meal_id INT REFERENCES meals(meal_id) ON DELETE CASCADE,
-                                            allergy_id INT REFERENCES allergies(allergy_id) ON DELETE CASCADE
+                                            meal_id INT REFERENCES meals(meal_id) ON DELETE CASCADE ON DELETE CASCADE,
+                                            allergy_id INT REFERENCES allergies(allergy_id) ON DELETE CASCADE ON DELETE CASCADE
 );
 -- Таблица диетических дней для админа
 CREATE TABLE IF NOT EXISTS diet_day_admin (
                                               diet_day_admin_id SERIAL PRIMARY KEY,
-                                              created_by INT REFERENCES users(user_id),
+                                              created_by INT REFERENCES users(user_id) ON DELETE CASCADE,
                                               when_created DATE DEFAULT CURRENT_DATE,
                                               name VARCHAR NOT NULL,
                                               calories REAL NOT NULL CHECK (calories > 0),
@@ -122,8 +122,8 @@ CREATE TABLE IF NOT EXISTS meal_diet_day_admin (
 -- Таблица дней диеты пользователя
 CREATE TABLE IF NOT EXISTS diet_day_user (
                                              diet_day_user_id SERIAL PRIMARY KEY,
-                                             diet_day_id INT REFERENCES diet_day_admin(diet_day_admin_id),
-                                             user_id INT REFERENCES users(user_id),
+                                             diet_day_id INT REFERENCES diet_day_admin(diet_day_admin_id) ON DELETE CASCADE,
+                                             user_id INT REFERENCES users(user_id) ON DELETE CASCADE,
                                              rate REAL CHECK (rate BETWEEN 0 AND 1),
                                              day_date DATE DEFAULT CURRENT_DATE
 );
