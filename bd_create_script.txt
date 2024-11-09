@@ -109,14 +109,9 @@ CREATE TABLE IF NOT EXISTS diet_day_admin (
                                               diet_day_admin_id SERIAL PRIMARY KEY,
                                               created_by INT REFERENCES users(user_id) ON DELETE CASCADE,
                                               when_created DATE DEFAULT CURRENT_DATE,
-<<<<<<< HEAD
-                                              name VARCHAR NOT NULL,
-                                              calories REAL NOT NULL CHECK (calories > 0),
-=======
-                                              name VARCHAR(50) NOT NULL,
-                                              calories REAL NOT NULL CHECK (calories BETWEEN 0 AND 5000)
->>>>>>> d26e34ad54a1f253e977580876a4dd4dd8fd9a14
-);
+                                              calories REAL NOT NULL CHECK (calories BETWEEN 0 AND 5000),
+                                              name VARCHAR(50) NOT NULL
+    );
 -- Таблица блюд для диетических дней админа
 CREATE TABLE IF NOT EXISTS meal_diet_day_admin (
                                                    meal_diet_day_admin_id SERIAL PRIMARY KEY,
