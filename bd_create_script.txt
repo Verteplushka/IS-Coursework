@@ -100,8 +100,8 @@ CREATE TABLE IF NOT EXISTS user_allergy (
 -- Таблица связей аллергии и блюда
 CREATE TABLE IF NOT EXISTS allergy_meal (
                                             allergy_meal_id SERIAL PRIMARY KEY,
-                                            meal_id INT REFERENCES meals(meal_id) ON DELETE CASCADE ON DELETE CASCADE,
-                                            allergy_id INT REFERENCES allergies(allergy_id) ON DELETE CASCADE ON DELETE CASCADE
+                                            meal_id INT REFERENCES meals(meal_id) ON DELETE CASCADE,
+                                            allergy_id INT REFERENCES allergies(allergy_id) ON DELETE CASCADE
 );
 -- Таблица диетических дней для админа
 CREATE TABLE IF NOT EXISTS diet_day_admin (
@@ -110,13 +110,13 @@ CREATE TABLE IF NOT EXISTS diet_day_admin (
                                               when_created DATE DEFAULT CURRENT_DATE,
                                               name VARCHAR NOT NULL,
                                               calories REAL NOT NULL CHECK (calories > 0),
-                                              portion_size REAL CHECK (portion_size > 0)
 );
 -- Таблица блюд для диетических дней админа
 CREATE TABLE IF NOT EXISTS meal_diet_day_admin (
                                                    meal_diet_day_admin_id SERIAL PRIMARY KEY,
                                                    diet_day_admin_id INT REFERENCES diet_day_admin(diet_day_admin_id) ON DELETE CASCADE,
-                                                   meal_id INT REFERENCES meals(meal_id) ON DELETE CASCADE
+                                                   meal_id INT REFERENCES meals(meal_id) ON DELETE CASCADE,
+                                                   portion_size REAL CHECK (portion_size > 0)
 );
 
 -- Таблица дней диеты пользователя
