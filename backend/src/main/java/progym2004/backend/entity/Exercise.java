@@ -8,7 +8,8 @@ import java.util.Set;
 
 @Entity
 @Table(name = "exercises")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Exercise {

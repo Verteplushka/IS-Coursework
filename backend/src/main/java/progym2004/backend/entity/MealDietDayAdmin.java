@@ -6,7 +6,8 @@ import lombok.*;
 
 @Entity
 @Table(name = "meal_diet_day_admin")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class MealDietDayAdmin {
