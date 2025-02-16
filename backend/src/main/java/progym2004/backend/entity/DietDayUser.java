@@ -33,5 +33,12 @@ public class DietDayUser {
 
     @Column(name = "day_date", columnDefinition = "DATE DEFAULT CURRENT_DATE")
     private LocalDate dayDate;
+
+    public DietDayUser(User user, DietDayAdmin dietDayAdmin, Double rate, LocalDate dayDate){
+        this.user = user;
+        this.dietDayAdmin = dietDayAdmin;
+        this.rate = rate;
+        this.dayDate = dayDate;
+    }
 }
 

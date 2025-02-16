@@ -52,9 +52,8 @@ public class User implements UserDetails {
     @Column(name = "height")
     private Double height;
 
-    @Size(max = 50)
-    @Column(name = "goal")
-    private String goal;
+    @Enumerated(EnumType.STRING)
+    private Goal goal;
 
     @Column(name = "fitness_level")
     private Integer fitnessLevel;

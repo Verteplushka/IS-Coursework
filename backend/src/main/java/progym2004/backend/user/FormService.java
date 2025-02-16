@@ -51,7 +51,7 @@ public class FormService {
             user = userRepository.save(user);
             weightJournalRepository.save(new WeightJournal(user, formRequest.getCurrentWeight()));
 
-            dietGenerator.generateDiet(user, formRequest.getCurrentWeight());
+            dietGenerator.rewriteDiet(user, formRequest.getCurrentWeight());
 
             return true;
         } catch (Exception e){
