@@ -22,4 +22,6 @@ public class UserController {
         }
         return ResponseEntity.badRequest().body("Form is incorrect");
     }
+
+
 }

@@ -43,6 +43,10 @@ public class User implements UserDetails {
     @Column(name = "birth_date")
     private LocalDate birthDate;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "gender")
+    private Gender gender;
+
     @DecimalMax("100")
     @DecimalMax("250")
     @Column(name = "height")

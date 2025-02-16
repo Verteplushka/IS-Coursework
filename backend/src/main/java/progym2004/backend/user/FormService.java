@@ -19,30 +19,43 @@ public class FormService {
     private final UserRepository userRepository;
     private final AllergyRepository allergyRepository;
     private final WeightJournalRepository weightJournalRepository;
+    private final DietGenerator dietGenerator;
 
     @Autowired
-    public FormService(JwtService jwtService, UserRepository userRepository, AllergyRepository allergyRepository, WeightJournalRepository weightJournalRepository){
+    public FormService(JwtService jwtService,
+                       UserRepository userRepository,
+                       AllergyRepository allergyRepository,
+                       WeightJournalRepository weightJournalRepository,
+                       DietGenerator dietGenerator){
         this.jwtService = jwtService;
         this.userRepository = userRepository;
         this.allergyRepository = allergyRepository;
         this.weightJournalRepository = weightJournalRepository;
+        this.dietGenerator = dietGenerator;
     }
     public boolean sendForm(FormRequest formRequest, String token){
         String login = jwtService.extractUsername(token);
         User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
-        user.setBirthDate(formRequest.getBirthDate());
-        user.setHeight(formRequest.getHeight());
-        user.setGoal(formRequest.getGoal());
-        user.setFitnessLevel(formRequest.getFitnessLevel());
-        user.setActivityLevel(formRequest.getActivityLevel());
-        user.setAvailableDays(formRequest.getAvailableDays());
-        Set<Allergy> allergies = new HashSet<>(allergyRepository.findAllById(formRequest.getAllergiesIds()));
-        user.setAllergies(allergies);
 
-        userRepository.save(user);
+        try {
+            user.setBirthDate(formRequest.getBirthDate());
+            user.setGender(formRequest.getGender());
+            user.setHeight(formRequest.getHeight());
+            user.setGoal(formRequest.getGoal());
+            user.setFitnessLevel(formRequest.getFitnessLevel());
+            user.setActivityLevel(formRequest.getActivityLevel());
+            user.setAvailableDays(formRequest.getAvailableDays());
+            Set<Allergy> allergies = new HashSet<>(allergyRepository.findAllById(formRequest.getAllergiesIds()));
+            user.setAllergies(allergies);
 
-        weightJournalRepository.save(new WeightJournal(user, formRequest.getCurrentWeight()));
+            user = userRepository.save(user);
+            weightJournalRepository.save(new WeightJournal(user, formRequest.getCurrentWeight()));
 
-        return true;
+            dietGenerator.generateDiet(user, formRequest.getCurrentWeight());
+
+            return true;
+        } catch (Exception e){
+            return false;
+        }
     }
 }

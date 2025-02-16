@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
                                      password VARCHAR(20) NOT NULL CHECK (LENGTH(password) >= 8),
                                      registration_date DATE DEFAULT CURRENT_DATE,
                                      birth_date DATE CHECK (birth_date BETWEEN '1900-01-01' AND CURRENT_DATE),
+				     gender VARCHAR(10),
                                      height REAL CHECK (height BETWEEN 100 AND 250),
                                      goal VARCHAR(50),
                                      fitness_level INT CHECK (fitness_level BETWEEN 1 AND 3),
