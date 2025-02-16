@@ -23,5 +23,9 @@ public class UserController {
         return ResponseEntity.badRequest().body("Form is incorrect");
     }
 
-
+    @GetMapping("/get_today_diet")
+    public ResponseEntity<DietResponse> sendForm(@RequestHeader ("Authorization") String token) {
+        String jwtToken = token.substring(7);
+        return ResponseEntity.ok(formService.getTodayDiet(jwtToken));
+    }
 }

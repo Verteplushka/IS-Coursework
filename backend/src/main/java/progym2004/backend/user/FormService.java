@@ -3,15 +3,15 @@ package progym2004.backend.user;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import progym2004.backend.config.JwtService;
-import progym2004.backend.entity.Allergy;
-import progym2004.backend.entity.User;
-import progym2004.backend.entity.WeightJournal;
-import progym2004.backend.repository.AllergyRepository;
-import progym2004.backend.repository.UserRepository;
-import progym2004.backend.repository.WeightJournalRepository;
+import progym2004.backend.entity.*;
+import progym2004.backend.mapper.MealMapper;
+import progym2004.backend.repository.*;
 
+import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class FormService {
@@ -20,18 +20,27 @@ public class FormService {
     private final AllergyRepository allergyRepository;
     private final WeightJournalRepository weightJournalRepository;
     private final DietGenerator dietGenerator;
+    private final DietDayUserRepository dietDayUserRepository;
+    private final DietDayAdminRepository dietDayAdminRepository;
+    private final MealDietDayAdminRepository mealDietDayAdminRepository;
 
     @Autowired
     public FormService(JwtService jwtService,
                        UserRepository userRepository,
                        AllergyRepository allergyRepository,
                        WeightJournalRepository weightJournalRepository,
-                       DietGenerator dietGenerator){
+                       DietGenerator dietGenerator,
+                       DietDayUserRepository dietDayUserRepository,
+                       DietDayAdminRepository dietDayAdminRepository,
+                       MealDietDayAdminRepository mealDietDayAdminRepository){
         this.jwtService = jwtService;
         this.userRepository = userRepository;
         this.allergyRepository = allergyRepository;
         this.weightJournalRepository = weightJournalRepository;
         this.dietGenerator = dietGenerator;
+        this.dietDayUserRepository = dietDayUserRepository;
+        this.dietDayAdminRepository = dietDayAdminRepository;
+        this.mealDietDayAdminRepository = mealDietDayAdminRepository;
     }
     public boolean sendForm(FormRequest formRequest, String token){
         String login = jwtService.extractUsername(token);
@@ -57,5 +66,41 @@ public class FormService {
         } catch (Exception e){
             return false;
         }
+    }
+
+    public DietResponse getTodayDiet(String token) {
+        String login = jwtService.extractUsername(token);
+        User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
+
+        DietDayUser foundDietDayUser = dietDayUserRepository.findDietDayUserByDayDateAndUser(LocalDate.now(), user);
+        if(foundDietDayUser == null){
+            dietGenerator.continueDiet(user);
+            foundDietDayUser = dietDayUserRepository.findDietDayUserByDayDateAndUser(LocalDate.now(), user);
+        }
+
+        Double rate = foundDietDayUser.getRate();
+
+        DietDayAdmin dietDayAdmin = foundDietDayUser.getDietDayAdmin();
+        Set<MealDto> mealDtos = mealDietDayAdminRepository.findMealDietDayAdminsByDietDayAdmin(dietDayAdmin)
+                .stream()
+                .map(mealDietDayAdmin -> {
+                    MealDto mealDto = MealMapper.toDto(mealDietDayAdmin.getMeal());
+                    Double portion = mealDietDayAdmin.getPortionSize() * rate;
+                    mealDto.setPortionSize(portion);
+
+                    mealDto.setCalories(mealDto.getCalories() * portion);
+                    mealDto.setProtein(mealDto.getProtein() * portion);
+                    mealDto.setFats(mealDto.getFats() * portion);
+                    mealDto.setCarbs(mealDto.getCarbs() * portion);
+
+                    return mealDto;
+                })
+                .collect(Collectors.toSet());
+
+        double totalProteins = mealDtos.stream().mapToDouble(MealDto::getProtein).sum();
+        double totalFats = mealDtos.stream().mapToDouble(MealDto::getFats).sum();
+        double totalCarbs = mealDtos.stream().mapToDouble(MealDto::getCarbs).sum();
+
+        return new DietResponse(dietDayAdmin.getName(), mealDtos, dietDayAdmin.getCalories() * rate, totalProteins, totalFats, totalCarbs);
     }
 }

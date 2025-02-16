@@ -16,18 +16,22 @@ public class DietGenerator {
     private final DietDayAdminRepository dietDayAdminRepository;
     private final MealDietDayAdminRepository mealDietDayAdminRepository;
     private final DietDayUserRepository dietDayUserRepository;
+    private final WeightJournalRepository weightJournalRepository;
     private final int generatedDaysAmount = 2;
 
     @Autowired
     public DietGenerator(DietDayAdminRepository dietDayAdminRepository,
                          MealDietDayAdminRepository mealDietDayAdminRepository,
-                         DietDayUserRepository dietDayUserRepository) {
+                         DietDayUserRepository dietDayUserRepository,
+                         WeightJournalRepository weightJournalRepository) {
         this.dietDayAdminRepository = dietDayAdminRepository;
         this.mealDietDayAdminRepository = mealDietDayAdminRepository;
         this.dietDayUserRepository = dietDayUserRepository;
+        this.weightJournalRepository = weightJournalRepository;
     }
 
-    public void continueDiet(User user, Double weight) {
+    public void continueDiet(User user) {
+        Double weight = weightJournalRepository.findTopByUser(user).getWeight();
         List<DietDayAdmin> availableDietDays = dietDayAdminRepository.findAll();
 
         int currentlyGeneratedDays = 0;
@@ -57,7 +61,7 @@ public class DietGenerator {
                     Double rate = dailyCalories / dietDay.getCalories();
                     LocalDate dietDate = LocalDate.now().plusDays(currentlyGeneratedDays);
 
-                    DietDayUser foundDietDayUser = dietDayUserRepository.findDietDayUserByDayDate(dietDate);
+                    DietDayUser foundDietDayUser = dietDayUserRepository.findDietDayUserByDayDateAndUser(dietDate, user);
                     if(foundDietDayUser != null){
                         dietDayUserRepository.delete(foundDietDayUser);
                     }
