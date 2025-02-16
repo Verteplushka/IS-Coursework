@@ -39,7 +39,8 @@ public class Exercise {
     @NotNull
     @Size(max = 50)
     @Column(name = "muscle_group", nullable = false)
-    private String muscleGroup;
+    @Enumerated(EnumType.STRING)
+    private MuscleGroup muscleGroup;
 
     @Size(max = 200)
     @Column(name = "description")
@@ -47,4 +48,11 @@ public class Exercise {
 
     @ManyToMany(mappedBy = "exercises")
     private Set<TrainingDay> trainingDays;
+
+    public Exercise(User user, String name, MuscleGroup muscleGroup, String description){
+        this.createdBy = user;
+        this.name = name;
+        this.muscleGroup = muscleGroup;
+        this.description = description;
+    }
 }
