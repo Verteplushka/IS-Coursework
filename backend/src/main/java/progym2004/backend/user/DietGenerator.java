@@ -35,15 +35,17 @@ public class DietGenerator {
         List<DietDayAdmin> availableDietDays = dietDayAdminRepository.findAll();
 
         int currentlyGeneratedDays = 0;
-        while(currentlyGeneratedDays < generatedDaysAmount){
+        while (currentlyGeneratedDays < generatedDaysAmount) {
             for (DietDayAdmin dietDay : availableDietDays) {
                 if (!hasAllergenMeals(dietDay, user)) {
                     Double dailyCalories = calculateDailyCalories(user, weight);
                     Double rate = dailyCalories / dietDay.getCalories();
-                    dietDayUserRepository.save(new DietDayUser(user, dietDay, rate, LocalDate.now()));
+                    LocalDate dietDate = LocalDate.now().plusDays(currentlyGeneratedDays);
+
+                    dietDayUserRepository.save(new DietDayUser(user, dietDay, rate, dietDate));
                     currentlyGeneratedDays++;
                 }
-                if (currentlyGeneratedDays == generatedDaysAmount){
+                if (currentlyGeneratedDays == generatedDaysAmount) {
                     break;
                 }
             }
@@ -54,7 +56,7 @@ public class DietGenerator {
         List<DietDayAdmin> availableDietDays = dietDayAdminRepository.findAll();
 
         int currentlyGeneratedDays = 0;
-        while(currentlyGeneratedDays < generatedDaysAmount){
+        while (currentlyGeneratedDays < generatedDaysAmount) {
             for (DietDayAdmin dietDay : availableDietDays) {
                 if (!hasAllergenMeals(dietDay, user)) {
                     Double dailyCalories = calculateDailyCalories(user, weight);
@@ -62,13 +64,13 @@ public class DietGenerator {
                     LocalDate dietDate = LocalDate.now().plusDays(currentlyGeneratedDays);
 
                     DietDayUser foundDietDayUser = dietDayUserRepository.findDietDayUserByDayDateAndUser(dietDate, user);
-                    if(foundDietDayUser != null){
+                    if (foundDietDayUser != null) {
                         dietDayUserRepository.delete(foundDietDayUser);
                     }
                     dietDayUserRepository.save(new DietDayUser(user, dietDay, rate, dietDate));
                     currentlyGeneratedDays++;
                 }
-                if (currentlyGeneratedDays == generatedDaysAmount){
+                if (currentlyGeneratedDays == generatedDaysAmount) {
                     break;
                 }
             }
