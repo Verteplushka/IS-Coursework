@@ -3,6 +3,7 @@ package progym2004.backend.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
+
 import java.time.LocalDate;
 
 @Entity
@@ -29,5 +30,11 @@ public class WeightJournal {
 
     @Column(name = "weight_date", columnDefinition = "DATE DEFAULT CURRENT_DATE")
     private LocalDate weightDate;
+
+    public WeightJournal(User user, Double weight){
+        this.user = user;
+        this.weight = weight;
+        this.weightDate = LocalDate.now();
+    }
 }
 

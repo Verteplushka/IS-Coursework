@@ -1,7 +1,5 @@
-package progym2004.backend.form;
+package progym2004.backend.user;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,7 +22,5 @@ public class FormRequest {
     private Integer fitnessLevel;
     private Integer activityLevel;
     private Integer availableDays;
-    private Role role;
-    private Set<Allergy> allergies;
-    private LocalDate trainingStartDate;
+    private Set<Long> allergiesIds;
 }

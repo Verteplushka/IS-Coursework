@@ -55,25 +55,8 @@ public class User implements UserDetails {
     @Column(name = "fitness_level")
     private Integer fitnessLevel;
 
-    public FitnessLevel getFitnessLevel() {
-        return FitnessLevel.fromValue(this.fitnessLevel);
-    }
-
-    public void setFitnessLevel(FitnessLevel fitnessLevel) {
-        this.fitnessLevel = fitnessLevel.getValue();
-    }
-
     @Column(name = "activity_level")
     private Integer activityLevel;
-
-    public ActivityLevel getActivityLevel() {
-        return ActivityLevel.fromValue(this.activityLevel);
-    }
-
-    public void setActivityLevel(ActivityLevel activityLevel) {
-        this.activityLevel = activityLevel.getValue();
-    }
-
 
     @Min(1)
     @Max(7)
@@ -140,4 +123,5 @@ public class User implements UserDetails {
         this.login = login;
         this.password = password;
     }
+
 }
