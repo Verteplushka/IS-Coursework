@@ -16,7 +16,7 @@ public class DietDayUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "diet_day_user_id")
-    private Long dietDayUserId;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "diet_day_id", referencedColumnName = "diet_day_admin_id", nullable = false)

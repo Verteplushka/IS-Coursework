@@ -16,7 +16,7 @@ public class DietDayAdmin {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "diet_day_admin_id")
-    private Long dietDayAdminId;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "created_by", referencedColumnName = "user_id", nullable = false)
@@ -24,6 +24,11 @@ public class DietDayAdmin {
 
     @Column(name = "when_created", columnDefinition = "DATE DEFAULT CURRENT_DATE")
     private LocalDate whenCreated;
+
+    @PrePersist
+    protected void onCreate() {
+        this.whenCreated = LocalDate.now();
+    }
 
     @DecimalMin("0")
     @DecimalMax("5000")

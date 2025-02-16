@@ -17,7 +17,7 @@ public class Exercise {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "exercise_id")
-    private Long exerciseId;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "created_by", referencedColumnName = "user_id", nullable = false)
@@ -25,6 +25,11 @@ public class Exercise {
 
     @Column(name = "when_created", columnDefinition = "DATE DEFAULT CURRENT_DATE")
     private LocalDate whenCreated;
+
+    @PrePersist
+    protected void onCreate() {
+        this.whenCreated = LocalDate.now();
+    }
 
     @NotNull
     @Size(max = 50)

@@ -17,7 +17,7 @@ public class Meal {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "meal_id")
-    private Long mealId;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "created_by", referencedColumnName = "user_id", nullable = false)
@@ -25,6 +25,11 @@ public class Meal {
 
     @Column(name = "when_created", columnDefinition = "DATE DEFAULT CURRENT_DATE")
     private LocalDate whenCreated;
+
+    @PrePersist
+    protected void onCreate() {
+        this.whenCreated = LocalDate.now();
+    }
 
     @NotNull
     @Size(max = 50)

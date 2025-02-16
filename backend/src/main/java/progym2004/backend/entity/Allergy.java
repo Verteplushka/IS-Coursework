@@ -17,7 +17,7 @@ public class Allergy {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "allergy_id")
-    private Long allergyId;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "created_by", referencedColumnName = "user_id", nullable = false)
@@ -26,13 +26,19 @@ public class Allergy {
     @Column(name = "when_created", columnDefinition = "DATE DEFAULT CURRENT_DATE")
     private LocalDate whenCreated;
 
+    @PrePersist
+    protected void onCreate() {
+        this.whenCreated = LocalDate.now();
+    }
+
+
     @NotNull
     @Size(max = 50)
     @Column(name = "name", unique = true, nullable = false)
     private String name;
 
-//    @ManyToMany(mappedBy = "allergies")
-//    private Set<User> users;
+    @ManyToMany(mappedBy = "allergies")
+    private Set<User> users;
 
     @ManyToMany
     @JoinTable(

@@ -16,7 +16,7 @@ public class TrainingDay {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "training_day_id")
-    private Long trainingDayId;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
@@ -27,9 +27,9 @@ public class TrainingDay {
 
     @ManyToMany
     @JoinTable(
-            name = "exercise_training_day", // имя промежуточной таблицы
-            joinColumns = @JoinColumn(name = "training_day_id"), // внешний ключ для TrainingDay
-            inverseJoinColumns = @JoinColumn(name = "exercise_id") // внешний ключ для Exercise
+            name = "exercise_training_day",
+            joinColumns = @JoinColumn(name = "training_day_id"),
+            inverseJoinColumns = @JoinColumn(name = "exercise_id")
     )
     private Set<Exercise> exercises;
 }

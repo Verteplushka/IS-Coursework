@@ -17,7 +17,7 @@ public class Achievement {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "achievement_id")
-    private Long achievementId;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "created_by", referencedColumnName = "user_id", nullable = false)
@@ -35,6 +35,12 @@ public class Achievement {
     @Column(name = "when_created", columnDefinition = "DATE DEFAULT CURRENT_DATE")
     private LocalDate whenCreated;
 
-//    @ManyToMany(mappedBy = "achievements")
-//    private Set<User> users;
+    @PrePersist
+    protected void onCreate() {
+        this.whenCreated = LocalDate.now();
+    }
+
+
+    @ManyToMany(mappedBy = "achievements")
+    private Set<User> users;
 }

@@ -16,7 +16,7 @@ public class WeightJournal {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "weight_journal_id")
-    private Long weightJournalId;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "user_id", nullable = false)
