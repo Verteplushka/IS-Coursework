@@ -47,4 +47,10 @@ public class Allergy {
             inverseJoinColumns = @JoinColumn(name = "meal_id") // внешний ключ для Meal
     )
     private Set<Meal> meals;
+
+    public Allergy(User user, String name, Set<Meal> meals){
+        this.createdBy = user;
+        this.name = name;
+        this.meals = meals;
+    }
 }

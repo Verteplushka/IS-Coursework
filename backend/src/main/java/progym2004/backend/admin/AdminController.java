@@ -14,10 +14,22 @@ public class AdminController {
     @PostMapping("/add_exercise")
     public ResponseEntity<String> addExercise(@RequestBody ExerciseRequest request, @RequestHeader("Authorization") String token) {
         String jwtToken = token.substring(7);
-        adminService.save(request, jwtToken);
+        adminService.saveExercise(request, jwtToken);
         return ResponseEntity.ok("Exercise saved successfully");
     }
 
+    @PostMapping("/add_allergy")
+    public ResponseEntity<String> addAllergy(@RequestBody AllergyRequest request, @RequestHeader("Authorization") String token) {
+        String jwtToken = token.substring(7);
+        adminService.saveAllergy(request, jwtToken);
+        return ResponseEntity.ok("Allergy saved successfully");
+    }
 
+    @PostMapping("/add_meal")
+    public ResponseEntity<String> addMeal(@RequestBody MealRequest request, @RequestHeader("Authorization") String token) {
+        String jwtToken = token.substring(7);
+        adminService.saveMeal(request, jwtToken);
+        return ResponseEntity.ok("Meal saved successfully");
+    }
 
 }

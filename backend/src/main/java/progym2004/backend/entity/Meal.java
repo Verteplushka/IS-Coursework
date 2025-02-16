@@ -58,4 +58,13 @@ public class Meal {
 
     @ManyToMany(mappedBy = "meals")
     private Set<Allergy> allergies;
+
+    public Meal(User user, String name, Double calories, Double protein, Double fats, Double carbs){
+        this.createdBy = user;
+        this.name = name;
+        this.calories = calories;
+        this.protein = protein;
+        this.fats = fats;
+        this.carbs = carbs;
+    }
 }
