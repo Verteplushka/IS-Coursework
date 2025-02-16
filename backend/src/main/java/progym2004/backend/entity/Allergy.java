@@ -31,8 +31,8 @@ public class Allergy {
     @Column(name = "name", unique = true, nullable = false)
     private String name;
 
-    @ManyToMany(mappedBy = "allergies")
-    private Set<User> users;
+//    @ManyToMany(mappedBy = "allergies")
+//    private Set<User> users;
 
     @ManyToMany
     @JoinTable(
