@@ -32,4 +32,11 @@ public class AdminController {
         return ResponseEntity.ok("Meal saved successfully");
     }
 
+    @PostMapping("/add_diet_day")
+    public ResponseEntity<String> addDietDay(@RequestBody DietDayRequest request, @RequestHeader("Authorization") String token) {
+        String jwtToken = token.substring(7);
+        adminService.saveDietDay(request, jwtToken);
+        return ResponseEntity.ok("Meal saved successfully");
+    }
+
 }

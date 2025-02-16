@@ -39,6 +39,12 @@ public class DietDayAdmin {
     @Size(max = 50)
     @Column(name = "name", nullable = false)
     private String name;
+
+    public DietDayAdmin(User user, String name){
+        this.createdBy = user;
+        this.name = name;
+        this.calories = 0.0;
+    }
 }
 
 

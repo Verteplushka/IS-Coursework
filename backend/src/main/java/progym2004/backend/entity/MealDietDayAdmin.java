@@ -29,5 +29,11 @@ public class MealDietDayAdmin {
     @DecimalMax("1000")
     @Column(name = "portion_size")
     private Double portionSize;
+
+    public MealDietDayAdmin(DietDayAdmin dietDayAdmin, Meal meal, Double portionSize){
+        this.dietDayAdmin = dietDayAdmin;
+        this.meal = meal;
+        this.portionSize = portionSize;
+    }
 }
 
