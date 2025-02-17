@@ -5,5 +5,5 @@ import progym2004.backend.entity.User;
 import progym2004.backend.entity.WeightJournal;
 
 public interface WeightJournalRepository extends JpaRepository<WeightJournal, Long> {
-    WeightJournal findTopByUser(User user);
+    WeightJournal findTopByUserOrderByIdDesc(User user);
 }

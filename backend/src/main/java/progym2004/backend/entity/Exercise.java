@@ -47,8 +47,7 @@ public class Exercise {
     private String description;
 
     @NotNull
-    @Size(max = 500)
-    @Column(name = "execution_instructions", nullable = false)
+    @Column(name = "execution_instructions", nullable = false, columnDefinition = "TEXT")
     private String executionInstructions;
 
     @Column(name = "is_compound", nullable = false)

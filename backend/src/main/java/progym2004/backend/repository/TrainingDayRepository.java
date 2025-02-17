@@ -8,4 +8,5 @@ import java.time.LocalDate;
 
 public interface TrainingDayRepository extends JpaRepository<TrainingDay, Long> {
     TrainingDay findTrainingDayByUserAndTrainingDate(User user, LocalDate trainingDate);
+    void deleteAllByUserAndTrainingDateGreaterThanEqual(User user, LocalDate trainingDate);
 }

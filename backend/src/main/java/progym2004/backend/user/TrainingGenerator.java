@@ -19,12 +19,15 @@ public class TrainingGenerator {
     @Autowired
     private TrainingDayRepository trainingDayRepository;  // Репозиторий для тренировочных дней
 
-    public void generateTrainingProgram(User user, LocalDate trainingStartDate) {
+    public void regenerateTrainingProgram(User user, LocalDate trainingStartDate) {
         int availableDaysPerWeek = user.getAvailableDays();
 
         // Генерируем тренировочные дни для следующего месяца
         LocalDate startDate = trainingStartDate;  // День начала тренировок
         LocalDate endDate = startDate.plusMonths(1);  // Конец месяца
+
+        // Удаляем все существующие тренировочные дни пользователя в этом периоде
+        trainingDayRepository.deleteAllByUserAndTrainingDateGreaterThanEqual(user, LocalDate.now());
 
         List<Integer> trainingDaysOfWeek = calculateTrainingDaysOfWeek(availableDaysPerWeek, trainingStartDate);
         int exercisesPerTraining = calculateExercisesPerTraining(user.getFitnessLevel(), user.getAvailableDays());
