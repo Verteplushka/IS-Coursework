@@ -118,7 +118,8 @@ public class FormService {
                         exercise.getId(),
                         exercise.getName(),
                         exercise.getMuscleGroup(),
-                        exercise.getDescription()
+                        exercise.getDescription(),
+                        exercise.getExecutionInstructions()
                 ))
                 .collect(Collectors.toSet());
 

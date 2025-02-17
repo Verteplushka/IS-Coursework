@@ -47,7 +47,9 @@ CREATE TABLE IF NOT EXISTS exercises (
                                          when_created DATE DEFAULT CURRENT_DATE,
                                          name VARCHAR(50) NOT NULL,
                                          muscle_group VARCHAR(50) NOT NULL,
-                                         description VARCHAR(200)
+					 is_compound BOOLEAN NOT NULL DEFAULT FALSE,
+                                         description VARCHAR(200),
+					 execution_instructions VARCHAR(500) NOT NULL DEFAULT ''
 );
 
 -- Таблица рабочих весов для упражнений

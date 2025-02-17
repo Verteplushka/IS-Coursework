@@ -46,13 +46,23 @@ public class Exercise {
     @Column(name = "description")
     private String description;
 
+    @NotNull
+    @Size(max = 500)
+    @Column(name = "execution_instructions", nullable = false)
+    private String executionInstructions;
+
+    @Column(name = "is_compound", nullable = false)
+    private boolean isCompound;
+
     @ManyToMany(mappedBy = "exercises")
     private Set<TrainingDay> trainingDays;
 
-    public Exercise(User user, String name, MuscleGroup muscleGroup, String description){
+    public Exercise(User user, String name, MuscleGroup muscleGroup, String description, String executionInstructions, boolean isCompound) {
         this.createdBy = user;
         this.name = name;
         this.muscleGroup = muscleGroup;
         this.description = description;
+        this.executionInstructions = executionInstructions;
+        this.isCompound = isCompound;
     }
 }

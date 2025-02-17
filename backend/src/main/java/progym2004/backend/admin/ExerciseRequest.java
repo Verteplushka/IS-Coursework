@@ -13,5 +13,7 @@ import progym2004.backend.entity.MuscleGroup;
 public class ExerciseRequest {
     private String name;
     private MuscleGroup muscleGroup;
+    private boolean isCompound;
     private String description;
+    private String executionInstructions;
 }

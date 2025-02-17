@@ -15,4 +15,5 @@ public class ExerciseDto {
     private String name;
     private MuscleGroup muscleGroup;
     private String description;
+    private String execution_instructions;
 }
