@@ -31,4 +31,10 @@ public class UserController {
         String jwtToken = token.substring(7);
         return ResponseEntity.ok(formService.getTodayTraining(jwtToken));
     }
+
+    @GetMapping("/get_training_program")
+    public ResponseEntity<TrainingProgramResponse> getTrainingProgram(@RequestHeader("Authorization") String token) {
+        String jwtToken = token.substring(7);
+        return ResponseEntity.ok(formService.getTrainingProgram(jwtToken));
+    }
 }

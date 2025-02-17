@@ -5,12 +5,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import progym2004.backend.config.JwtService;
 import progym2004.backend.entity.*;
+import progym2004.backend.mapper.ExerciseMapper;
 import progym2004.backend.mapper.MealMapper;
+import progym2004.backend.mapper.TrainingMapper;
 import progym2004.backend.repository.*;
 
 import java.text.Normalizer;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -157,16 +160,19 @@ public class FormService {
         User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
 
         TrainingDay trainingDay = trainingDayRepository.findTrainingDayByUserAndTrainingDate(user, LocalDate.now());
-        Set<ExerciseDto> exerciseDtos = trainingDay.getExercises().stream()
-                .map(exercise -> new ExerciseDto(
-                        exercise.getId(),
-                        exercise.getName(),
-                        exercise.getMuscleGroup(),
-                        exercise.getDescription(),
-                        exercise.getExecutionInstructions()
-                ))
-                .collect(Collectors.toSet());
+        Set<ExerciseDto> exerciseDtos = ExerciseMapper.toDtos(trainingDay.getExercises());
 
         return new TrainingResponse(exerciseDtos, LocalDate.now());
+    }
+
+
+
+    public TrainingProgramResponse getTrainingProgram(String token){
+        String login = jwtService.extractUsername(token);
+        User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<TrainingDay> trainingDays = trainingDayRepository.findTrainingDaysByUserAndTrainingDateGreaterThanEqual(user, LocalDate.now());
+        List<TrainingResponse> trainingResponses = TrainingMapper.mapTrainingDaysToResponses(trainingDays);
+        return new TrainingProgramResponse(trainingResponses);
     }
 }
