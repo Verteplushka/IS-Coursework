@@ -9,7 +9,6 @@ import progym2004.backend.repository.*;
 
 import java.time.LocalDate;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -21,8 +20,9 @@ public class FormService {
     private final WeightJournalRepository weightJournalRepository;
     private final DietGenerator dietGenerator;
     private final DietDayUserRepository dietDayUserRepository;
-    private final DietDayAdminRepository dietDayAdminRepository;
     private final MealDietDayAdminRepository mealDietDayAdminRepository;
+    private final TrainingGenerator trainingGenerator;
+    private final TrainingDayRepository trainingDayRepository;
 
     @Autowired
     public FormService(JwtService jwtService,
@@ -31,18 +31,21 @@ public class FormService {
                        WeightJournalRepository weightJournalRepository,
                        DietGenerator dietGenerator,
                        DietDayUserRepository dietDayUserRepository,
-                       DietDayAdminRepository dietDayAdminRepository,
-                       MealDietDayAdminRepository mealDietDayAdminRepository){
+                       MealDietDayAdminRepository mealDietDayAdminRepository,
+                       TrainingGenerator trainingGenerator,
+                       TrainingDayRepository trainingDayRepository) {
         this.jwtService = jwtService;
         this.userRepository = userRepository;
         this.allergyRepository = allergyRepository;
         this.weightJournalRepository = weightJournalRepository;
         this.dietGenerator = dietGenerator;
         this.dietDayUserRepository = dietDayUserRepository;
-        this.dietDayAdminRepository = dietDayAdminRepository;
         this.mealDietDayAdminRepository = mealDietDayAdminRepository;
+        this.trainingGenerator = trainingGenerator;
+        this.trainingDayRepository = trainingDayRepository;
     }
-    public boolean sendForm(FormRequest formRequest, String token){
+
+    public boolean sendForm(FormRequest formRequest, String token) {
         String login = jwtService.extractUsername(token);
         User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -61,9 +64,10 @@ public class FormService {
             weightJournalRepository.save(new WeightJournal(user, formRequest.getCurrentWeight()));
 
             dietGenerator.rewriteDiet(user, formRequest.getCurrentWeight());
+            trainingGenerator.generateTrainingProgram(user, formRequest.getStartTraining());
 
             return true;
-        } catch (Exception e){
+        } catch (Exception e) {
             return false;
         }
     }
@@ -73,7 +77,7 @@ public class FormService {
         User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
 
         DietDayUser foundDietDayUser = dietDayUserRepository.findDietDayUserByDayDateAndUser(LocalDate.now(), user);
-        if(foundDietDayUser == null){
+        if (foundDietDayUser == null) {
             dietGenerator.continueDiet(user);
             foundDietDayUser = dietDayUserRepository.findDietDayUserByDayDateAndUser(LocalDate.now(), user);
         }
@@ -102,5 +106,22 @@ public class FormService {
         double totalCarbs = mealDtos.stream().mapToDouble(MealDto::getCarbs).sum();
 
         return new DietResponse(dietDayAdmin.getName(), mealDtos, dietDayAdmin.getCalories() * rate, totalProteins, totalFats, totalCarbs);
+    }
+
+    public TrainingResponse getTodayTraining(String token) {
+        String login = jwtService.extractUsername(token);
+        User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
+
+        TrainingDay trainingDay = trainingDayRepository.findTrainingDayByUserAndTrainingDate(user, LocalDate.now());
+        Set<ExerciseDto> exerciseDtos = trainingDay.getExercises().stream()
+                .map(exercise -> new ExerciseDto(
+                        exercise.getId(),
+                        exercise.getName(),
+                        exercise.getMuscleGroup(),
+                        exercise.getDescription()
+                ))
+                .collect(Collectors.toSet());
+
+        return new TrainingResponse(exerciseDtos, LocalDate.now());
     }
 }

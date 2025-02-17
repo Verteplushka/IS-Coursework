@@ -24,8 +24,14 @@ public class UserController {
     }
 
     @GetMapping("/get_today_diet")
-    public ResponseEntity<DietResponse> sendForm(@RequestHeader ("Authorization") String token) {
+    public ResponseEntity<DietResponse> getDiet(@RequestHeader ("Authorization") String token) {
         String jwtToken = token.substring(7);
         return ResponseEntity.ok(formService.getTodayDiet(jwtToken));
+    }
+
+    @GetMapping("/get_today_training")
+    public ResponseEntity<TrainingResponse> getTraining(@RequestHeader ("Authorization") String token) {
+        String jwtToken = token.substring(7);
+        return ResponseEntity.ok(formService.getTodayTraining(jwtToken));
     }
 }
