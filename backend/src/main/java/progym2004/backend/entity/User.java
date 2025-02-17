@@ -73,6 +73,9 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Column(name = "start_training")
+    private LocalDate startTraining;
+
     @ManyToMany
     @JoinTable(
             name = "user_allergy",
@@ -142,6 +145,7 @@ public class User implements UserDetails {
         this.activityLevel = other.activityLevel;
         this.availableDays = other.availableDays;
         this.role = other.role;
+        this.startTraining = other.startTraining;
         this.allergies = other.allergies != null ? new HashSet<>(other.allergies) : null;
         this.achievements = other.achievements != null ? new HashSet<>(other.achievements) : null;
     }

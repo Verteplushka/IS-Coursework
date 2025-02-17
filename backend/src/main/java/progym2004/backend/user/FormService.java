@@ -65,12 +65,14 @@ public class FormService {
             user.setAvailableDays(formRequest.getAvailableDays());
             Set<Allergy> allergies = new HashSet<>(allergyRepository.findAllById(formRequest.getAllergiesIds()));
             user.setAllergies(allergies);
+            user.setStartTraining(formRequest.getStartTraining());
 
             WeightJournal prevWeight = weightJournalRepository.findTopByUserOrderByIdDesc(user);
 
             if (user.getAvailableDays().equals(userFromBD.getAvailableDays())
                     && user.getFitnessLevel().equals(userFromBD.getFitnessLevel())
-                    && user.getGoal().equals(userFromBD.getGoal())) {
+                    && user.getGoal().equals(userFromBD.getGoal())
+                    && user.getStartTraining().equals(userFromBD.getStartTraining())) {
                 if (prevWeight != null) {
                     if (prevWeight.getWeight().equals(formRequest.getCurrentWeight())
                             && user.getGender().equals(userFromBD.getGender())
