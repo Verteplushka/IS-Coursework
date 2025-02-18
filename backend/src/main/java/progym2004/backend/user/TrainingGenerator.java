@@ -143,45 +143,48 @@ public class TrainingGenerator {
 
         // Получаем все возможные упражнения для пользователя
         List<Exercise> availableExercises = exerciseRepository.findAll();
-        Collections.shuffle(availableExercises); // Перемешиваем список случайным образом
+        Collections.shuffle(availableExercises);
 
         // Отбираем упражнения только из переданных групп и исключаем CARDIO
         List<Exercise> exercisesWithMuscleGroups = availableExercises.stream()
-                .filter(ex -> targetMuscleGroups.contains(ex.getMuscleGroup()))
+                .filter(ex -> targetMuscleGroups.contains(ex.getMuscleGroup()) && ex.getMuscleGroup() != MuscleGroup.CARDIO)
                 .collect(Collectors.toList());
 
         int numberInTraining = 0;
 
         // Кардио в начале
-        saveExerciseAndGenerateRepetitionsAndSets(selectCardioExercise(availableExercises), trainingDay, numberInTraining, user.getFitnessLevel(), goal);
+        exerciseTrainingDayRepository.save(new ExerciseTrainingDay(trainingDay, selectCardioExercise(availableExercises), numberInTraining, null, null));
         numberInTraining++;
 
-        // Добавляем упражнения так, чтобы задействовать максимум разных групп мышц
-        Set<MuscleGroup> usedMuscleGroups = new HashSet<>();
-        Iterator<Exercise> iterator = exercisesWithMuscleGroups.iterator();
+        // Генерируем упражнения по кругу для каждой из мышечных групп
+        int muscleGroupIndex = 0;
+        while (numberInTraining < exercisesPerTraining && !exercisesWithMuscleGroups.isEmpty()) {
+            MuscleGroup currentMuscleGroup = targetMuscleGroups.get(muscleGroupIndex);
+            // Находим упражнения для текущей группы мышц
+            List<Exercise> exercisesForCurrentGroup = exercisesWithMuscleGroups.stream()
+                    .filter(ex -> ex.getMuscleGroup() == currentMuscleGroup)
+                    .collect(Collectors.toList());
 
-        while (iterator.hasNext() && numberInTraining < exercisesPerTraining - 1) {
-            Exercise exercise = iterator.next();
-            if (usedMuscleGroups.add(exercise.getMuscleGroup())) { // Добавляем, если этой группы мышц еще не было
+            // Если есть упражнения для этой группы, добавляем одно
+            if (!exercisesForCurrentGroup.isEmpty()) {
+                Exercise exercise = exercisesForCurrentGroup.remove(0); // Берем первое упражнение из списка
+                exercisesWithMuscleGroups.remove(exercise); // Удаляем его из общего списка
                 saveExerciseAndGenerateRepetitionsAndSets(exercise, trainingDay, numberInTraining, user.getFitnessLevel(), goal);
                 numberInTraining++;
-                iterator.remove(); // Удаляем использованное упражнение
             }
-        }
 
-        // Если осталось место, заполняем случайными упражнениями из той же группы
-        while (numberInTraining < exercisesPerTraining - 1 && !exercisesWithMuscleGroups.isEmpty()) {
-            saveExerciseAndGenerateRepetitionsAndSets(exercisesWithMuscleGroups.remove(0), trainingDay, numberInTraining, user.getFitnessLevel(), goal);
-            numberInTraining++;
+            // Переходим к следующей мышечной группе по кругу
+            muscleGroupIndex = (muscleGroupIndex + 1) % targetMuscleGroups.size();
         }
 
         // Добавляем кардио в конце, если цель позволяет
         if ((goal == Goal.MAINTENANCE || goal == Goal.WEIGHT_LOSS) && exercisesPerTraining >= 4) {
-            saveExerciseAndGenerateRepetitionsAndSets(selectCardioExercise(availableExercises), trainingDay, numberInTraining, user.getFitnessLevel(), goal);
+            exerciseTrainingDayRepository.save(new ExerciseTrainingDay(trainingDay, selectCardioExercise(availableExercises), numberInTraining, null, null));
         }
 
         return trainingDay;
     }
+
 
     // Метод для выбора случайного упражнения по указанной группе мышц
     private Exercise selectCardioExercise(List<Exercise> exercises) {
@@ -194,7 +197,13 @@ public class TrainingGenerator {
     private void saveExerciseAndGenerateRepetitionsAndSets(Exercise exercise, TrainingDay trainingDay, int numberInTraining, Integer fitnessLevel, Goal goal) {
         Integer sets = fitnessLevel == 1 ? 3 : 4;
         if (exercise.getRecommendedRepetitions() != null) {
-            exerciseTrainingDayRepository.save(new ExerciseTrainingDay(trainingDay, exercise, numberInTraining, sets, exercise.getRecommendedRepetitions()));
+            Integer amplifier = switch (fitnessLevel) {
+                case 1 -> -5;
+                case 2 -> 0;
+                case 3 -> 5;
+                default -> throw new IllegalStateException("Unexpected value for fitnessLevel: " + fitnessLevel);
+            };
+            exerciseTrainingDayRepository.save(new ExerciseTrainingDay(trainingDay, exercise, numberInTraining, sets, exercise.getRecommendedRepetitions() + amplifier));
         } else {
             Integer repetitions = switch (goal) {
                 case MUSCLE_GAIN -> 10;

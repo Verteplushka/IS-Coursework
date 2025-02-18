@@ -54,11 +54,12 @@ public class FormService {
         String login = jwtService.extractUsername(token);
         User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
         WeightJournal weightJournal = weightJournalRepository.findTopByUserOrderByIdDesc(user);
+        Double weight = weightJournal == null ? null : weightJournal.getWeight();
         Set<Long> allergyIds = user.getAllergies().stream()
                 .map(Allergy::getId)
                 .collect(Collectors.toSet());
 
-        return new FormRequest(user.getBirthDate(), user.getGender(), user.getHeight(), weightJournal.getWeight(), user.getGoal(), user.getFitnessLevel(), user.getActivityLevel(), user.getAvailableDays(), allergyIds, user.getStartTraining());
+        return new FormRequest(user.getBirthDate(), user.getGender(), user.getHeight(), weight, user.getGoal(), user.getFitnessLevel(), user.getActivityLevel(), user.getAvailableDays(), allergyIds, user.getStartTraining());
     }
 
     @Transactional

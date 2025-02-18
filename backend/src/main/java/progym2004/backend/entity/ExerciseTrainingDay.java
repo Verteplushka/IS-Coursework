@@ -31,10 +31,10 @@ public class ExerciseTrainingDay {
     @Column(name = "exercise_number", nullable = false)
     private Integer exerciseNumber;
 
-    @Column(name = "sets", nullable = false)
+    @Column(name = "sets")
     private Integer sets;
 
-    @Column(name = "repetitions", nullable = false)
+    @Column(name = "repetitions")
     private Integer repetitions;
 
     public ExerciseTrainingDay(TrainingDay trainingDay, Exercise exercise, Integer exerciseNumber, Integer sets, Integer repetitions) {
