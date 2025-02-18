@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -19,6 +20,7 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
 public class User implements UserDetails {
 
     @Id
@@ -70,6 +72,9 @@ public class User implements UserDetails {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @Column(name = "start_training")
+    private LocalDate startTraining;
 
     @ManyToMany
     @JoinTable(
@@ -127,4 +132,21 @@ public class User implements UserDetails {
         this.password = password;
     }
 
+    public User(User other) {
+        this.id = other.id;
+        this.login = other.login;
+        this.password = other.password;
+        this.registrationDate = other.registrationDate;
+        this.birthDate = other.birthDate;
+        this.gender = other.gender;
+        this.height = other.height;
+        this.goal = other.goal;
+        this.fitnessLevel = other.fitnessLevel;
+        this.activityLevel = other.activityLevel;
+        this.availableDays = other.availableDays;
+        this.role = other.role;
+        this.startTraining = other.startTraining;
+        this.allergies = other.allergies != null ? new HashSet<>(other.allergies) : null;
+        this.achievements = other.achievements != null ? new HashSet<>(other.achievements) : null;
+    }
 }

@@ -5,14 +5,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TrainingResponse {
-    List<ExerciseDto> exercises;
-    LocalDate trainingDate;
+public class TrainingProgramResponse {
+
+    private List<TrainingResponse> trainings;
 }

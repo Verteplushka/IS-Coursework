@@ -47,15 +47,17 @@ public class Exercise {
     private String description;
 
     @NotNull
-    @Size(max = 500)
-    @Column(name = "execution_instructions", nullable = false)
+    @Column(name = "execution_instructions", nullable = false, columnDefinition = "TEXT")
     private String executionInstructions;
 
     @Column(name = "is_compound", nullable = false)
     private boolean isCompound;
 
-    @ManyToMany(mappedBy = "exercises")
-    private Set<TrainingDay> trainingDays;
+    @Column(name = "recommended_repetitions")
+    private Integer recommendedRepetitions;
+
+    @OneToMany(mappedBy = "exercise")
+    private Set<ExerciseTrainingDay> exerciseTrainingDays;
 
     public Exercise(User user, String name, MuscleGroup muscleGroup, String description, String executionInstructions, boolean isCompound) {
         this.createdBy = user;

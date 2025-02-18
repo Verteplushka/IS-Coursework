@@ -31,7 +31,7 @@ public class DietGenerator {
     }
 
     public void continueDiet(User user) {
-        Double weight = weightJournalRepository.findTopByUser(user).getWeight();
+        Double weight = weightJournalRepository.findTopByUserOrderByIdDesc(user).getWeight();
         List<DietDayAdmin> availableDietDays = dietDayAdminRepository.findAll();
 
         int currentlyGeneratedDays = 0;

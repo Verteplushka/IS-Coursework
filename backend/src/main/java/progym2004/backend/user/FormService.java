@@ -2,13 +2,18 @@ package progym2004.backend.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import progym2004.backend.config.JwtService;
 import progym2004.backend.entity.*;
+import progym2004.backend.mapper.ExerciseMapper;
 import progym2004.backend.mapper.MealMapper;
 import progym2004.backend.repository.*;
 
+import java.text.Normalizer;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -23,6 +28,7 @@ public class FormService {
     private final MealDietDayAdminRepository mealDietDayAdminRepository;
     private final TrainingGenerator trainingGenerator;
     private final TrainingDayRepository trainingDayRepository;
+    private final ExerciseTrainingDayRepository exerciseTrainingDayRepository;
 
     @Autowired
     public FormService(JwtService jwtService,
@@ -33,7 +39,7 @@ public class FormService {
                        DietDayUserRepository dietDayUserRepository,
                        MealDietDayAdminRepository mealDietDayAdminRepository,
                        TrainingGenerator trainingGenerator,
-                       TrainingDayRepository trainingDayRepository) {
+                       TrainingDayRepository trainingDayRepository, ExerciseTrainingDayRepository exerciseTrainingDayRepository) {
         this.jwtService = jwtService;
         this.userRepository = userRepository;
         this.allergyRepository = allergyRepository;
@@ -43,11 +49,15 @@ public class FormService {
         this.mealDietDayAdminRepository = mealDietDayAdminRepository;
         this.trainingGenerator = trainingGenerator;
         this.trainingDayRepository = trainingDayRepository;
+        this.exerciseTrainingDayRepository = exerciseTrainingDayRepository;
     }
 
-    public boolean sendForm(FormRequest formRequest, String token) {
+    @Transactional
+    public FormUpdateStatus sendForm(FormRequest formRequest, String token) {
         String login = jwtService.extractUsername(token);
         User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
+
+        User userFromBD = new User(user);
 
         try {
             user.setBirthDate(formRequest.getBirthDate());
@@ -59,16 +69,54 @@ public class FormService {
             user.setAvailableDays(formRequest.getAvailableDays());
             Set<Allergy> allergies = new HashSet<>(allergyRepository.findAllById(formRequest.getAllergiesIds()));
             user.setAllergies(allergies);
+            user.setStartTraining(formRequest.getStartTraining());
+
+            WeightJournal prevWeight = weightJournalRepository.findTopByUserOrderByIdDesc(user);
+
+            if (user.getAvailableDays().equals(userFromBD.getAvailableDays())
+                    && user.getFitnessLevel().equals(userFromBD.getFitnessLevel())
+                    && user.getGoal().equals(userFromBD.getGoal())
+                    && user.getStartTraining().equals(userFromBD.getStartTraining())) {
+                if (prevWeight != null) {
+                    if (prevWeight.getWeight().equals(formRequest.getCurrentWeight())
+                            && user.getGender().equals(userFromBD.getGender())
+                            && user.getHeight().equals(userFromBD.getHeight())
+                            && user.getActivityLevel().equals(userFromBD.getActivityLevel())
+                            && user.getAllergies().equals(userFromBD.getAllergies())) {
+                        return FormUpdateStatus.NO_CHANGES;
+                    }
+                }
+                user = userRepository.save(user);
+                weightJournalRepository.save(new WeightJournal(user, formRequest.getCurrentWeight()));
+                dietGenerator.rewriteDiet(user, formRequest.getCurrentWeight());
+                return FormUpdateStatus.UPDATED_DIET;
+
+            } else if (!user.getGoal().equals(userFromBD.getGoal())) {
+                user = userRepository.save(user);
+                weightJournalRepository.save(new WeightJournal(user, formRequest.getCurrentWeight()));
+                dietGenerator.rewriteDiet(user, formRequest.getCurrentWeight());
+                trainingGenerator.regenerateTrainingProgram(user, formRequest.getStartTraining());
+                return FormUpdateStatus.UPDATED_ALL;
+            } else if (prevWeight != null) {
+                if (prevWeight.getWeight().equals(formRequest.getCurrentWeight())
+                        && user.getGender().equals(userFromBD.getGender())
+                        && user.getHeight().equals(userFromBD.getHeight())
+                        && user.getActivityLevel().equals(userFromBD.getActivityLevel())
+                        && user.getAllergies().equals(userFromBD.getAllergies())) {
+                    user = userRepository.save(user);
+                    trainingGenerator.regenerateTrainingProgram(user, formRequest.getStartTraining());
+                    return FormUpdateStatus.UPDATED_TRAINING;
+                }
+            }
 
             user = userRepository.save(user);
             weightJournalRepository.save(new WeightJournal(user, formRequest.getCurrentWeight()));
-
             dietGenerator.rewriteDiet(user, formRequest.getCurrentWeight());
-            trainingGenerator.generateTrainingProgram(user, formRequest.getStartTraining());
-
-            return true;
+            trainingGenerator.regenerateTrainingProgram(user, formRequest.getStartTraining());
+            return FormUpdateStatus.UPDATED_ALL;
         } catch (Exception e) {
-            return false;
+            e.printStackTrace();
+            return FormUpdateStatus.ERROR;
         }
     }
 
@@ -113,16 +161,28 @@ public class FormService {
         User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
 
         TrainingDay trainingDay = trainingDayRepository.findTrainingDayByUserAndTrainingDate(user, LocalDate.now());
-        Set<ExerciseDto> exerciseDtos = trainingDay.getExercises().stream()
-                .map(exercise -> new ExerciseDto(
-                        exercise.getId(),
-                        exercise.getName(),
-                        exercise.getMuscleGroup(),
-                        exercise.getDescription(),
-                        exercise.getExecutionInstructions()
-                ))
-                .collect(Collectors.toSet());
+        List<ExerciseDto> exerciseDtos = ExerciseMapper.toDtos(exerciseTrainingDayRepository.findExerciseTrainingDaysByTrainingDayOrderById(trainingDay));
 
         return new TrainingResponse(exerciseDtos, LocalDate.now());
+    }
+
+
+
+    public TrainingProgramResponse getTrainingProgram(String token){
+        String login = jwtService.extractUsername(token);
+        User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<TrainingDay> trainingDays = trainingDayRepository.findTrainingDaysByUserAndTrainingDateGreaterThanEqual(user, LocalDate.now());
+
+        List<TrainingResponse> trainingResponses = trainingDays.stream()
+                .map(trainingDay -> {
+                    List<ExerciseDto> exerciseDtos = ExerciseMapper.toDtos(
+                            exerciseTrainingDayRepository.findExerciseTrainingDaysByTrainingDayOrderById(trainingDay)
+                    );
+                    return new TrainingResponse(exerciseDtos, trainingDay.getTrainingDate());
+                })
+                .toList();
+
+        return new TrainingProgramResponse(trainingResponses);
     }
 }

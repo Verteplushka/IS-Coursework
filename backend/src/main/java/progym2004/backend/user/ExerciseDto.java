@@ -11,9 +11,11 @@ import progym2004.backend.entity.MuscleGroup;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ExerciseDto {
-    private Long id;
+    private Integer id;
     private String name;
     private MuscleGroup muscleGroup;
     private String description;
     private String execution_instructions;
+    private Integer sets;
+    private Integer repetitions;
 }

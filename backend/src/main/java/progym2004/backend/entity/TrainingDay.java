@@ -25,11 +25,14 @@ public class TrainingDay {
     @Column(name = "training_date")
     private LocalDate trainingDate;
 
-    @ManyToMany
-    @JoinTable(
-            name = "exercise_training_day",
-            joinColumns = @JoinColumn(name = "training_day_id"),
-            inverseJoinColumns = @JoinColumn(name = "exercise_id")
-    )
-    private Set<Exercise> exercises;
+    @OneToMany(mappedBy = "trainingDay")
+    private Set<ExerciseTrainingDay> exerciseTrainingDays;
+
+    @Column(name = "is_completed")
+    private Boolean isCompleted = false;
+
+    public TrainingDay(User user, LocalDate trainingDate){
+        this.user = user;
+        this.trainingDate = trainingDate;
+    }
 }
