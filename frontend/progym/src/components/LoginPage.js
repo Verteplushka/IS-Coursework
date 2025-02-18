@@ -17,7 +17,7 @@ const LoginPage = () => {
       });
       localStorage.setItem("access_token", response.data.access_token);
       localStorage.setItem("refresh_token", response.data.refresh_token);
-      window.location.href = "/dashboard";
+      window.location.href = "/UserForm";
     } catch (err) {
       setError("Ошибка авторизации. Проверьте логин и пароль.");
     }
