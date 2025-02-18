@@ -9,11 +9,9 @@ import progym2004.backend.mapper.ExerciseMapper;
 import progym2004.backend.mapper.MealMapper;
 import progym2004.backend.repository.*;
 
-import java.text.Normalizer;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -144,7 +142,7 @@ public class FormService {
         Double rate = foundDietDayUser.getRate();
 
         DietDayAdmin dietDayAdmin = foundDietDayUser.getDietDayAdmin();
-        Set<MealDto> mealDtos = mealDietDayAdminRepository.findMealDietDayAdminsByDietDayAdmin(dietDayAdmin)
+        List<MealDto> mealDtos = mealDietDayAdminRepository.findMealDietDayAdminsByDietDayAdmin(dietDayAdmin)
                 .stream()
                 .map(mealDietDayAdmin -> {
                     MealDto mealDto = MealMapper.toDto(mealDietDayAdmin.getMeal());
@@ -158,7 +156,7 @@ public class FormService {
 
                     return mealDto;
                 })
-                .collect(Collectors.toSet());
+                .toList();
 
         double totalProteins = mealDtos.stream().mapToDouble(MealDto::getProtein).sum();
         double totalFats = mealDtos.stream().mapToDouble(MealDto::getFats).sum();

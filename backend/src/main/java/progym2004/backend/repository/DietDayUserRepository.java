@@ -8,4 +8,5 @@ import java.time.LocalDate;
 
 public interface DietDayUserRepository extends JpaRepository<DietDayUser, Long> {
     DietDayUser findDietDayUserByDayDateAndUser(LocalDate dayDate, User user);
+    void deleteAllByUserAndDayDateGreaterThanEqual(User user, LocalDate dayDate);
 }

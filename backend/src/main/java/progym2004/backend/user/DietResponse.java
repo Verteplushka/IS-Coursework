@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Set;
+import java.util.List;
 
 @Getter
 @Setter
@@ -13,7 +13,7 @@ import java.util.Set;
 @NoArgsConstructor
 public class DietResponse {
     private String name;
-    private Set<MealDto> meals;
+    private List<MealDto> meals;
     private Double calories;
     private Double protein;
     private Double fats;

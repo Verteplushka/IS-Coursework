@@ -34,48 +34,70 @@ public class DietGenerator {
         Double weight = weightJournalRepository.findTopByUserOrderByIdDesc(user).getWeight();
         List<DietDayAdmin> availableDietDays = dietDayAdminRepository.findAll();
 
+        // Фильтруем доступные диеты, оставляя только те, где нет аллергенов
+        List<DietDayAdmin> filteredDietDays = availableDietDays.stream()
+                .filter(dietDay -> !hasAllergenMeals(dietDay, user))
+                .collect(Collectors.toList());
+
+        // Если после фильтрации список пустой, значит нет подходящей диеты
+        if (filteredDietDays.isEmpty()) {
+            throw new IllegalStateException("Нет доступных диет без аллергенов для пользователя " + user.getId());
+        }
+
         int currentlyGeneratedDays = 0;
         while (currentlyGeneratedDays < generatedDaysAmount) {
-            for (DietDayAdmin dietDay : availableDietDays) {
-                if (!hasAllergenMeals(dietDay, user)) {
-                    Double dailyCalories = calculateDailyCalories(user, weight);
-                    Double rate = dailyCalories / dietDay.getCalories();
-                    LocalDate dietDate = LocalDate.now().plusDays(currentlyGeneratedDays);
+            for (DietDayAdmin dietDay : filteredDietDays) {
+                Double dailyCalories = calculateDailyCalories(user, weight);
+                Double rate = dailyCalories / dietDay.getCalories();
+                LocalDate dietDate = LocalDate.now().plusDays(currentlyGeneratedDays);
 
-                    dietDayUserRepository.save(new DietDayUser(user, dietDay, rate, dietDate));
-                    currentlyGeneratedDays++;
-                }
+                dietDayUserRepository.save(new DietDayUser(user, dietDay, rate, dietDate));
+                currentlyGeneratedDays++;
+
                 if (currentlyGeneratedDays == generatedDaysAmount) {
                     break;
                 }
             }
         }
     }
+
 
     public void rewriteDiet(User user, Double weight) {
+        // Удаляем все будущие и текущие DietDayUser для пользователя
+        dietDayUserRepository.deleteAllByUserAndDayDateGreaterThanEqual(user, LocalDate.now());
+
         List<DietDayAdmin> availableDietDays = dietDayAdminRepository.findAll();
+
+        // Фильтруем доступные диеты, исключая те, где есть аллергены
+        List<DietDayAdmin> filteredDietDays = availableDietDays.stream()
+                .filter(dietDay -> !hasAllergenMeals(dietDay, user))
+                .collect(Collectors.toList());
+
+        // Если нет подходящих диет, выбрасываем исключение
+        if (filteredDietDays.isEmpty()) {
+            throw new IllegalStateException("Нет доступных диет без аллергенов для пользователя " + user.getId());
+        }
 
         int currentlyGeneratedDays = 0;
         while (currentlyGeneratedDays < generatedDaysAmount) {
-            for (DietDayAdmin dietDay : availableDietDays) {
-                if (!hasAllergenMeals(dietDay, user)) {
-                    Double dailyCalories = calculateDailyCalories(user, weight);
-                    Double rate = dailyCalories / dietDay.getCalories();
-                    LocalDate dietDate = LocalDate.now().plusDays(currentlyGeneratedDays);
+            for (DietDayAdmin dietDay : filteredDietDays) {
+                Double dailyCalories = calculateDailyCalories(user, weight);
+                Double rate = dailyCalories / dietDay.getCalories();
+                LocalDate dietDate = LocalDate.now().plusDays(currentlyGeneratedDays);
 
-                    DietDayUser foundDietDayUser = dietDayUserRepository.findDietDayUserByDayDateAndUser(dietDate, user);
-                    if (foundDietDayUser != null) {
-                        dietDayUserRepository.delete(foundDietDayUser);
-                    }
-                    dietDayUserRepository.save(new DietDayUser(user, dietDay, rate, dietDate));
-                    currentlyGeneratedDays++;
-                }
+                // Создаём новый `DietDayUser`
+                dietDayUserRepository.save(new DietDayUser(user, dietDay, rate, dietDate));
+                currentlyGeneratedDays++;
+
+                // Если уже сгенерировали нужное количество дней — выходим из цикла
                 if (currentlyGeneratedDays == generatedDaysAmount) {
                     break;
                 }
             }
         }
     }
+
+
 
     private boolean hasAllergenMeals(DietDayAdmin dietDay, User user) {
         Set<MealDietDayAdmin> mealDietDayAdmins = mealDietDayAdminRepository.findMealDietDayAdminsByDietDayAdmin(dietDay);
