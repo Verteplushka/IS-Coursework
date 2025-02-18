@@ -52,6 +52,17 @@ public class FormService {
         this.exerciseTrainingDayRepository = exerciseTrainingDayRepository;
     }
 
+    public FormRequest getUserParams(String token){
+        String login = jwtService.extractUsername(token);
+        User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
+        WeightJournal weightJournal = weightJournalRepository.findTopByUserOrderByIdDesc(user);
+        Set<Long> allergyIds = user.getAllergies().stream()
+                .map(Allergy::getId)
+                .collect(Collectors.toSet());
+
+        return new FormRequest(user.getBirthDate(), user.getGender(), user.getHeight(), weightJournal.getWeight(), user.getGoal(), user.getFitnessLevel(), user.getActivityLevel(), user.getAvailableDays(), allergyIds, user.getStartTraining());
+    }
+
     @Transactional
     public FormUpdateStatus sendForm(FormRequest formRequest, String token) {
         String login = jwtService.extractUsername(token);

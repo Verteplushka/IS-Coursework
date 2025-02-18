@@ -14,6 +14,12 @@ public class UserController {
         this.formService = formService;
     }
 
+    @GetMapping("/get_user_params")
+    public ResponseEntity<FormRequest> getUserParams(@RequestHeader("Authorization") String token) {
+        String jwtToken = token.substring(7);
+        return ResponseEntity.ok(formService.getUserParams(jwtToken));
+    }
+
     @PostMapping("/sendForm")
     public ResponseEntity<FormUpdateStatus> sendForm(@RequestBody FormRequest request, @RequestHeader("Authorization") String token) {
         String jwtToken = token.substring(7);

@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS exercises (
 					 is_compound BOOLEAN NOT NULL DEFAULT FALSE,
 					 recommended_repetitions INT,
                                          description VARCHAR(200),
-					 execution_instructions VARCHAR(500) NOT NULL DEFAULT ''
+					 execution_instructions TEXT NOT NULL DEFAULT ''
 );
 
 -- Таблица рабочих весов для упражнений
