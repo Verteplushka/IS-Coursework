@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import progym2004.backend.entity.*;
 import progym2004.backend.repository.ExerciseRepository;
+import progym2004.backend.repository.ExerciseTrainingDayRepository;
 import progym2004.backend.repository.TrainingDayRepository;
 
 import java.time.LocalDate;
@@ -13,11 +14,17 @@ import java.util.stream.Collectors;
 @Service
 public class TrainingGenerator {
 
-    @Autowired
-    private ExerciseRepository exerciseRepository;  // Репозиторий для упражнений
+    private final ExerciseRepository exerciseRepository;
+    private final TrainingDayRepository trainingDayRepository;
+    private final ExerciseTrainingDayRepository exerciseTrainingDayRepository;
 
     @Autowired
-    private TrainingDayRepository trainingDayRepository;  // Репозиторий для тренировочных дней
+    public TrainingGenerator(ExerciseRepository exerciseRepository, TrainingDayRepository trainingDayRepository, ExerciseTrainingDayRepository exerciseTrainingDayRepository) {
+        this.exerciseRepository = exerciseRepository;
+        this.trainingDayRepository = trainingDayRepository;
+        this.exerciseTrainingDayRepository = exerciseTrainingDayRepository;
+    }
+
 
     public void regenerateTrainingProgram(User user, LocalDate trainingStartDate) {
         int availableDaysPerWeek = user.getAvailableDays();
@@ -40,7 +47,6 @@ public class TrainingGenerator {
                 // Если да, создаем тренировочный день
                 if (trainingDayCount < availableDaysPerWeek) {
                     TrainingDay trainingDay = generateTrainingDay(user, startDate, exercisesPerTraining);
-                    trainingDayRepository.save(trainingDay);
                     trainingDayCount++;
                 }
             }
@@ -112,12 +118,8 @@ public class TrainingGenerator {
     }
 
     private TrainingDay generateTrainingDay(User user, LocalDate trainingDate, int exercisesPerTraining) {
-        TrainingDay trainingDay = new TrainingDay();
-        trainingDay.setUser(user);
-        trainingDay.setTrainingDate(trainingDate);
-
+        TrainingDay trainingDay = trainingDayRepository.save(new TrainingDay(user, trainingDate));
         Goal goal = user.getGoal();
-        Set<Exercise> selectedExercises = new LinkedHashSet<>();
 
         // Получаем все возможные упражнения для пользователя
         List<Exercise> availableExercises = exerciseRepository.findAll();
@@ -128,29 +130,31 @@ public class TrainingGenerator {
                 .filter(ex -> ex.getMuscleGroup() != MuscleGroup.CARDIO)
                 .collect(Collectors.toList());
 
+        int numberInTraining = 0;
         // Кардио в начале
-        selectedExercises.add(selectCardioExercise(availableExercises));
+        saveExerciseAndGenerateRepetitionsAndSets(selectCardioExercise(availableExercises), trainingDay, numberInTraining, user.getFitnessLevel(), goal);
+        numberInTraining++;
 
         // Добавляем упражнения так, чтобы задействовать максимум разных групп мышц за неделю
         Set<MuscleGroup> usedMuscleGroups = new HashSet<>();
         for (Exercise exercise : nonCardioExercises) {
-            if (selectedExercises.size() >= exercisesPerTraining - 1) break; // -1, так как кардио уже добавлено
             if (usedMuscleGroups.add(exercise.getMuscleGroup())) { // Добавляем, если этой группы мышц еще не было
-                selectedExercises.add(exercise);
+                saveExerciseAndGenerateRepetitionsAndSets(exercise, trainingDay, numberInTraining, user.getFitnessLevel(), goal);
+                numberInTraining++;
             }
         }
 
         // Если осталось место, заполняем случайными упражнениями
-        while (selectedExercises.size() < exercisesPerTraining - 1 && !nonCardioExercises.isEmpty()) {
-            selectedExercises.add(nonCardioExercises.remove(0));
+        while (numberInTraining < exercisesPerTraining - 1 && !nonCardioExercises.isEmpty()) {
+            saveExerciseAndGenerateRepetitionsAndSets(nonCardioExercises.remove(0), trainingDay, numberInTraining, user.getFitnessLevel(), goal);
+            numberInTraining++;
         }
 
         // Если условия выполняются, добавляем кардио-тренировку в конце
         if ((goal == Goal.MAINTENANCE || goal == Goal.WEIGHT_LOSS) && exercisesPerTraining >= 4) {
-            selectedExercises.add(selectCardioExercise(availableExercises));
+            saveExerciseAndGenerateRepetitionsAndSets(selectCardioExercise(availableExercises), trainingDay, numberInTraining, user.getFitnessLevel(), goal);
         }
 
-        trainingDay.setExercises(selectedExercises);
         return trainingDay;
     }
 
@@ -162,8 +166,17 @@ public class TrainingGenerator {
         return filteredExercises.isEmpty() ? null : filteredExercises.get(new Random().nextInt(filteredExercises.size()));
     }
 
+    private void saveExerciseAndGenerateRepetitionsAndSets(Exercise exercise, TrainingDay trainingDay, int numberInTraining, Integer fitnessLevel, Goal goal) {
+        Integer sets = fitnessLevel == 1 ? 3 : 4;
+        if (exercise.getRecommendedRepetitions() != null) {
+            exerciseTrainingDayRepository.save(new ExerciseTrainingDay(trainingDay, exercise, numberInTraining, sets, exercise.getRecommendedRepetitions()));
+        } else {
+            Integer repetitions = goal.equals(Goal.MUSCLE_GAIN) ? 10 : 15;
+            exerciseTrainingDayRepository.save(new ExerciseTrainingDay(trainingDay, exercise, numberInTraining, sets, repetitions));
+        }
+    }
 
-    public static int calculateExercisesPerTraining(int exp, int days) {
+    private static int calculateExercisesPerTraining(int exp, int days) {
         switch (exp) {
             case 1:
                 if (days <= 3) {

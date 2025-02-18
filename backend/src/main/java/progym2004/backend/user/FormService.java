@@ -7,7 +7,6 @@ import progym2004.backend.config.JwtService;
 import progym2004.backend.entity.*;
 import progym2004.backend.mapper.ExerciseMapper;
 import progym2004.backend.mapper.MealMapper;
-import progym2004.backend.mapper.TrainingMapper;
 import progym2004.backend.repository.*;
 
 import java.text.Normalizer;
@@ -29,6 +28,7 @@ public class FormService {
     private final MealDietDayAdminRepository mealDietDayAdminRepository;
     private final TrainingGenerator trainingGenerator;
     private final TrainingDayRepository trainingDayRepository;
+    private final ExerciseTrainingDayRepository exerciseTrainingDayRepository;
 
     @Autowired
     public FormService(JwtService jwtService,
@@ -39,7 +39,7 @@ public class FormService {
                        DietDayUserRepository dietDayUserRepository,
                        MealDietDayAdminRepository mealDietDayAdminRepository,
                        TrainingGenerator trainingGenerator,
-                       TrainingDayRepository trainingDayRepository) {
+                       TrainingDayRepository trainingDayRepository, ExerciseTrainingDayRepository exerciseTrainingDayRepository) {
         this.jwtService = jwtService;
         this.userRepository = userRepository;
         this.allergyRepository = allergyRepository;
@@ -49,6 +49,7 @@ public class FormService {
         this.mealDietDayAdminRepository = mealDietDayAdminRepository;
         this.trainingGenerator = trainingGenerator;
         this.trainingDayRepository = trainingDayRepository;
+        this.exerciseTrainingDayRepository = exerciseTrainingDayRepository;
     }
 
     @Transactional
@@ -160,7 +161,7 @@ public class FormService {
         User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
 
         TrainingDay trainingDay = trainingDayRepository.findTrainingDayByUserAndTrainingDate(user, LocalDate.now());
-        Set<ExerciseDto> exerciseDtos = ExerciseMapper.toDtos(trainingDay.getExercises());
+        List<ExerciseDto> exerciseDtos = ExerciseMapper.toDtos(exerciseTrainingDayRepository.findExerciseTrainingDaysByTrainingDayOrderById(trainingDay));
 
         return new TrainingResponse(exerciseDtos, LocalDate.now());
     }
@@ -172,7 +173,16 @@ public class FormService {
         User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
 
         List<TrainingDay> trainingDays = trainingDayRepository.findTrainingDaysByUserAndTrainingDateGreaterThanEqual(user, LocalDate.now());
-        List<TrainingResponse> trainingResponses = TrainingMapper.mapTrainingDaysToResponses(trainingDays);
+
+        List<TrainingResponse> trainingResponses = trainingDays.stream()
+                .map(trainingDay -> {
+                    List<ExerciseDto> exerciseDtos = ExerciseMapper.toDtos(
+                            exerciseTrainingDayRepository.findExerciseTrainingDaysByTrainingDayOrderById(trainingDay)
+                    );
+                    return new TrainingResponse(exerciseDtos, trainingDay.getTrainingDate());
+                })
+                .toList();
+
         return new TrainingProgramResponse(trainingResponses);
     }
 }

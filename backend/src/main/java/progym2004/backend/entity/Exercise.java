@@ -53,8 +53,11 @@ public class Exercise {
     @Column(name = "is_compound", nullable = false)
     private boolean isCompound;
 
-    @ManyToMany(mappedBy = "exercises")
-    private Set<TrainingDay> trainingDays;
+    @Column(name = "recommended_repetitions")
+    private Integer recommendedRepetitions;
+
+    @OneToMany(mappedBy = "exercise")
+    private Set<ExerciseTrainingDay> exerciseTrainingDays;
 
     public Exercise(User user, String name, MuscleGroup muscleGroup, String description, String executionInstructions, boolean isCompound) {
         this.createdBy = user;

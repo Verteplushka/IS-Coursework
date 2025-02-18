@@ -6,13 +6,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.Set;
+import java.util.List;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class TrainingResponse {
-    Set<ExerciseDto> exercises;
+    List<ExerciseDto> exercises;
     LocalDate trainingDate;
 }

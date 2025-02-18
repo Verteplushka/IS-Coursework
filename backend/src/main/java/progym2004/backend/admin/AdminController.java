@@ -36,7 +36,7 @@ public class AdminController {
     public ResponseEntity<String> addDietDay(@RequestBody DietDayRequest request, @RequestHeader("Authorization") String token) {
         String jwtToken = token.substring(7);
         adminService.saveDietDay(request, jwtToken);
-        return ResponseEntity.ok("Meal saved successfully");
+        return ResponseEntity.ok("Diet day saved successfully");
     }
 
 }
