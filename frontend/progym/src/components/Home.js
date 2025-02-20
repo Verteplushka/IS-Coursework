@@ -50,7 +50,6 @@ const HomePage = () => {
     })
       .then((res) => res.text())
       .then((message) => {
-        alert(message); 
         setIsTrainingCompleted(true); // Помечаем тренировку как завершенную
       })
       .catch(console.error);
@@ -66,7 +65,6 @@ const HomePage = () => {
     })
       .then((res) => res.text())
       .then((message) => {
-        alert(message); 
         setIsTrainingCompleted(false); // Сбрасываем статус тренировки
       })
       .catch(console.error);
@@ -90,7 +88,7 @@ const HomePage = () => {
       .then((res) => res.json())
       .then((data) => {
         setTraining(data);
-        setIsTrainingCompleted(data.isCompleted); // Инициализируем статус тренировки
+        setIsTrainingCompleted(data.completed); // Инициализируем статус тренировки
       })
       .catch(console.error);
   };
@@ -172,8 +170,8 @@ const HomePage = () => {
                   </Typography>
                 )}
 
-                {/* Кнопки только если тренировка не завершена */}
-                {!isTrainingCompleted ? (
+                {/* Кнопки только если тренировка не завершена и данные о тренировке есть */}
+                {training && training.exercises.length > 0 && !isTrainingCompleted && (
                   <>
                     <Button onClick={regenerateTraining} variant="contained" sx={{ mt: 2 }}>
                       Обновить тренировку
@@ -187,7 +185,10 @@ const HomePage = () => {
                       Завершить тренировку
                     </Button>
                   </>
-                ) : (
+                )}
+
+                {/* Кнопки только если тренировка завершена */}
+                {isTrainingCompleted && (
                   <>
                     <Typography variant="body1" sx={{ fontStyle: "italic", color: "green" }}>
                       Молодец! Ты выполнил тренировку! 🎉
@@ -274,9 +275,13 @@ const HomePage = () => {
                 ) : (
                   <Typography>Загрузка данных о диете...</Typography>
                 )}
-                <Button onClick={regenerateDiet} variant="contained" sx={{ mt: 2 }}>
-                  Обновить диету
-                </Button>
+
+                {/* Кнопка обновления диеты только если данные о диете есть */}
+                {diet && (
+                  <Button onClick={regenerateDiet} variant="contained" sx={{ mt: 2 }}>
+                    Обновить диету
+                  </Button>
+                )}
               </CardContent>
             </Card>
           </Grid>
@@ -287,3 +292,4 @@ const HomePage = () => {
 };
 
 export default HomePage;
+пш
