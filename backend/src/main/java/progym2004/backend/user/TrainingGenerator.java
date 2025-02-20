@@ -87,10 +87,9 @@ public class TrainingGenerator {
 
         int exercisesPerTraining = calculateExercisesPerTraining(user.getFitnessLevel(), user.getAvailableDays());
 
-        // Получаем список всех мышечных групп
-        List<MuscleGroup> allMuscleGroups = Arrays.stream(MuscleGroup.values())
-                .filter(mg -> mg != MuscleGroup.CARDIO)
-                .toList();
+        // Получаем список всех мышечных групп (изменяемый список!)
+        List<MuscleGroup> allMuscleGroups = new ArrayList<>(Arrays.asList(MuscleGroup.values()));
+        allMuscleGroups.remove(MuscleGroup.CARDIO); // Исключаем CARDIO
 
         // Выбираем случайные мышечные группы для сегодняшней тренировки
         Collections.shuffle(allMuscleGroups);
