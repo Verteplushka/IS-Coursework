@@ -26,7 +26,7 @@ public class DietDayAdmin {
     private LocalDate whenCreated;
 
     @DecimalMin("0")
-    @DecimalMax("5000")
+    @DecimalMax("10000")
     @Column(name = "calories", nullable = false)
     private Double calories;
 

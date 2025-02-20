@@ -30,6 +30,11 @@ public class MealDietDayAdmin {
     @Column(name = "portion_size")
     private Double portionSize;
 
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "meal_position", nullable = false)
+    private MealPosition mealPosition;
+
     public MealDietDayAdmin(DietDayAdmin dietDayAdmin, Meal meal, Double portionSize){
         this.dietDayAdmin = dietDayAdmin;
         this.meal = meal;

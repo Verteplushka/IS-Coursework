@@ -129,8 +129,8 @@ CREATE TABLE IF NOT EXISTS meal_diet_day_admin (
                                                    meal_diet_day_admin_id SERIAL PRIMARY KEY,
                                                    diet_day_admin_id INT REFERENCES diet_day_admin(diet_day_admin_id) ON DELETE CASCADE,
                                                    meal_id INT REFERENCES meals(meal_id) ON DELETE CASCADE,
-                                                   portion_size REAL CHECK (portion_size BETWEEN 0 AND 1000)
-
+                                                   portion_size REAL CHECK (portion_size BETWEEN 0 AND 1000),
+						   meal_position VARCHAR(255) NOT NULL DEFAULT 'BREAKFAST'
 );
 
 -- Таблица дней диеты пользователя
