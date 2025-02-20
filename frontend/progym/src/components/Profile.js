@@ -1,10 +1,20 @@
 import React, { useEffect, useState } from "react";
 import Header from "./Header";
-import { Container, Grid, Card, CardContent, Typography } from "@mui/material";
+import {
+  Container,
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  Box,
+  LinearProgress,
+  Divider,
+} from "@mui/material";
 
 const Profile = () => {
   const [trainingStats, setTrainingStats] = useState(null);
   const [dietStats, setDietStats] = useState(null);
+  const [weightProgress, setWeightProgress] = useState(null); // Состояние для веса
   const [loading, setLoading] = useState(true);
 
   const token = localStorage.getItem("access_token");
@@ -17,26 +27,49 @@ const Profile = () => {
       }
 
       try {
-        const trainingResponse = await fetch("http://localhost:8080/api/user/get_training_statistics", {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
+        const trainingResponse = await fetch(
+          "http://localhost:8080/api/user/get_training_statistics",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
         const trainingData = await trainingResponse.json();
 
-        const dietResponse = await fetch("http://localhost:8080/api/user/get_diet_statistics", {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
+        const dietResponse = await fetch(
+          "http://localhost:8080/api/user/get_diet_statistics",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
         const dietData = await dietResponse.json();
+
+        // Новый запрос для получения прогресса по весу
+        const weightResponse = await fetch(
+          "http://localhost:8080/api/user/get_weight_progress",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        const weightData = await weightResponse.json();
+
+        // Выводим результат в консоль
+        console.log("Weight Progress Data:", weightData);
 
         setTrainingStats(trainingData);
         setDietStats(dietData);
+        setWeightProgress(weightData); // Сохраняем прогресс по весу в состояние
       } catch (error) {
         console.error("Ошибка при загрузке статистики:", error);
       } finally {
@@ -48,32 +81,84 @@ const Profile = () => {
   }, [token]);
 
   if (loading) {
-    return <p>Загрузка...</p>;
+    return (
+      <Box sx={{ width: "100%", p: 4 }}>
+        <LinearProgress />
+      </Box>
+    );
   }
 
   // Проверка на наличие данных перед их отображением
-  if (!trainingStats || !dietStats) {
-    return <p>Ошибка загрузки статистики.</p>;
+  if (!trainingStats || !dietStats || !weightProgress) {
+    return <Typography sx={{ p: 4 }}>Ошибка загрузки статистики.</Typography>;
   }
+
+  // Мотивационные речи
+  const getMotivationalMessage = () => {
+    const completionPercentage = trainingStats.completionPercentage;
+    if (completionPercentage >= 90) {
+      return "Ты просто машина! 💪 Продолжай в том же духе!";
+    } else if (completionPercentage >= 70) {
+      return "Отличный результат! Ты на верном пути! 🚀";
+    } else if (completionPercentage >= 50) {
+      return "Хороший старт! Но есть куда расти! 💥";
+    } else {
+      return "Не сдавайся! Каждый шаг важен! 🌟";
+    }
+  };
 
   return (
     <div>
       <Header />
       <Container maxWidth="md" sx={{ mt: 4 }}>
+        {/* Мотивационная речь */}
+        <Box sx={{ mb: 4, textAlign: "center" }}>
+          <Typography variant="h4" gutterBottom>
+            Твой прогресс
+          </Typography>
+          <Typography
+            variant="h6"
+            sx={{ fontStyle: "italic", color: "text.secondary" }}
+          >
+            {getMotivationalMessage()}
+          </Typography>
+        </Box>
+
         <Grid container spacing={3}>
           {/* Статистика тренировок */}
           <Grid item xs={12} md={6}>
             <Card sx={{ p: 2 }}>
               <CardContent>
                 <Typography variant="h5" gutterBottom>
-                  Статистика тренировок
+                  🏋️‍♂️ Статистика тренировок
                 </Typography>
-                <p>Всего тренировок: {trainingStats.totalTrainings}</p>
-                <p>Завершённых тренировок: {trainingStats.completedTrainings}</p>
-                <p>Процент завершения: {trainingStats.completionPercentage}%</p>
-                <p>Среднее упражнений на тренировку: {trainingStats.averageExercisesPerTraining}</p>
-                <p>Общее количество выполненных упражнений: {trainingStats.totalCompletedExercises}</p>
-                <p>Кардио-упражнений: {trainingStats.cardioExercisesCount}</p>
+                <Divider sx={{ mb: 2 }} />
+                <Typography variant="body1" sx={{ mb: 1 }}>
+                  <strong>Всего тренировок:</strong>{" "}
+                  {trainingStats.totalTrainings}
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1 }}>
+                  <strong>Завершённых тренировок:</strong>{" "}
+                  {trainingStats.completedTrainings}
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1 }}>
+                  <strong>Процент завершения:</strong>{" "}
+                  {trainingStats.completionPercentage.toFixed(2)}%{" "}
+                  {/* Округление */}
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1 }}>
+                  <strong>Среднее упражнений на тренировку:</strong>{" "}
+                  {trainingStats.averageExercisesPerTraining.toFixed(2)}{" "}
+                  {/* Округление */}
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1 }}>
+                  <strong>Общее количество выполненных упражнений:</strong>{" "}
+                  {trainingStats.totalCompletedExercises}
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1 }}>
+                  <strong>Кардио-упражнений:</strong>{" "}
+                  {trainingStats.cardioExercisesCount}
+                </Typography>
               </CardContent>
             </Card>
           </Grid>
@@ -83,15 +168,54 @@ const Profile = () => {
             <Card sx={{ p: 2 }}>
               <CardContent>
                 <Typography variant="h5" gutterBottom>
-                  Статистика питания
+                  🍎 Статистика питания
                 </Typography>
-                <p>Дней на диете: {dietStats.totalDietDays}</p>
-                <p>Общее количество калорий: {dietStats.totalCalories}</p>
-                <p>Белки: {dietStats.totalProtein} г</p>
-                <p>Жиры: {dietStats.totalFats} г</p>
-                <p>Углеводы: {dietStats.totalCarbs} г</p>
-                <p>Средняя калорийность за день: {dietStats.averageCaloriesPerDay}</p>
-                <p>Среднее количество приёмов пищи в день: {dietStats.averageMealsPerDay}</p>
+                <Divider sx={{ mb: 2 }} />
+                <Typography variant="body1" sx={{ mb: 1 }}>
+                  <strong>Дней на диете:</strong> {dietStats.totalDietDays}
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1 }}>
+                  <strong>Общее количество калорий:</strong>{" "}
+                  {dietStats.totalCalories.toFixed(2)} {/* Округление */}
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1 }}>
+                  <strong>Белки:</strong> {dietStats.totalProtein.toFixed(2)} г{" "}
+                  {/* Округление */}
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1 }}>
+                  <strong>Жиры:</strong> {dietStats.totalFats.toFixed(2)} г{" "}
+                  {/* Округление */}
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1 }}>
+                  <strong>Углеводы:</strong> {dietStats.totalCarbs.toFixed(2)} г{" "}
+                  {/* Округление */}
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1 }}>
+                  <strong>Средняя калорийность за день:</strong>{" "}
+                  {dietStats.averageCaloriesPerDay.toFixed(2)}{" "}
+                  {/* Округление */}
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 1 }}>
+                  <strong>Среднее количество приёмов пищи в день:</strong>{" "}
+                  {dietStats.averageMealsPerDay.toFixed(2)} {/* Округление */}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Статистика по весу */}
+          <Grid item xs={12}>
+            <Card sx={{ p: 2 }}>
+              <CardContent>
+                <Typography variant="h5" gutterBottom>
+                  ⚖️ Прогресс по весу
+                </Typography>
+                <Divider sx={{ mb: 2 }} />
+                {weightProgress.weights.map((entry, index) => (
+                  <Typography key={index} variant="body1" sx={{ mb: 1 }}>
+                    <strong>{entry.weightDate}</strong>: {entry.weight} кг
+                  </Typography>
+                ))}
               </CardContent>
             </Card>
           </Grid>

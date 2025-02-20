@@ -8,6 +8,8 @@ import progym2004.backend.entity.User;
 import progym2004.backend.repository.AllergyRepository;
 import progym2004.backend.repository.UserRepository;
 
+import java.time.Clock;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -17,12 +19,14 @@ public class GeneralService {
     private final JwtService jwtService;
     private final AllergyRepository allergyRepository;
     private final UserRepository userRepository;
+    private final Clock clock;
 
     @Autowired
-    public GeneralService(AllergyRepository allergyRepository, JwtService jwtService, UserRepository userRepository){
+    public GeneralService(AllergyRepository allergyRepository, JwtService jwtService, UserRepository userRepository, Clock clock){
         this.allergyRepository = allergyRepository;
         this.jwtService = jwtService;
         this.userRepository = userRepository;
+        this.clock = clock;
     }
     public AllergiesResponse getAllAllergies() {
         List<Allergy> allergies = allergyRepository.findAll();
@@ -35,5 +39,9 @@ public class GeneralService {
         String login = jwtService.extractUsername(token);
         User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
         return new UserResponse(user.getUsername(), user.getRole());
+    }
+
+    public LocalDate getDay(){
+        return LocalDate.now(clock);
     }
 }

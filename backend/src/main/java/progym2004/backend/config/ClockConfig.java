@@ -19,7 +19,7 @@ public class ClockConfig {
     @Primary
     @Bean
     public Clock fixedClock() {
-        return Clock.fixed(LocalDate.of(2025, 2, 22).atStartOfDay(ZoneId.systemDefault()).toInstant(), ZoneId.systemDefault());
+        return Clock.fixed(LocalDate.of(2025, 2, 25).atStartOfDay(ZoneId.systemDefault()).toInstant(), ZoneId.systemDefault());
     }
 }
 
