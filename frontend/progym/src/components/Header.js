@@ -30,7 +30,7 @@ const Header = ({ userName }) => {
   };
 
   const handleHomeClick = () => {
-    navigate("/Home"); // Переход на домашнюю страницу (или другую вкладку)
+    navigate("/home"); // Переход на домашнюю страницу (или другую вкладку)
   };
 
   return (

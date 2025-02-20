@@ -110,7 +110,8 @@ const UserForm = () => {
     const twoWeeksFromNow = new Date();
     twoWeeksFromNow.setDate(currentDate.getDate() + 14);
 
-    if (startTrainingObj < currentDate) {
+    if (startTrainingObj.getDate < currentDate.getDate) {
+        console.log("startTrainingObj:" + startTrainingObj+"currentDate:"+currentDate); // Добавьте для отладки
       errors.push("Дата начала тренировок не может быть в прошлом.");
     }
 
