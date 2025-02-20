@@ -169,10 +169,10 @@ public class FormService {
                     Double portion = mealDietDayAdmin.getPortionSize() * rate;
                     mealDto.setPortionSize(portion);
 
-                    mealDto.setCalories(mealDto.getCalories() * portion);
-                    mealDto.setProtein(mealDto.getProtein() * portion);
-                    mealDto.setFats(mealDto.getFats() * portion);
-                    mealDto.setCarbs(mealDto.getCarbs() * portion);
+                    mealDto.setCalories(mealDto.getCalories() * portion / 100);
+                    mealDto.setProtein(mealDto.getProtein() * portion / 100);
+                    mealDto.setFats(mealDto.getFats() * portion / 100);
+                    mealDto.setCarbs(mealDto.getCarbs() * portion / 100);
 
                     return mealDto;
                 })
@@ -330,10 +330,10 @@ public class FormService {
                         Double portion = mealDietDayAdmin.getPortionSize() * dietDayUser.getRate();
                         mealDto.setPortionSize(portion);
 
-                        mealDto.setCalories(mealDto.getCalories() * portion);
-                        mealDto.setProtein(mealDto.getProtein() * portion);
-                        mealDto.setFats(mealDto.getFats() * portion);
-                        mealDto.setCarbs(mealDto.getCarbs() * portion);
+                        mealDto.setCalories(mealDto.getCalories() * portion / 100);
+                        mealDto.setProtein(mealDto.getProtein() * portion / 100);
+                        mealDto.setFats(mealDto.getFats() * portion / 100);
+                        mealDto.setCarbs(mealDto.getCarbs() * portion / 100);
 
                         return mealDto;
                     })
@@ -376,10 +376,10 @@ public class FormService {
                                 Double portion = mealDietDayAdmin.getPortionSize() * rate;
                                 mealDto.setPortionSize(portion);
 
-                                mealDto.setCalories(mealDto.getCalories() * portion);
-                                mealDto.setProtein(mealDto.getProtein() * portion);
-                                mealDto.setFats(mealDto.getFats() * portion);
-                                mealDto.setCarbs(mealDto.getCarbs() * portion);
+                                mealDto.setCalories(mealDto.getCalories() * portion / 100);
+                                mealDto.setProtein(mealDto.getProtein() * portion / 100);
+                                mealDto.setFats(mealDto.getFats() * portion / 100);
+                                mealDto.setCarbs(mealDto.getCarbs() * portion / 100);
 
                                 return mealDto.getCalories();
                             });
@@ -396,10 +396,10 @@ public class FormService {
                                 Double portion = mealDietDayAdmin.getPortionSize() * rate;
                                 mealDto.setPortionSize(portion);
 
-                                mealDto.setCalories(mealDto.getCalories() * portion);
-                                mealDto.setProtein(mealDto.getProtein() * portion);
-                                mealDto.setFats(mealDto.getFats() * portion);
-                                mealDto.setCarbs(mealDto.getCarbs() * portion);
+                                mealDto.setCalories(mealDto.getCalories() * portion / 100);
+                                mealDto.setProtein(mealDto.getProtein() * portion / 100);
+                                mealDto.setFats(mealDto.getFats() * portion / 100);
+                                mealDto.setCarbs(mealDto.getCarbs() * portion / 100);
 
                                 return mealDto.getProtein();
                             });
@@ -416,10 +416,10 @@ public class FormService {
                                 Double portion = mealDietDayAdmin.getPortionSize() * rate;
                                 mealDto.setPortionSize(portion);
 
-                                mealDto.setCalories(mealDto.getCalories() * portion);
-                                mealDto.setProtein(mealDto.getProtein() * portion);
-                                mealDto.setFats(mealDto.getFats() * portion);
-                                mealDto.setCarbs(mealDto.getCarbs() * portion);
+                                mealDto.setCalories(mealDto.getCalories() * portion / 100);
+                                mealDto.setProtein(mealDto.getProtein() * portion / 100);
+                                mealDto.setFats(mealDto.getFats() * portion / 100);
+                                mealDto.setCarbs(mealDto.getCarbs() * portion / 100);
 
                                 return mealDto.getFats();
                             });
@@ -436,10 +436,10 @@ public class FormService {
                                 Double portion = mealDietDayAdmin.getPortionSize() * rate;
                                 mealDto.setPortionSize(portion);
 
-                                mealDto.setCalories(mealDto.getCalories() * portion);
-                                mealDto.setProtein(mealDto.getProtein() * portion);
-                                mealDto.setFats(mealDto.getFats() * portion);
-                                mealDto.setCarbs(mealDto.getCarbs() * portion);
+                                mealDto.setCalories(mealDto.getCalories() * portion / 100);
+                                mealDto.setProtein(mealDto.getProtein() * portion / 100);
+                                mealDto.setFats(mealDto.getFats() * portion / 100);
+                                mealDto.setCarbs(mealDto.getCarbs() * portion / 100);
 
                                 return mealDto.getCarbs();
                             });
@@ -464,6 +464,4 @@ public class FormService {
                 averageMealsPerDay
         );
     }
-
-
 }
