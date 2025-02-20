@@ -17,6 +17,7 @@ import {
   CircularProgress,
   Snackbar,
   Alert,
+  ListSubheader,
 } from "@mui/material";
 import axios from "axios";
 import Header from "./Header"; // Импортируем шапку
@@ -401,11 +402,7 @@ const UserForm = () => {
                 </Select>
               </FormControl>
 
-              <FormControl
-                fullWidth
-                margin="normal"
-                error={!!validationErrors.fitnessLevel}
-              >
+              <FormControl fullWidth margin="normal">
                 <InputLabel>Уровень подготовки</InputLabel>
                 <Select
                   name="fitnessLevel"
@@ -413,18 +410,48 @@ const UserForm = () => {
                   onChange={handleChange}
                   label="Уровень подготовки"
                 >
-                  <MenuItem value="1">Низкий</MenuItem>
-                  <MenuItem value="2">Средний</MenuItem>
-                  <MenuItem value="3">Высокий</MenuItem>
+                  {/* Низкий уровень */}
+                  <MenuItem value="1">
+                    <Box>
+                      <Typography>Низкий</Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{ fontStyle: "italic", color: "text.secondary" }}
+                      >
+                        Новичок в зале
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+
+                  {/* Средний уровень */}
+                  <MenuItem value="2">
+                    <Box>
+                      <Typography>Средний</Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{ fontStyle: "italic", color: "text.secondary" }}
+                      >
+                        Полгода - год в зале
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+
+                  {/* Высокий уровень */}
+                  <MenuItem value="3">
+                    <Box>
+                      <Typography>Высокий</Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{ fontStyle: "italic", color: "text.secondary" }}
+                      >
+                        Более года в зале
+                      </Typography>
+                    </Box>
+                  </MenuItem>
                 </Select>
               </FormControl>
-
               {/* Поле для выбора уровня активности */}
-              <FormControl
-                fullWidth
-                margin="normal"
-                error={!!validationErrors.activityLevel}
-              >
+              <FormControl fullWidth margin="normal">
                 <InputLabel>Уровень активности</InputLabel>
                 <Select
                   name="activityLevel"
@@ -432,11 +459,70 @@ const UserForm = () => {
                   onChange={handleChange}
                   label="Уровень активности"
                 >
-                  <MenuItem value="1">Сидячий</MenuItem>
-                  <MenuItem value="2">Легкий</MenuItem>
-                  <MenuItem value="3">Средний</MenuItem>
-                  <MenuItem value="4">Активный</MenuItem>
-                  <MenuItem value="5">Очень активный</MenuItem>
+                  {/* Сидячий */}
+                  <MenuItem value="1">
+                    <Box>
+                      <Typography>Сидячий</Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{ fontStyle: "italic", color: "text.secondary" }}
+                      >
+                        Минимальная физическая активность (офисная работа)
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+
+                  {/* Лёгкий */}
+                  <MenuItem value="2">
+                    <Box>
+                      <Typography>Лёгкий</Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{ fontStyle: "italic", color: "text.secondary" }}
+                      >
+                        Лёгкие тренировки 1-2 раза в неделю
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+
+                  {/* Средний */}
+                  <MenuItem value="3">
+                    <Box>
+                      <Typography>Средний</Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{ fontStyle: "italic", color: "text.secondary" }}
+                      >
+                        Регулярные тренировки 3-4 раза в неделю
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+
+                  {/* Активный */}
+                  <MenuItem value="4">
+                    <Box>
+                      <Typography>Активный</Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{ fontStyle: "italic", color: "text.secondary" }}
+                      >
+                        Интенсивные тренировки 5-6 раз в неделю
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+
+                  {/* Очень активный */}
+                  <MenuItem value="5">
+                    <Box>
+                      <Typography>Очень активный</Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{ fontStyle: "italic", color: "text.secondary" }}
+                      >
+                        Профессиональный спорт или тяжёлая физическая работа
+                      </Typography>
+                    </Box>
+                  </MenuItem>
                 </Select>
               </FormControl>
 
