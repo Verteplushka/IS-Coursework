@@ -122,7 +122,7 @@ const HomePage = () => {
     <>
       <Header />
       <Container maxWidth="md" sx={{ mt: 4 }}>
-        <Grid container spacing={3}>
+        <Grid container spacing={10}>
           {/* Блок с тренировкой */}
           <Grid item xs={12} md={6}>
             <Card sx={{ p: 2 }}>
@@ -142,7 +142,7 @@ const HomePage = () => {
                         }}
                       >
                         <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-                          {exercise.name} ({exercise.muscleGroup})
+                          {exercise.name}
                         </Typography>
                         <Typography
                           variant="body2"
@@ -150,12 +150,13 @@ const HomePage = () => {
                         >
                           {exercise.description}
                         </Typography>
+                        <Box sx={{ height: 10 }} />
                         <Typography variant="body2">
-                          <strong>Инструкция:</strong>{" "}
+                          <strong>Инструкция:</strong>
                           {exercise.execution_instructions}
                         </Typography>
                         {exercise.sets && exercise.repetitions ? (
-                          <Typography variant="body2">
+                          <Typography variant="body2" sx={{ color: "gray" }}>
                             Подходы: {exercise.sets}, Повторения:{" "}
                             {exercise.repetitions}
                           </Typography>
@@ -181,10 +182,24 @@ const HomePage = () => {
                   training.exercises.length > 0 &&
                   !isTrainingCompleted && (
                     <>
+                      {diet && (
+                        <Typography
+                          variant="body1"
+                          sx={{
+                            mt: 2,
+                            fontStyle: "italic",
+                            color: "primary.main",
+                            fontSize: "0.9rem",
+                          }}
+                        >
+                          Эта тренировка... Кто ее вообще придумал? Срочно
+                          несите другую
+                        </Typography>
+                      )}
                       <Button
                         onClick={regenerateTraining}
                         variant="contained"
-                        sx={{ mt: 2 }}
+                        sx={{ mt: 2, mr: 2 }}
                       >
                         Обновить тренировку
                       </Button>
@@ -192,9 +207,9 @@ const HomePage = () => {
                         onClick={completeTraining}
                         variant="contained"
                         color="success"
-                        sx={{ mt: 2, ml: 2 }}
+                        sx={{ mt: 2 }}
                       >
-                        Завершить тренировку
+                        Я выполнил тренировку!
                       </Button>
                     </>
                   )}
@@ -235,16 +250,16 @@ const HomePage = () => {
                       {diet.name}
                     </Typography>
                     <Typography variant="body1">
-                      Калории: {diet.calories.toFixed(2)} ккал
+                      Калории: {Math.round(diet.calories)} ккал
                     </Typography>
                     <Typography variant="body1">
-                      Белки: {diet.protein.toFixed(2)} г
+                      Белки: {Math.round(diet.protein)} г
                     </Typography>
                     <Typography variant="body1">
-                      Жиры: {diet.fats.toFixed(2)} г
+                      Жиры: {Math.round(diet.fats)} г
                     </Typography>
                     <Typography variant="body1">
-                      Углеводы: {diet.carbs.toFixed(2)} г
+                      Углеводы: {Math.round(diet.carbs)} г
                     </Typography>
                     <Divider sx={{ my: 2 }} />
 
@@ -270,19 +285,19 @@ const HomePage = () => {
                                 {meal.name}
                               </Typography>
                               <Typography variant="body2">
-                                Порция: {meal.portionSize.toFixed(2)} г
+                                Порция: {Math.round(meal.portionSize)} г
                               </Typography>
                               <Typography variant="body2">
-                                Калории: {meal.calories.toFixed(2)} ккал
+                                Калории: {Math.round(meal.calories)} ккал
                               </Typography>
                               <Typography variant="body2">
-                                Белки: {meal.protein.toFixed(2)} г
+                                Белки: {Math.round(meal.protein)} г
                               </Typography>
                               <Typography variant="body2">
-                                Жиры: {meal.fats.toFixed(2)} г
+                                Жиры: {Math.round(meal.fats)} г
                               </Typography>
                               <Typography variant="body2">
-                                Углеводы: {meal.carbs.toFixed(2)} г
+                                Углеводы: {Math.round(meal.carbs)} г
                               </Typography>
                             </ListItem>
                           ))}
@@ -292,6 +307,20 @@ const HomePage = () => {
                   </>
                 ) : (
                   <Typography>Загрузка данных о диете...</Typography>
+                )}
+
+                {diet && (
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      mt: 2,
+                      fontStyle: "italic",
+                      color: "primary.main",
+                      fontSize: "0.9rem",
+                    }}
+                  >
+                    Эта диета мне совсем не подходит, давайте другую
+                  </Typography>
                 )}
 
                 {/* Кнопка обновления диеты только если данные о диете есть */}
