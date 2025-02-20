@@ -16,11 +16,10 @@ import Header from "./Header";
 const History = () => {
   const [trainingHistory, setTrainingHistory] = useState([]);
   const [dietHistory, setDietHistory] = useState([]);
-  const [expandedTrainings, setExpandedTrainings] = useState([]); // Массив для хранения развернутых тренировок
-  const [expandedDiets, setExpandedDiets] = useState([]); // Массив для хранения развернутых диет
+  const [expandedTrainingIndex, setExpandedTrainingIndex] = useState(null);
+  const [expandedDietIndex, setExpandedDietIndex] = useState(null);
   const token = localStorage.getItem("access_token");
 
-  // Запрашиваем историю тренировок
   const fetchTrainingHistory = () => {
     fetch("http://localhost:8080/api/user/get_training_history", {
       headers: { Authorization: `Bearer ${token}` },
@@ -65,17 +64,14 @@ const History = () => {
     fetchDietHistory();
   }, [token]);
 
-  // Функции для разворачивания информации о тренировке и диете
-  const toggleTraining = (id) => {
-    setExpandedTrainings((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+  const toggleTraining = (index) => {
+    setExpandedTrainingIndex((prevIndex) =>
+      prevIndex === index ? null : index
     );
   };
 
-  const toggleDiet = (id) => {
-    setExpandedDiets((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
+  const toggleDiet = (index) => {
+    setExpandedDietIndex((prevIndex) => (prevIndex === index ? null : index));
   };
 
   return (
@@ -91,53 +87,92 @@ const History = () => {
                   История тренировок
                 </Typography>
                 {trainingHistory.length === 0 ? (
-                  <Typography>Загрузка...</Typography>
+                  <Typography>
+                    Ого, похоже твоя история тренировок пустая...
+                  </Typography>
                 ) : (
                   <List>
                     {trainingHistory.map((training, idx) => (
                       <ListItem
                         key={idx}
                         sx={{
-                          backgroundColor: training.completed ? "green" : "red",
-                          color: "white",
                           marginBottom: "10px",
                           borderRadius: "8px",
                           padding: "10px",
+                          border: "1px solid #e0e0e0",
                         }}
                       >
                         <Box
                           display="flex"
                           justifyContent="space-between"
+                          alignItems="center"
                           width="100%"
                         >
-                          <Typography
-                            variant="body1"
-                            sx={{ fontWeight: "bold" }}
+                          <Box
+                            display="flex"
+                            alignItems="center"
+                            sx={{ flex: 1 }}
                           >
-                            {`Тренировка от ${training.trainingDate}`}
-                          </Typography>
+                            {/* Индикатор выполненности */}
+                            <Typography
+                              variant="body1"
+                              sx={{
+                                fontWeight: "bold",
+                                marginRight: "10px",
+                                color: training.completed ? "green" : "red",
+                              }}
+                            >
+                              {training.completed ? "✔️" : "❌"}
+                            </Typography>
+                            <Typography
+                              variant="body1"
+                              sx={{ fontWeight: "bold" }}
+                            >
+                              {`Тренировка от ${training.trainingDate}`}
+                            </Typography>
+                          </Box>
+
+                          {/* Иконка для раскрытия/сворачивания */}
                           <IconButton
-                            onClick={() => toggleTraining(training.id)}
-                            sx={{ color: "white" }}
+                            onClick={() => toggleTraining(idx)}
+                            sx={{
+                              color: "black",
+                              marginLeft: "auto",
+                            }}
                           >
-                            {expandedTrainings.includes(training.id) ? (
+                            {expandedTrainingIndex === idx ? (
                               <ExpandLess />
                             ) : (
                               <ExpandMore />
                             )}
                           </IconButton>
                         </Box>
-                        {expandedTrainings.includes(training.id) && (
+                        {expandedTrainingIndex === idx && (
                           <Box sx={{ mt: 2 }}>
                             <Typography variant="body2">
                               <strong>Упражнения:</strong>
                             </Typography>
                             <List>
                               {training.exercises.map((exercise, index) => (
-                                <ListItem key={index}>
-                                  <Typography variant="body2">
-                                    {exercise.name} ({exercise.muscleGroup})
+                                <ListItem
+                                  key={index}
+                                  sx={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    paddingLeft: 0, // Убираем отступы слева
+                                  }}
+                                >
+                                  <Typography variant="body2" sx={{ flex: 1 }}>
+                                    {exercise.name}
                                   </Typography>
+                                  {exercise.sets && exercise.repetitions && (
+                                    <Typography
+                                      variant="body2"
+                                      sx={{ fontSize: "0.875rem" }}
+                                    >
+                                      {exercise.sets} по {exercise.repetitions}
+                                    </Typography>
+                                  )}
                                 </ListItem>
                               ))}
                             </List>
@@ -159,7 +194,9 @@ const History = () => {
                   История диет
                 </Typography>
                 {dietHistory.length === 0 ? (
-                  <Typography>Загрузка...</Typography>
+                  <Typography>
+                    Ого, похоже твоя история диет пустая...
+                  </Typography>
                 ) : (
                   <List>
                     {dietHistory.map((diet, idx) => (
@@ -169,40 +206,87 @@ const History = () => {
                           justifyContent="space-between"
                           width="100%"
                         >
-                          <Typography
-                            variant="body1"
-                            sx={{ fontWeight: "bold" }}
-                          >
-                            {diet.name}
-                          </Typography>
+                          <Box>
+                            <Typography
+                              variant="body1"
+                              sx={{ fontWeight: "bold" }}
+                            >
+                              {diet.name}
+                            </Typography>
+                            {/* Дата диеты рядом с названием */}
+                            <Typography variant="body2" sx={{ color: "gray" }}>
+                              {new Date(diet.dietDate).toLocaleDateString()}
+                            </Typography>
+                          </Box>
                           <IconButton
-                            onClick={() => toggleDiet(diet.id)}
+                            onClick={() => toggleDiet(idx)}
                             sx={{ color: "black" }}
                           >
-                            {expandedDiets.includes(diet.id) ? (
+                            {expandedDietIndex === idx ? (
                               <ExpandLess />
                             ) : (
                               <ExpandMore />
                             )}
                           </IconButton>
                         </Box>
-                        {expandedDiets.includes(diet.id) && (
-                          <Box sx={{ mt: 2 }}>
-                            <Typography variant="body2">
-                              <strong>Калории:</strong>{" "}
-                              {Math.round(diet.calories)} ккал
-                            </Typography>
-                            <Typography variant="body2">
-                              <strong>Белки:</strong> {Math.round(diet.protein)}{" "}
-                              г
-                            </Typography>
-                            <Typography variant="body2">
-                              <strong>Жиры:</strong> {Math.round(diet.fats)} г
-                            </Typography>
-                            <Typography variant="body2">
-                              <strong>Углеводы:</strong>{" "}
-                              {Math.round(diet.carbs)} г
-                            </Typography>
+
+                        {expandedDietIndex === idx && (
+                          <Box
+                            sx={{ display: "flex", flexDirection: "column" }}
+                          >
+                            {/* Информация о калориях и БЖУ */}
+                            <Box
+                              sx={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                              }}
+                            >
+                              <Box sx={{ flex: 1 }}>
+                                <Typography variant="body2">
+                                  <strong>Калории:</strong>{" "}
+                                  {Math.round(diet.calories)} ккал
+                                </Typography>
+                                <Typography variant="body2">
+                                  <strong>Белки:</strong>{" "}
+                                  {Math.round(diet.protein)} г
+                                </Typography>
+                                <Typography variant="body2">
+                                  <strong>Жиры:</strong> {Math.round(diet.fats)}{" "}
+                                  г
+                                </Typography>
+                                <Typography variant="body2">
+                                  <strong>Углеводы:</strong>{" "}
+                                  {Math.round(diet.carbs)} г
+                                </Typography>
+                              </Box>
+
+                              {/* Правая колонка с блюдами */}
+                              <Box sx={{ flex: 1 }}>
+                                <Typography
+                                  variant="body2"
+                                  sx={{
+                                    mt: 2,
+                                    fontWeight: "bold",
+                                    textAlign: "center",
+                                  }}
+                                >
+                                  <strong>Блюда:</strong>
+                                </Typography>
+                                <List>
+                                  {diet.meals.map((meal, mealIndex) => (
+                                    <ListItem
+                                      key={mealIndex}
+                                      sx={{ paddingLeft: 0 }}
+                                    >
+                                      <Typography variant="body2">
+                                        {meal.name} <br /> (
+                                        {Math.round(meal.calories)} ккал)
+                                      </Typography>
+                                    </ListItem>
+                                  ))}
+                                </List>
+                              </Box>
+                            </Box>
                           </Box>
                         )}
                       </ListItem>
