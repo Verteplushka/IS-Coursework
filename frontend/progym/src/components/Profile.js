@@ -10,6 +10,28 @@ import {
   LinearProgress,
   Divider,
 } from "@mui/material";
+import { Line } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
+
+// Регистрируем необходимые компоненты для Chart.js
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 const Profile = () => {
   const [trainingStats, setTrainingStats] = useState(null);
@@ -107,6 +129,43 @@ const Profile = () => {
     }
   };
 
+  // Мотивация по прогрессу по весу
+  const getWeightMotivation = () => {
+    const weightChanges = weightProgress.weights;
+    const latestWeight = weightChanges[weightChanges.length - 1].weight;
+    const previousWeight = weightChanges[weightChanges.length - 2]?.weight;
+
+    if (!previousWeight) return "Твой вес стабилен! Отлично!";
+
+    if (latestWeight < previousWeight) {
+      return `Красава! Ты скинул ${Math.abs(
+        previousWeight - latestWeight
+      ).toFixed(2)} кг! 💪 Продолжай в том же духе!`;
+    } else if (latestWeight > previousWeight) {
+      return `Ооо, немного набрал вес. Все будет ок, главное не сдаваться! 🚀 Следующий шаг - сбросить это!`;
+    } else {
+      return "Вес стабильный, продолжай двигаться вперед! 🌱";
+    }
+  };
+
+  // Данные для графика
+  const weightDates = weightProgress.weights.map((entry) => entry.weightDate);
+  const weightValues = weightProgress.weights.map((entry) => entry.weight);
+
+  // Данные для графика
+  const data = {
+    labels: weightDates,
+    datasets: [
+      {
+        label: "Прогресс по весу (кг)",
+        data: weightValues,
+        fill: false,
+        borderColor: "rgba(75,192,192,1)",
+        tension: 0.1,
+      },
+    ],
+  };
+
   return (
     <div>
       <Header />
@@ -144,12 +203,10 @@ const Profile = () => {
                 <Typography variant="body1" sx={{ mb: 1 }}>
                   <strong>Процент завершения:</strong>{" "}
                   {trainingStats.completionPercentage.toFixed(2)}%{" "}
-                  {/* Округление */}
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 1 }}>
                   <strong>Среднее упражнений на тренировку:</strong>{" "}
                   {trainingStats.averageExercisesPerTraining.toFixed(2)}{" "}
-                  {/* Округление */}
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 1 }}>
                   <strong>Общее количество выполненных упражнений:</strong>{" "}
@@ -176,34 +233,30 @@ const Profile = () => {
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 1 }}>
                   <strong>Общее количество калорий:</strong>{" "}
-                  {dietStats.totalCalories.toFixed(2)} {/* Округление */}
+                  {dietStats.totalCalories.toFixed(2)}
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 1 }}>
                   <strong>Белки:</strong> {dietStats.totalProtein.toFixed(2)} г{" "}
-                  {/* Округление */}
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 1 }}>
                   <strong>Жиры:</strong> {dietStats.totalFats.toFixed(2)} г{" "}
-                  {/* Округление */}
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 1 }}>
                   <strong>Углеводы:</strong> {dietStats.totalCarbs.toFixed(2)} г{" "}
-                  {/* Округление */}
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 1 }}>
                   <strong>Средняя калорийность за день:</strong>{" "}
                   {dietStats.averageCaloriesPerDay.toFixed(2)}{" "}
-                  {/* Округление */}
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 1 }}>
                   <strong>Среднее количество приёмов пищи в день:</strong>{" "}
-                  {dietStats.averageMealsPerDay.toFixed(2)} {/* Округление */}
+                  {dietStats.averageMealsPerDay.toFixed(2)}
                 </Typography>
               </CardContent>
             </Card>
           </Grid>
 
-          {/* Статистика по весу */}
+          {/* График прогресса по весу */}
           <Grid item xs={12}>
             <Card sx={{ p: 2 }}>
               <CardContent>
@@ -211,11 +264,15 @@ const Profile = () => {
                   ⚖️ Прогресс по весу
                 </Typography>
                 <Divider sx={{ mb: 2 }} />
-                {weightProgress.weights.map((entry, index) => (
-                  <Typography key={index} variant="body1" sx={{ mb: 1 }}>
-                    <strong>{entry.weightDate}</strong>: {entry.weight} кг
+                <Line data={data} />
+                <Box sx={{ mt: 2, textAlign: "center" }}>
+                  <Typography
+                    variant="h6"
+                    sx={{ fontStyle: "italic", color: "text.secondary" }}
+                  >
+                    {getWeightMotivation()}
                   </Typography>
-                ))}
+                </Box>
               </CardContent>
             </Card>
           </Grid>
