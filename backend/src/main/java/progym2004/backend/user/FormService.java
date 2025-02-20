@@ -12,9 +12,7 @@ import progym2004.backend.repository.*;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -212,5 +210,24 @@ public class FormService {
                 .toList();
 
         return new TrainingProgramResponse(trainingResponses);
+    }
+
+    public WeightProgressResponse getWeightProgress(String token) {
+        String login = jwtService.extractUsername(token);
+        User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<WeightJournal> weightJournals = weightJournalRepository.findAllByUserOrderById(user);
+        Map<LocalDate, WeightJournal> lastEntriesByDate = weightJournals.stream()
+                .collect(Collectors.toMap(
+                        WeightJournal::getWeightDate,
+                        journal -> journal,
+                        (existing, replacement) -> existing.getId() > replacement.getId() ? existing : replacement
+                ));
+        List<WeightJournalDto> weightJournalDtos = lastEntriesByDate.values().stream()
+                .map(journal -> new WeightJournalDto(journal.getWeightDate(), journal.getWeight()))
+                .sorted(Comparator.comparing(WeightJournalDto::getWeightDate))
+                .toList();
+
+        return new WeightProgressResponse(weightJournalDtos);
     }
 }
