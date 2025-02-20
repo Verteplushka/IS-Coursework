@@ -37,6 +37,17 @@ public class UserController {
         return ResponseEntity.badRequest().body("Failed to complete the training.");
     }
 
+    @PostMapping("/uncomplete_training")
+    public ResponseEntity<String> uncompleteTraining(@RequestHeader("Authorization") String token) {
+        String jwtToken = token.substring(7);
+        boolean success = formService.uncompleteTraining(jwtToken);
+
+        if (success) {
+            return ResponseEntity.ok("Training has been successfully uncompleted.");
+        }
+        return ResponseEntity.badRequest().body("Failed to uncomplete the training.");
+    }
+
 
     @GetMapping("/get_today_diet")
     public ResponseEntity<DietResponse> getDiet(@RequestHeader("Authorization") String token) {
