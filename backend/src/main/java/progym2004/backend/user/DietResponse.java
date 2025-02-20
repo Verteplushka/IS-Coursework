@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Getter
@@ -18,4 +19,5 @@ public class DietResponse {
     private Double protein;
     private Double fats;
     private Double carbs;
+    private LocalDate dietDate;
 }

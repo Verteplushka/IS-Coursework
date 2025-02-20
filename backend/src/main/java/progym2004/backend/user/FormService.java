@@ -198,7 +198,7 @@ public class FormService {
         double totalFats = mealDtos.stream().mapToDouble(MealDto::getFats).sum();
         double totalCarbs = mealDtos.stream().mapToDouble(MealDto::getCarbs).sum();
 
-        return new DietResponse(dietDayAdmin.getName(), mealDtos, dietDayAdmin.getCalories() * rate, totalProteins, totalFats, totalCarbs);
+        return new DietResponse(dietDayAdmin.getName(), mealDtos, dietDayAdmin.getCalories() * rate, totalProteins, totalFats, totalCarbs, LocalDate.now(clock));
     }
 
     public TrainingResponse getTodayTraining(String token) {
@@ -368,7 +368,8 @@ public class FormService {
                     totalCalories,
                     totalProtein,
                     totalFats,
-                    totalCarbs
+                    totalCarbs,
+                    dietDayUser.getDayDate()
             );
         }).toList();
 
