@@ -7,6 +7,7 @@ import UserForm from "./components/UserForm"; // Импортируем стра
 import Home from "./components/Home"; // Импортируем страницу по заполнению данных пользователя
 import History from "./components/History"; // Импортируем страницу по заполнению данных пользователя
 import Profile from "./components/Profile"; // Импортируем страницу по заполнению данных пользователя
+import TrainingCalendar from "./components/TrainingCalendar"; // Импортируем страницу по заполнению данных пользователя
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/history" element={<History />} />
         <Route path="/Home" element={<Home />} />
         <Route path="/Profile" element={<Profile />} />
+        <Route path="/TrainingCalendar" element={<TrainingCalendar />} />
       </Routes>
     </Router>
   );
