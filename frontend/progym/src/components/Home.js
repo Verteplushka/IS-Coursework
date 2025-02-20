@@ -9,13 +9,15 @@ import {
   Box,
   Divider,
   Grid,
-  Button,  // Импортируем кнопку для регенерации
+  Button,
 } from "@mui/material";
 import Header from "./Header";
 
 const HomePage = () => {
   const [diet, setDiet] = useState(null);
   const [training, setTraining] = useState(null);
+  const [isTrainingCompleted, setIsTrainingCompleted] = useState(false);
+  const [isTrainingCancelled, setIsTrainingCancelled] = useState(false); // Новое состояние для отслеживания отмены тренировки
   const token = localStorage.getItem("access_token");
 
   // Функция для обновления диеты
@@ -38,6 +40,29 @@ const HomePage = () => {
       .catch(console.error);
   };
 
+  // Функция для пометки тренировки как выполненной
+  const completeTraining = () => {
+    fetch("http://localhost:8080/api/user/complete_training", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => res.text())
+      .then((message) => {
+        alert(message);
+        setIsTrainingCompleted(true);
+      })
+      .catch(console.error);
+  };
+
+  // Функция для отмены тренировки
+  const cancelTraining = () => {
+    setIsTrainingCancelled(true); // Отмечаем, что тренировка отменена
+    setIsTrainingCompleted(false); // Возвращаем тренировку в не завершенное состояние
+  };
+
   // Запрашиваем данные о диете
   const fetchDiet = () => {
     fetch("http://localhost:8080/api/user/get_today_diet", {
@@ -54,7 +79,10 @@ const HomePage = () => {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
-      .then(setTraining)
+      .then((data) => {
+        setTraining(data);
+        setIsTrainingCompleted(data.isCompleted); // Устанавливаем состояние выполнения тренировки
+      })
       .catch(console.error);
   };
 
@@ -98,7 +126,14 @@ const HomePage = () => {
                 {training && training.exercises.length > 0 ? (
                   <List>
                     {training.exercises.map((exercise) => (
-                      <ListItem key={exercise.id} sx={{ display: "flex", flexDirection: "column", alignItems: "start" }}>
+                      <ListItem
+                        key={exercise.id}
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "start",
+                        }}
+                      >
                         <Typography variant="body1" sx={{ fontWeight: "bold" }}>
                           {exercise.name} ({exercise.muscleGroup})
                         </Typography>
@@ -127,9 +162,43 @@ const HomePage = () => {
                     себе чиловый вечер с фильмом и вкусной едой? 🍕🎬
                   </Typography>
                 )}
-                <Button onClick={regenerateTraining} variant="contained" sx={{ mt: 2 }}>
-                  Обновить тренировку
-                </Button>
+
+                {/* Показать текст и кнопки в зависимости от состояния тренировки */}
+                {isTrainingCompleted ? (
+                  <Typography sx={{ color: "green", fontWeight: "bold" }}>
+                    Отличная работа! Ты выполнил тренировку! 🎉
+                  </Typography>
+                ) : isTrainingCancelled ? (
+                  <Typography sx={{ color: "red", fontWeight: "bold" }}>
+                    Ой, ты не выполнил тренировку. Но ничего, не переживай, тренировка отменена! 😂
+                  </Typography>
+                ) : (
+                  <>
+                    <Button onClick={regenerateTraining} variant="contained" sx={{ mt: 2 }}>
+                      Обновить тренировку
+                    </Button>
+                    <Button
+                      onClick={completeTraining}
+                      variant="contained"
+                      color="success"
+                      sx={{ mt: 2, ml: 2 }}
+                    >
+                      Завершить тренировку
+                    </Button>
+                  </>
+                )}
+
+                {/* Кнопка для отмены тренировки */}
+                {isTrainingCompleted && !isTrainingCancelled && (
+                  <Button
+                    onClick={cancelTraining}
+                    variant="contained"
+                    color="error"
+                    sx={{ mt: 2, ml: 2 }}
+                  >
+                    Я не выполнил тренировку
+                  </Button>
+                )}
               </CardContent>
             </Card>
           </Grid>
