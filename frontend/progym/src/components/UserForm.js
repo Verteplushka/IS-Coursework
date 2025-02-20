@@ -93,6 +93,7 @@ const UserForm = () => {
   const handleSubmit = () => {
     const {
       birthDate,
+      gender,
       height,
       currentWeight,
       goal,
@@ -111,7 +112,9 @@ const UserForm = () => {
     const maxBirthDate = new Date(currentDate);
     maxBirthDate.setFullYear(currentDate.getFullYear() - 7);
 
-    if (birthDateObj > maxBirthDate) {
+    if (!birthDate) {
+      errors.birthDate = "Пожалуйста, укажите дату рождения.";
+    } else if (birthDateObj > maxBirthDate) {
       errors.birthDate = "Дата рождения должна быть более 7 лет назад.";
     } else if (birthDateObj < minBirthDate) {
       errors.birthDate = "Дата рождения не может быть раньше 1900-01-01.";
@@ -155,13 +158,41 @@ const UserForm = () => {
     const twoWeeksFromNow = new Date();
     twoWeeksFromNow.setDate(currentDate.getDate() + 14);
 
-    if (startTrainingObj < currentDate) {
+    if (!startTraining) {
+      errors.startTraining = "Пожалуйста, укажите дату начала тренировок.";
+    } else if (startTrainingObj < currentDate) {
       errors.startTraining = "Дата начала тренировок не может быть в прошлом.";
-    }
-
-    if (startTrainingObj > twoWeeksFromNow) {
+    } else if (startTrainingObj > twoWeeksFromNow) {
       errors.startTraining =
         "Дата начала тренировок должна быть в пределах ближайших 2 недель.";
+    }
+
+    if (!height) {
+      errors.height = "Пожалуйста, укажите рост.";
+    }
+
+    if (!currentWeight) {
+      errors.currentWeight = "Пожалуйста, укажите вес.";
+    }
+
+    if (!gender) {
+      errors.gender = "Пожалуйста, выберите пол.";
+    }
+
+    if (!goal) {
+      errors.goal = "Пожалуйста, выберите цель.";
+    }
+
+    if (!fitnessLevel) {
+      errors.fitnessLevel = "Пожалуйста, выберите уровень подготовки.";
+    }
+
+    if (!activityLevel) {
+      errors.activityLevel = "Пожалуйста, выберите уровень активности.";
+    }
+
+    if (!availableDays) {
+      errors.availableDays = "Пожалуйста, укажите количество доступных дней.";
     }
 
     // Проверка на обязательность заполнения всех полей
@@ -259,7 +290,11 @@ const UserForm = () => {
           />
 
           {/* Поле для выбора пола */}
-          <FormControl fullWidth margin="normal">
+          <FormControl
+            fullWidth
+            margin="normal"
+            error={!!validationErrors.gender}
+          >
             <InputLabel>Пол</InputLabel>
             <Select
               name="gender"
@@ -273,7 +308,11 @@ const UserForm = () => {
           </FormControl>
 
           {/* Поле для выбора цели */}
-          <FormControl fullWidth margin="normal">
+          <FormControl
+            fullWidth
+            margin="normal"
+            error={!!validationErrors.goal}
+          >
             <InputLabel>Цель</InputLabel>
             <Select
               name="goal"
@@ -287,8 +326,30 @@ const UserForm = () => {
             </Select>
           </FormControl>
 
+          <FormControl
+            fullWidth
+            margin="normal"
+            error={!!validationErrors.fitnessLevel}
+          >
+            <InputLabel>Уровень подготовки</InputLabel>
+            <Select
+              name="fitnessLevel"
+              value={formData.fitnessLevel}
+              onChange={handleChange}
+              label="Уровень подготовки"
+            >
+              <MenuItem value="1">Низкий</MenuItem>
+              <MenuItem value="2">Средний</MenuItem>
+              <MenuItem value="3">Высокий</MenuItem>
+            </Select>
+          </FormControl>
+
           {/* Поле для выбора уровня активности */}
-          <FormControl fullWidth margin="normal">
+          <FormControl
+            fullWidth
+            margin="normal"
+            error={!!validationErrors.activityLevel}
+          >
             <InputLabel>Уровень активности</InputLabel>
             <Select
               name="activityLevel"
@@ -305,21 +366,25 @@ const UserForm = () => {
           </FormControl>
 
           {/* Поле для выбора доступных дней */}
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Доступные дни</InputLabel>
+          <FormControl
+            fullWidth
+            margin="normal"
+            error={!!validationErrors.availableDays}
+          >
+            <InputLabel>Количество тренировок в неделю</InputLabel>
             <Select
               name="availableDays"
               value={formData.availableDays}
               onChange={handleChange}
               label="Доступные дни"
             >
-              <MenuItem value="1">1 день</MenuItem>
-              <MenuItem value="2">2 дня</MenuItem>
-              <MenuItem value="3">3 дня</MenuItem>
-              <MenuItem value="4">4 дня</MenuItem>
-              <MenuItem value="5">5 дней</MenuItem>
-              <MenuItem value="6">6 дней</MenuItem>
-              <MenuItem value="7">7 дней</MenuItem>
+              <MenuItem value="1">1</MenuItem>
+              <MenuItem value="2">2</MenuItem>
+              <MenuItem value="3">3</MenuItem>
+              <MenuItem value="4">4</MenuItem>
+              <MenuItem value="5">5</MenuItem>
+              <MenuItem value="6">6</MenuItem>
+              <MenuItem value="7">7</MenuItem>
             </Select>
           </FormControl>
 
