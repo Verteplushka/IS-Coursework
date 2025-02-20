@@ -144,19 +144,25 @@ const HomePage = () => {
                         <Typography variant="body1" sx={{ fontWeight: "bold" }}>
                           {exercise.name} ({exercise.muscleGroup})
                         </Typography>
-                        <Typography variant="body2" sx={{ fontStyle: "italic" }}>
+                        <Typography
+                          variant="body2"
+                          sx={{ fontStyle: "italic" }}
+                        >
                           {exercise.description}
                         </Typography>
                         <Typography variant="body2">
-                          <strong>Инструкция:</strong> {exercise.execution_instructions}
+                          <strong>Инструкция:</strong>{" "}
+                          {exercise.execution_instructions}
                         </Typography>
                         {exercise.sets && exercise.repetitions ? (
                           <Typography variant="body2">
-                            Подходы: {exercise.sets}, Повторения: {exercise.repetitions}
+                            Подходы: {exercise.sets}, Повторения:{" "}
+                            {exercise.repetitions}
                           </Typography>
                         ) : (
                           <Typography variant="body2" sx={{ color: "gray" }}>
-                            Количество повторений не задано, делайте по ощущениям
+                            Количество повторений не задано, делайте по
+                            ощущениям
                           </Typography>
                         )}
                         <Divider sx={{ my: 1, width: "100%" }} />
@@ -171,26 +177,35 @@ const HomePage = () => {
                 )}
 
                 {/* Кнопки только если тренировка не завершена и данные о тренировке есть */}
-                {training && training.exercises.length > 0 && !isTrainingCompleted && (
-                  <>
-                    <Button onClick={regenerateTraining} variant="contained" sx={{ mt: 2 }}>
-                      Обновить тренировку
-                    </Button>
-                    <Button
-                      onClick={completeTraining}
-                      variant="contained"
-                      color="success"
-                      sx={{ mt: 2, ml: 2 }}
-                    >
-                      Завершить тренировку
-                    </Button>
-                  </>
-                )}
+                {training &&
+                  training.exercises.length > 0 &&
+                  !isTrainingCompleted && (
+                    <>
+                      <Button
+                        onClick={regenerateTraining}
+                        variant="contained"
+                        sx={{ mt: 2 }}
+                      >
+                        Обновить тренировку
+                      </Button>
+                      <Button
+                        onClick={completeTraining}
+                        variant="contained"
+                        color="success"
+                        sx={{ mt: 2, ml: 2 }}
+                      >
+                        Завершить тренировку
+                      </Button>
+                    </>
+                  )}
 
                 {/* Кнопки только если тренировка завершена */}
                 {isTrainingCompleted && (
                   <>
-                    <Typography variant="body1" sx={{ fontStyle: "italic", color: "green" }}>
+                    <Typography
+                      variant="body1"
+                      sx={{ fontStyle: "italic", color: "green" }}
+                    >
                       Молодец! Ты выполнил тренировку! 🎉
                     </Typography>
                     <Button
@@ -248,7 +263,10 @@ const HomePage = () => {
                                 alignItems: "start",
                               }}
                             >
-                              <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+                              <Typography
+                                variant="body1"
+                                sx={{ fontWeight: "bold" }}
+                              >
                                 {meal.name}
                               </Typography>
                               <Typography variant="body2">
@@ -278,7 +296,11 @@ const HomePage = () => {
 
                 {/* Кнопка обновления диеты только если данные о диете есть */}
                 {diet && (
-                  <Button onClick={regenerateDiet} variant="contained" sx={{ mt: 2 }}>
+                  <Button
+                    onClick={regenerateDiet}
+                    variant="contained"
+                    sx={{ mt: 2 }}
+                  >
                     Обновить диету
                   </Button>
                 )}
