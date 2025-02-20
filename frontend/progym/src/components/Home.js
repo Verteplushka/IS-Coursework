@@ -50,7 +50,7 @@ const HomePage = () => {
     })
       .then((res) => res.text())
       .then((message) => {
-        alert(message); 
+        //alert(message); 
         setIsTrainingCompleted(true); // Помечаем тренировку как завершенную
       })
       .catch(console.error);
@@ -66,7 +66,7 @@ const HomePage = () => {
     })
       .then((res) => res.text())
       .then((message) => {
-        alert(message); 
+        //alert(message); 
         setIsTrainingCompleted(false); // Сбрасываем статус тренировки
       })
       .catch(console.error);
