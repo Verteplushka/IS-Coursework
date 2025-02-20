@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import progym2004.backend.entity.DietPreference;
 import progym2004.backend.entity.Gender;
 import progym2004.backend.entity.Goal;
 
@@ -25,5 +26,6 @@ public class UserParamsResponse {
     private Integer availableDays;
     private Set<Long> allergiesIds;
     private LocalDate startTraining;
+    private DietPreference dietPreference;
     private boolean isEndingSoon;
 }

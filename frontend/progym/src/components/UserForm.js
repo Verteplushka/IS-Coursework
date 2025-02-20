@@ -78,6 +78,32 @@ const UserForm = () => {
     }
   }, []);
 
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    if (token) {
+      axios
+        .get("http://localhost:8080/api/user/get_user_params", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((response) => {
+          setFormData((prevData) => ({
+            ...prevData,
+            ...response.data,
+          }));
+
+          if (response.data.allergiesIds) {
+            setSelectedAllergies(response.data.allergiesIds.map(String));
+          }
+        })
+        .catch((err) => {
+          console.error("Не удалось загрузить данные пользователя.", err);
+        });
+    }
+  }, []);
+  console.log(allergies);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -247,7 +273,7 @@ const UserForm = () => {
 
   return (
     <>
-      <Header/>
+      <Header />
 
       <Container
         maxWidth="md"
@@ -452,7 +478,7 @@ const UserForm = () => {
                 <FormControlLabel
                   control={
                     <Switch
-                      checked={formData.dietPreference === "VEGETARIAN"}
+                      checked={formData.dietPreference === "VEGETARIAN"} // Проверяем, является ли текущий выбор "VEGETARIAN"
                       onChange={handleCheckboxChange}
                       name="dietPreference"
                       color="primary"

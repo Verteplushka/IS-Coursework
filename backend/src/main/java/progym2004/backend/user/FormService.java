@@ -64,7 +64,7 @@ public class FormService {
         LocalDate lastTrainingDate = trainingDayRepository.findTopByUserOrderByTrainingDateDesc(user).getTrainingDate();
         boolean isEndingSoon = lastTrainingDate.equals(LocalDate.now(clock));
 
-        return new UserParamsResponse(user.getBirthDate(), user.getGender(), user.getHeight(), weight, user.getGoal(), user.getFitnessLevel(), user.getActivityLevel(), user.getAvailableDays(), allergyIds, user.getStartTraining(), isEndingSoon);
+        return new UserParamsResponse(user.getBirthDate(), user.getGender(), user.getHeight(), weight, user.getGoal(), user.getFitnessLevel(), user.getActivityLevel(), user.getAvailableDays(), allergyIds, user.getStartTraining(), user.getDietPreference(), isEndingSoon);
     }
 
     @Transactional
