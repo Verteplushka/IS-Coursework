@@ -60,16 +60,9 @@ const HomePage = () => {
         await axios.post("http://localhost:8080/api/user/sendForm", updatedParams, {
           headers: { Authorization: `Bearer ${token}` },
         });
-  
-        // После успешного обновления данных пользователя запрашиваем актуальные тренировки и рацион
-        await Promise.all([
-          axios.get("http://localhost:8080/api/user/get_today_training", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          axios.get("http://localhost:8080/api/user/get_today_diet", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-        ]);
+   // Перезагружаем страницу после успешного запроса
+   window.location.reload();
+        
       }
   
       setOpenDialog(false);
