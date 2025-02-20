@@ -5,6 +5,7 @@ import LoginPage from "./components/LoginPage"; // Убедись, что пут
 import RegistrationPage from "./components/RegistrationPage"; // Импортируем страницу регистрации
 import UserForm from "./components/UserForm"; // Импортируем страницу по заполнению данных пользователя
 import Home from "./components/Home"; // Импортируем страницу по заполнению данных пользователя
+import History from "./components/History"; // Импортируем страницу по заполнению данных пользователя
 import Profile from "./components/Profile"; // Импортируем страницу по заполнению данных пользователя
 
 function App() {

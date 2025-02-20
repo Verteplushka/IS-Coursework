@@ -24,7 +24,7 @@ const Header = () => {
     fetch("http://localhost:8080/api/general/get_user", {
       method: "GET",
       headers: {
-        "Authorization": `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
     })
@@ -66,8 +66,8 @@ const Header = () => {
     navigate("/userform");
   };
 
-  const handleTrainingHistoryClick = () => {
-    navigate("/training-history");
+  const handleHistoryClick = () => {
+    navigate("/history");
   };
 
   return (
@@ -81,16 +81,24 @@ const Header = () => {
             ProGym2004
           </Typography>
         </Box>
-        <Box display="flex" alignItems="center" flexGrow={1} justifyContent="center">
+
+        {/* Меню навигации: ссылки по центру */}
+        <Box
+          display="flex"
+          alignItems="center"
+          flexGrow={1}
+          justifyContent="center"
+          sx={{ gap: 10 }} // Это задает равномерные промежутки между элементами
+        >
           <IconButton color="inherit" onClick={handleUserFormClick}>
-            <Typography variant="body1" color="inherit" sx={{ mr: 2 }}>
-              Форма пользователя
+            <Typography variant="body1" color="inherit">
+              Изменить данные
             </Typography>
           </IconButton>
 
-          <IconButton color="inherit" onClick={handleTrainingHistoryClick}>
-            <Typography variant="body1" color="inherit" sx={{ mr: 2 }}>
-              История тренировок
+          <IconButton color="inherit" onClick={handleHistoryClick}>
+            <Typography variant="body1" color="inherit">
+              История
             </Typography>
           </IconButton>
         </Box>
@@ -103,7 +111,11 @@ const Header = () => {
               <Avatar>{user.name.charAt(0)}</Avatar>
             </IconButton>
 
-            <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
+            <Menu
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={handleMenuClose}
+            >
               <MenuItem onClick={handleProfileClick}>
                 <AccountCircle sx={{ mr: 1 }} /> Профиль
               </MenuItem>

@@ -10,16 +10,16 @@ import java.time.ZoneId;
 
 @Configuration
 public class ClockConfig {
-    @Primary
+//    @Primary
     @Bean
     public Clock systemClock() {
         return Clock.systemDefaultZone();
     }
 
-//    @Primary
+    @Primary
     @Bean
     public Clock fixedClock() {
-        return Clock.fixed(LocalDate.of(2025, 3, 25).atStartOfDay(ZoneId.systemDefault()).toInstant(), ZoneId.systemDefault());
+        return Clock.fixed(LocalDate.of(2025, 2, 22).atStartOfDay(ZoneId.systemDefault()).toInstant(), ZoneId.systemDefault());
     }
 }
 
