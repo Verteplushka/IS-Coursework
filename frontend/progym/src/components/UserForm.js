@@ -30,8 +30,7 @@ const UserForm = () => {
     availableDays: "",
     allergies: [],
     startTraining: "",
-    isVegan: false,
-    isVegetarian: false,
+    dietPreference: "",
   });
   const [allergies, setAllergies] = useState([]);
   const [selectedAllergies, setSelectedAllergies] = useState([]);
@@ -44,6 +43,7 @@ const UserForm = () => {
     activityLevel: "",
     availableDays: "",
     startTraining: "",
+    dietPreference: "",
   });
 
   useEffect(() => {
@@ -87,10 +87,10 @@ const UserForm = () => {
   };
 
   const handleCheckboxChange = (e) => {
-    const { name, checked } = e.target;
+    const { checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: checked,
+      dietPreference: checked ? "VEGETARIAN" : "OMNIVORE", // Устанавливаем соответствующее значение в dietPreference
     }));
   };
 
@@ -112,6 +112,7 @@ const UserForm = () => {
       activityLevel,
       availableDays,
       startTraining,
+      dietPreference,
     } = formData;
 
     let errors = {};
@@ -141,17 +142,6 @@ const UserForm = () => {
     ) {
       errors.height =
         "Рост должен быть целым числом в пределах от 100 до 250 см.";
-    }
-
-    // Проверка доступных дней
-    const availableDaysValue = parseInt(availableDays);
-    if (
-      !Number.isInteger(availableDaysValue) ||
-      availableDaysValue < 1 ||
-      availableDaysValue > 7
-    ) {
-      errors.availableDays =
-        "Количество доступных дней должно быть целым числом между 1 и 7.";
     }
 
     // Проверка веса
@@ -209,6 +199,10 @@ const UserForm = () => {
       errors.availableDays = "Пожалуйста, укажите количество доступных дней.";
     }
 
+    if (!dietPreference) {
+      errors.dietPreference = "Пожалуйста, выберите приоритет в диете.";
+    }
+
     // Проверка на обязательность заполнения всех полей
     if (
       !birthDate ||
@@ -219,7 +213,8 @@ const UserForm = () => {
       !fitnessLevel ||
       !activityLevel ||
       !availableDays ||
-      !startTraining
+      !startTraining ||
+      !dietPreference
     ) {
       errors.general = "Пожалуйста, заполните все поля.";
     }
@@ -457,15 +452,17 @@ const UserForm = () => {
                 <FormControlLabel
                   control={
                     <Switch
-                      checked={formData.isVegetarian}
+                      checked={formData.dietPreference === "VEGETARIAN"}
                       onChange={handleCheckboxChange}
-                      name="isVegetarian"
+                      name="dietPreference"
                       color="primary"
                     />
                   }
-                  label={formData.isVegetarian ? "Да" : "Нет"}
-                  labelPlacement="end" // Сдвигает лейбл справа
-                  sx={{ marginLeft: 2 }} // Отступ между переключателем и текстом
+                  label={
+                    formData.dietPreference === "VEGETARIAN" ? "Да" : "Нет"
+                  }
+                  labelPlacement="end"
+                  sx={{ marginLeft: 2 }}
                 />
               </Box>
             </Box>
@@ -501,7 +498,7 @@ const UserForm = () => {
           </Grid>
         </Grid>
 
-        <Box display="flex" justifyContent="center" width="100%" mt={4} mb={4}>
+        <Box display="flex" justifyContent="center" width="100%" mt={3} mb={5}>
           <Button variant="contained" color="primary" onClick={handleSubmit}>
             Сохранить
           </Button>

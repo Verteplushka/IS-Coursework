@@ -4,10 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import progym2004.backend.entity.Allergy;
-import progym2004.backend.entity.Gender;
-import progym2004.backend.entity.Goal;
-import progym2004.backend.entity.Role;
+import progym2004.backend.entity.*;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -27,4 +24,5 @@ public class FormRequest {
     private Integer availableDays;
     private Set<Long> allergiesIds;
     private LocalDate startTraining;
+    private DietPreference dietPreference;
 }

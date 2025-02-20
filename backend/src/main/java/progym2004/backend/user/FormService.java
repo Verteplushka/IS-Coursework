@@ -85,6 +85,7 @@ public class FormService {
             Set<Allergy> allergies = new HashSet<>(allergyRepository.findAllById(formRequest.getAllergiesIds()));
             user.setAllergies(allergies);
             user.setStartTraining(formRequest.getStartTraining());
+            user.setDietPreference(formRequest.getDietPreference());
 
             WeightJournal prevWeight = weightJournalRepository.findTopByUserOrderByIdDesc(user);
             LocalDate startDate = formRequest.getStartTraining().isBefore(LocalDate.now(clock)) ? LocalDate.now(clock) : formRequest.getStartTraining();
@@ -98,7 +99,8 @@ public class FormService {
                             && user.getGender().equals(userFromBD.getGender())
                             && user.getHeight().equals(userFromBD.getHeight())
                             && user.getActivityLevel().equals(userFromBD.getActivityLevel())
-                            && user.getAllergies().equals(userFromBD.getAllergies())) {
+                            && user.getAllergies().equals(userFromBD.getAllergies())
+                            && user.getDietPreference().equals(userFromBD.getDietPreference())) {
                         return FormUpdateStatus.NO_CHANGES;
                     }
                 }
@@ -118,7 +120,8 @@ public class FormService {
                         && user.getGender().equals(userFromBD.getGender())
                         && user.getHeight().equals(userFromBD.getHeight())
                         && user.getActivityLevel().equals(userFromBD.getActivityLevel())
-                        && user.getAllergies().equals(userFromBD.getAllergies())) {
+                        && user.getAllergies().equals(userFromBD.getAllergies())
+                        && user.getDietPreference().equals(userFromBD.getDietPreference())) {
                     user = userRepository.save(user);
                     trainingGenerator.regenerateTrainingProgram(user, startDate);
                     return FormUpdateStatus.UPDATED_TRAINING;
