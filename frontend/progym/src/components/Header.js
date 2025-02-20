@@ -9,7 +9,7 @@ import {
   Avatar,
   Box,
 } from "@mui/material";
-import { AccountCircle, ExitToApp, Home } from "@mui/icons-material";
+import { AccountCircle, ExitToApp, Home, CalendarToday } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 
 const Header = () => {
@@ -70,6 +70,10 @@ const Header = () => {
     navigate("/history");
   };
 
+  const handleCalendarClick = () => {
+    navigate("/TrainingCalendar");
+  };
+
   return (
     <AppBar position="sticky">
       <Toolbar sx={{ paddingRight: 0 }}>
@@ -82,13 +86,13 @@ const Header = () => {
           </Typography>
         </Box>
 
-        {/* Меню навигации: ссылки по центру */}
+        {/* Меню навигации */}
         <Box
           display="flex"
           alignItems="center"
           flexGrow={1}
           justifyContent="center"
-          sx={{ gap: 10 }} // Это задает равномерные промежутки между элементами
+          sx={{ gap: 10 }}
         >
           <IconButton color="inherit" onClick={handleUserFormClick}>
             <Typography variant="body1" color="inherit">
@@ -101,7 +105,15 @@ const Header = () => {
               История
             </Typography>
           </IconButton>
+
+          <IconButton color="inherit" onClick={handleCalendarClick}>
+            <CalendarToday sx={{ mr: 1 }} />
+            <Typography variant="body1" color="inherit">
+              Календарь
+            </Typography>
+          </IconButton>
         </Box>
+
         {user ? (
           <Box display="flex" alignItems="center">
             <Typography variant="body1" color="inherit" sx={{ mr: 2 }}>

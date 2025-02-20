@@ -292,4 +292,3 @@ const HomePage = () => {
 };
 
 export default HomePage;
-пш
