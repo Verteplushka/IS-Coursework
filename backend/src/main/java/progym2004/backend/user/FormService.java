@@ -12,6 +12,7 @@ import progym2004.backend.repository.*;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -233,7 +234,7 @@ public class FormService {
         return new WeightProgressResponse(weightJournalDtos);
     }
 
-    public TrainingProgramResponse getTrainingHistory(String token){
+    public TrainingProgramResponse getTrainingHistory(String token) {
         String login = jwtService.extractUsername(token);
         User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -249,4 +250,70 @@ public class FormService {
                 .toList();
         return new TrainingProgramResponse(trainingResponses);
     }
+
+    public TrainingStatisticsResponse getTrainingStatistics(String token) {
+        String login = jwtService.extractUsername(token);
+        User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Получаем все тренировки пользователя до текущей даты
+        List<TrainingDay> trainingDays = trainingDayRepository.findTrainingDaysByUserAndTrainingDateBefore(user, LocalDate.now(clock));
+
+        // Количество всех тренировок
+        long totalTrainings = trainingDays.size();
+
+        // Количество завершенных тренировок
+        long completedTrainings = trainingDays.stream()
+                .filter(TrainingDay::getIsCompleted)
+                .count();
+
+        // Процент завершенных тренировок
+        double completionPercentage = totalTrainings > 0 ? (completedTrainings / (double) totalTrainings) * 100 : 0;
+
+        // Среднее количество упражнений на тренировку
+        double averageExercisesPerTraining = trainingDays.stream()
+                .mapToInt(training -> training.getExerciseTrainingDays().size())
+                .average()
+                .orElse(0);
+
+        // Количество тренировок по месяцам (всего и выполненных)
+        Map<Month, Long> trainingMonthCount = trainingDays.stream()
+                .collect(Collectors.groupingBy(training -> training.getTrainingDate().getMonth(), Collectors.counting()));
+
+        Map<Month, Long> completedTrainingMonthCount = trainingDays.stream()
+                .filter(TrainingDay::getIsCompleted)
+                .collect(Collectors.groupingBy(training -> training.getTrainingDate().getMonth(), Collectors.counting()));
+
+        // Первая тренировка
+        LocalDate firstTrainingDate = trainingDays.stream()
+                .map(TrainingDay::getTrainingDate)
+                .min(LocalDate::compareTo)
+                .orElse(null);
+
+        // Подсчитываем количество упражнений в завершенных тренировках
+        long totalCompletedExercises = trainingDays.stream()
+                .filter(TrainingDay::getIsCompleted)
+                .flatMap(training -> training.getExerciseTrainingDays().stream())
+                .count();
+
+        // Подсчитываем количество упражнений с мышечной группой "кардио"
+        long cardioExercisesCount = trainingDays.stream()
+                .filter(TrainingDay::getIsCompleted)
+                .flatMap(training -> training.getExerciseTrainingDays().stream())
+                .map(exerciseTrainingDay -> exerciseTrainingDay.getExercise().getMuscleGroup())
+                .filter(muscleGroup -> muscleGroup == MuscleGroup.CARDIO)
+                .count();
+
+        return new TrainingStatisticsResponse(
+                totalTrainings,
+                completedTrainings,
+                completionPercentage,
+                averageExercisesPerTraining,
+                trainingMonthCount,
+                completedTrainingMonthCount,
+                firstTrainingDate,
+                totalCompletedExercises,
+                cardioExercisesCount
+        );
+    }
+
 }

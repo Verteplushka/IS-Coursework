@@ -26,7 +26,7 @@ public class UserController {
         return ResponseEntity.ok(formService.sendForm(request, jwtToken));
     }
 
-    @GetMapping("/complete_training")
+    @PostMapping("/complete_training")
     public ResponseEntity<Void> completeTraining(@RequestHeader("Authorization") String token) {
         String jwtToken = token.substring(7);
         if (formService.completeTraining(jwtToken)) {
@@ -63,5 +63,11 @@ public class UserController {
     public ResponseEntity<TrainingProgramResponse> getTrainingHistory(@RequestHeader("Authorization") String token) {
         String jwtToken = token.substring(7);
         return ResponseEntity.ok(formService.getTrainingHistory(jwtToken));
+    }
+
+    @GetMapping("/get_training_statistics")
+    public ResponseEntity<TrainingStatisticsResponse> getTrainingStatistics(@RequestHeader("Authorization") String token) {
+        String jwtToken = token.substring(7);
+        return ResponseEntity.ok(formService.getTrainingStatistics(jwtToken));
     }
 }
