@@ -53,7 +53,7 @@ public class FormService {
         this.exerciseTrainingDayRepository = exerciseTrainingDayRepository;
     }
 
-    public UserParamsResponse getUserParams(String token){
+    public UserParamsResponse getUserParams(String token) {
         String login = jwtService.extractUsername(token);
         User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
         WeightJournal weightJournal = weightJournalRepository.findTopByUserOrderByIdDesc(user);
@@ -136,6 +136,19 @@ public class FormService {
         }
     }
 
+    public boolean completeTraining(String token) {
+        String login = jwtService.extractUsername(token);
+        User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
+
+        TrainingDay trainingDay = trainingDayRepository.findTrainingDayByUserAndTrainingDate(user, LocalDate.now());
+        if (trainingDay == null) {
+            return false;
+        }
+        trainingDay.setIsCompleted(true);
+        trainingDayRepository.save(trainingDay);
+        return true;
+    }
+
     public DietResponse getTodayDiet(String token) {
         String login = jwtService.extractUsername(token);
         User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
@@ -183,8 +196,7 @@ public class FormService {
     }
 
 
-
-    public TrainingProgramResponse getTrainingProgram(String token){
+    public TrainingProgramResponse getTrainingProgram(String token) {
         String login = jwtService.extractUsername(token);
         User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
 

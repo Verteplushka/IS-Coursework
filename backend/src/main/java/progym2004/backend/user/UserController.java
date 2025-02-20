@@ -26,6 +26,15 @@ public class UserController {
         return ResponseEntity.ok(formService.sendForm(request, jwtToken));
     }
 
+    @GetMapping("/complete_training")
+    public ResponseEntity<Void> completeTraining(@RequestHeader("Authorization") String token) {
+        String jwtToken = token.substring(7);
+        if (formService.completeTraining(jwtToken)) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.status(400).build();
+    }
+
     @GetMapping("/get_today_diet")
     public ResponseEntity<DietResponse> getDiet(@RequestHeader("Authorization") String token) {
         String jwtToken = token.substring(7);
