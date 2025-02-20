@@ -208,7 +208,7 @@ public class FormService {
         TrainingDay trainingDay = trainingDayRepository.findTrainingDayByUserAndTrainingDate(user, LocalDate.now(clock));
         List<ExerciseDto> exerciseDtos = ExerciseMapper.toDtos(exerciseTrainingDayRepository.findExerciseTrainingDaysByTrainingDayOrderById(trainingDay));
 
-        return new TrainingResponse(exerciseDtos, LocalDate.now(clock));
+        return new TrainingResponse(exerciseDtos, LocalDate.now(clock), trainingDay.getIsCompleted());
     }
 
 
