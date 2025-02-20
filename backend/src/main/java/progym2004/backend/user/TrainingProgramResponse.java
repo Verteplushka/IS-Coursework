@@ -12,6 +12,5 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TrainingProgramResponse {
-
     private List<TrainingResponse> trainings;
 }

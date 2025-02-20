@@ -6,6 +6,7 @@ import progym2004.backend.entity.*;
 import progym2004.backend.repository.*;
 import progym2004.backend.repository.DietDayUserRepository;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.*;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class DietGenerator {
+    private final Clock clock;
     private final DietDayAdminRepository dietDayAdminRepository;
     private final MealDietDayAdminRepository mealDietDayAdminRepository;
     private final DietDayUserRepository dietDayUserRepository;
@@ -20,10 +22,11 @@ public class DietGenerator {
     private final int generatedDaysAmount = 2;
 
     @Autowired
-    public DietGenerator(DietDayAdminRepository dietDayAdminRepository,
+    public DietGenerator(Clock clock, DietDayAdminRepository dietDayAdminRepository,
                          MealDietDayAdminRepository mealDietDayAdminRepository,
                          DietDayUserRepository dietDayUserRepository,
                          WeightJournalRepository weightJournalRepository) {
+        this.clock = clock;
         this.dietDayAdminRepository = dietDayAdminRepository;
         this.mealDietDayAdminRepository = mealDietDayAdminRepository;
         this.dietDayUserRepository = dietDayUserRepository;
@@ -49,7 +52,7 @@ public class DietGenerator {
             for (DietDayAdmin dietDay : filteredDietDays) {
                 Double dailyCalories = calculateDailyCalories(user, weight);
                 Double rate = dailyCalories / dietDay.getCalories();
-                LocalDate dietDate = LocalDate.now().plusDays(currentlyGeneratedDays);
+                LocalDate dietDate = LocalDate.now(clock).plusDays(currentlyGeneratedDays);
 
                 dietDayUserRepository.save(new DietDayUser(user, dietDay, rate, dietDate));
                 currentlyGeneratedDays++;
@@ -64,7 +67,7 @@ public class DietGenerator {
 
     public void rewriteDiet(User user, Double weight) {
         // Удаляем все будущие и текущие DietDayUser для пользователя
-        dietDayUserRepository.deleteAllByUserAndDayDateGreaterThanEqual(user, LocalDate.now());
+        dietDayUserRepository.deleteAllByUserAndDayDateGreaterThanEqual(user, LocalDate.now(clock));
 
         List<DietDayAdmin> availableDietDays = dietDayAdminRepository.findAll();
 
@@ -83,7 +86,7 @@ public class DietGenerator {
             for (DietDayAdmin dietDay : filteredDietDays) {
                 Double dailyCalories = calculateDailyCalories(user, weight);
                 Double rate = dailyCalories / dietDay.getCalories();
-                LocalDate dietDate = LocalDate.now().plusDays(currentlyGeneratedDays);
+                LocalDate dietDate = LocalDate.now(clock).plusDays(currentlyGeneratedDays);
 
                 // Создаём новый `DietDayUser`
                 dietDayUserRepository.save(new DietDayUser(user, dietDay, rate, dietDate));
@@ -112,7 +115,7 @@ public class DietGenerator {
     }
 
     private Double calculateDailyCalories(User user, Double weight) {
-        int age = Period.between(user.getBirthDate(), LocalDate.now()).getYears();
+        int age = Period.between(user.getBirthDate(), LocalDate.now(clock)).getYears();
         double heightCm = user.getHeight();
         int activityLevel = user.getActivityLevel();
 

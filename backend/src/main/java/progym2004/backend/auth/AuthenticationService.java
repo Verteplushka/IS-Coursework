@@ -20,11 +20,13 @@ import progym2004.backend.token.TokenRepository;
 import progym2004.backend.token.TokenType;
 
 import java.io.IOException;
+import java.time.Clock;
 import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
+  private final Clock clock;
   private final UserRepository repository;
   private final TokenRepository tokenRepository;
   private final PasswordEncoder passwordEncoder;
@@ -36,7 +38,7 @@ public class AuthenticationService {
         .login(request.getLogin())
         .password(passwordEncoder.encode(request.getPassword()))
         .role(request.getRole())
-        .registrationDate(LocalDate.now())
+        .registrationDate(LocalDate.now(clock))
         .build();
     var savedUser = repository.save(user);
     var jwtToken = jwtService.generateToken(user);

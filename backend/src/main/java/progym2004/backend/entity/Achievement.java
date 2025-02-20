@@ -35,12 +35,6 @@ public class Achievement {
     @Column(name = "when_created", columnDefinition = "DATE DEFAULT CURRENT_DATE")
     private LocalDate whenCreated;
 
-    @PrePersist
-    protected void onCreate() {
-        this.whenCreated = LocalDate.now();
-    }
-
-
     @ManyToMany(mappedBy = "achievements")
     private Set<User> users;
 }

@@ -7,11 +7,14 @@ import progym2004.backend.config.JwtService;
 import progym2004.backend.entity.*;
 import progym2004.backend.repository.*;
 
+import java.time.Clock;
+import java.time.LocalDate;
 import java.util.Map;
 import java.util.Set;
 
 @Service
 public class AdminService {
+    private final Clock clock;
     private final ExerciseRepository exerciseRepository;
     private final AllergyRepository allergyRepository;
     private final MealRepository mealRepository;
@@ -22,13 +25,14 @@ public class AdminService {
     private final JwtService jwtService;
 
     @Autowired
-    public AdminService(ExerciseRepository exerciseRepository,
+    public AdminService(Clock clock, ExerciseRepository exerciseRepository,
                         AllergyRepository allergyRepository,
                         MealRepository mealRepository,
                         DietDayAdminRepository dietDayAdminRepository,
                         MealDietDayAdminRepository mealDietDayAdminRepository,
                         UserRepository userRepository,
                         JwtService jwtService) {
+        this.clock = clock;
 
         this.exerciseRepository = exerciseRepository;
         this.allergyRepository = allergyRepository;
@@ -43,7 +47,7 @@ public class AdminService {
         String login = jwtService.extractUsername(token);
         User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
 
-        Exercise exercise = new Exercise(user, exerciseRequest.getName(), exerciseRequest.getMuscleGroup(), exerciseRequest.getDescription(), exerciseRequest.getExecutionInstructions(), exerciseRequest.isCompound());
+        Exercise exercise = new Exercise(user, exerciseRequest.getName(), exerciseRequest.getMuscleGroup(), exerciseRequest.getDescription(), exerciseRequest.getExecutionInstructions(), exerciseRequest.isCompound(), LocalDate.now(clock));
         return exerciseRepository.save(exercise);
     }
 
@@ -52,7 +56,7 @@ public class AdminService {
         User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
 
         Set<Meal> meals = mealRepository.findAllByIdIn(allergyRequest.getAllergyMealsIds());
-        Allergy allergy = new Allergy(user, allergyRequest.getName(), meals);
+        Allergy allergy = new Allergy(user, allergyRequest.getName(), meals, LocalDate.now(clock));
         return allergyRepository.save(allergy);
     }
 
@@ -60,7 +64,7 @@ public class AdminService {
         String login = jwtService.extractUsername(token);
         User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
 
-        Meal meal = new Meal(user, mealRequest.getName(), mealRequest.getCalories(), mealRequest.getProtein(), mealRequest.getFats(), mealRequest.getCarbs());
+        Meal meal = new Meal(user, mealRequest.getName(), mealRequest.getCalories(), mealRequest.getProtein(), mealRequest.getFats(), mealRequest.getCarbs(), LocalDate.now(clock));
         return mealRepository.save(meal);
     }
 
@@ -68,7 +72,7 @@ public class AdminService {
         String login = jwtService.extractUsername(token);
         User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
 
-        DietDayAdmin dietDayAdmin = dietDayAdminRepository.save(new DietDayAdmin(user, dietDayRequest.getName()));
+        DietDayAdmin dietDayAdmin = dietDayAdminRepository.save(new DietDayAdmin(user, dietDayRequest.getName(), LocalDate.now(clock)));
         for (Map.Entry<Long, Double> mealPortion : dietDayRequest.getMealPortions().entrySet()) {
             Meal meal = mealRepository.findById(mealPortion.getKey()).orElseThrow(() -> new RuntimeException("Meal with id = " + mealPortion.getKey() + " not found"));
             mealDietDayAdminRepository.save(new MealDietDayAdmin(dietDayAdmin, meal, mealPortion.getValue()));

@@ -15,4 +15,10 @@ import java.util.List;
 public class TrainingResponse {
     List<ExerciseDto> exercises;
     LocalDate trainingDate;
+    boolean isCompleted;
+    public TrainingResponse(List<ExerciseDto> exercises, LocalDate trainingDate){
+        this.exercises = exercises;
+        this.trainingDate = trainingDate;
+        this.isCompleted = false;
+    }
 }

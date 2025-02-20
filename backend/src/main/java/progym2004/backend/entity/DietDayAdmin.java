@@ -25,11 +25,6 @@ public class DietDayAdmin {
     @Column(name = "when_created", columnDefinition = "DATE DEFAULT CURRENT_DATE")
     private LocalDate whenCreated;
 
-    @PrePersist
-    protected void onCreate() {
-        this.whenCreated = LocalDate.now();
-    }
-
     @DecimalMin("0")
     @DecimalMax("5000")
     @Column(name = "calories", nullable = false)
@@ -40,10 +35,11 @@ public class DietDayAdmin {
     @Column(name = "name", nullable = false)
     private String name;
 
-    public DietDayAdmin(User user, String name){
+    public DietDayAdmin(User user, String name, LocalDate whenCreated){
         this.createdBy = user;
         this.name = name;
         this.calories = 0.0;
+        this.whenCreated = whenCreated;
     }
 }
 

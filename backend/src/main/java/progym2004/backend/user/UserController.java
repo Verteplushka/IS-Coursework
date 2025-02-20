@@ -58,4 +58,10 @@ public class UserController {
         String jwtToken = token.substring(7);
         return ResponseEntity.ok(formService.getWeightProgress(jwtToken));
     }
+
+    @GetMapping("/get_training_history")
+    public ResponseEntity<TrainingProgramResponse> getTrainingHistory(@RequestHeader("Authorization") String token) {
+        String jwtToken = token.substring(7);
+        return ResponseEntity.ok(formService.getTrainingHistory(jwtToken));
+    }
 }

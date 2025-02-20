@@ -7,19 +7,21 @@ import progym2004.backend.repository.ExerciseRepository;
 import progym2004.backend.repository.ExerciseTrainingDayRepository;
 import progym2004.backend.repository.TrainingDayRepository;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class TrainingGenerator {
-
+    private final Clock clock;
     private final ExerciseRepository exerciseRepository;
     private final TrainingDayRepository trainingDayRepository;
     private final ExerciseTrainingDayRepository exerciseTrainingDayRepository;
 
     @Autowired
-    public TrainingGenerator(ExerciseRepository exerciseRepository, TrainingDayRepository trainingDayRepository, ExerciseTrainingDayRepository exerciseTrainingDayRepository) {
+    public TrainingGenerator(Clock clock, ExerciseRepository exerciseRepository, TrainingDayRepository trainingDayRepository, ExerciseTrainingDayRepository exerciseTrainingDayRepository) {
+        this.clock = clock;
         this.exerciseRepository = exerciseRepository;
         this.trainingDayRepository = trainingDayRepository;
         this.exerciseTrainingDayRepository = exerciseTrainingDayRepository;
@@ -31,7 +33,7 @@ public class TrainingGenerator {
         LocalDate endDate = startDate.plusMonths(1);
 
         // Удаляем все существующие тренировочные дни пользователя в этом периоде
-        trainingDayRepository.deleteAllByUserAndTrainingDateGreaterThanEqual(user, LocalDate.now());
+        trainingDayRepository.deleteAllByUserAndTrainingDateGreaterThanEqual(user, LocalDate.now(clock));
 
         List<Integer> trainingDaysOfWeek = calculateTrainingDaysOfWeek(availableDaysPerWeek, trainingStartDate);
         int exercisesPerTraining = calculateExercisesPerTraining(user.getFitnessLevel(), user.getAvailableDays());

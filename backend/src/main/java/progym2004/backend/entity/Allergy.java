@@ -26,12 +26,6 @@ public class Allergy {
     @Column(name = "when_created", columnDefinition = "DATE DEFAULT CURRENT_DATE")
     private LocalDate whenCreated;
 
-    @PrePersist
-    protected void onCreate() {
-        this.whenCreated = LocalDate.now();
-    }
-
-
     @NotNull
     @Size(max = 50)
     @Column(name = "name", unique = true, nullable = false)
@@ -48,10 +42,11 @@ public class Allergy {
     )
     private Set<Meal> meals;
 
-    public Allergy(User user, String name, Set<Meal> meals){
+    public Allergy(User user, String name, Set<Meal> meals, LocalDate whenCreated){
         this.createdBy = user;
         this.name = name;
         this.meals = meals;
+        this.whenCreated = whenCreated;
     }
 
     @Override

@@ -10,13 +10,14 @@ import progym2004.backend.mapper.ExerciseMapper;
 import progym2004.backend.mapper.MealMapper;
 import progym2004.backend.repository.*;
 
+import java.time.Clock;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class FormService {
+    private final Clock clock;
     private final JwtService jwtService;
     private final UserRepository userRepository;
     private final AllergyRepository allergyRepository;
@@ -30,7 +31,7 @@ public class FormService {
     private final int daysBeforeProgramEnds = 7;
 
     @Autowired
-    public FormService(JwtService jwtService,
+    public FormService(Clock clock, JwtService jwtService,
                        UserRepository userRepository,
                        AllergyRepository allergyRepository,
                        WeightJournalRepository weightJournalRepository,
@@ -39,6 +40,7 @@ public class FormService {
                        MealDietDayAdminRepository mealDietDayAdminRepository,
                        TrainingGenerator trainingGenerator,
                        TrainingDayRepository trainingDayRepository, ExerciseTrainingDayRepository exerciseTrainingDayRepository) {
+        this.clock = clock;
         this.jwtService = jwtService;
         this.userRepository = userRepository;
         this.allergyRepository = allergyRepository;
@@ -60,7 +62,7 @@ public class FormService {
                 .map(Allergy::getId)
                 .collect(Collectors.toSet());
         LocalDate lastTrainingDate = trainingDayRepository.findTopByUserOrderByTrainingDateDesc(user).getTrainingDate();
-        boolean isEndingSoon = lastTrainingDate.equals(LocalDate.now());
+        boolean isEndingSoon = lastTrainingDate.equals(LocalDate.now(clock));
 
         return new UserParamsResponse(user.getBirthDate(), user.getGender(), user.getHeight(), weight, user.getGoal(), user.getFitnessLevel(), user.getActivityLevel(), user.getAvailableDays(), allergyIds, user.getStartTraining(), isEndingSoon);
     }
@@ -85,7 +87,7 @@ public class FormService {
             user.setStartTraining(formRequest.getStartTraining());
 
             WeightJournal prevWeight = weightJournalRepository.findTopByUserOrderByIdDesc(user);
-            LocalDate startDate = formRequest.getStartTraining().isBefore(LocalDate.now()) ? LocalDate.now() : formRequest.getStartTraining();
+            LocalDate startDate = formRequest.getStartTraining().isBefore(LocalDate.now(clock)) ? LocalDate.now(clock) : formRequest.getStartTraining();
 
             if (user.getAvailableDays().equals(userFromBD.getAvailableDays())
                     && user.getFitnessLevel().equals(userFromBD.getFitnessLevel())
@@ -101,13 +103,13 @@ public class FormService {
                     }
                 }
                 user = userRepository.save(user);
-                weightJournalRepository.save(new WeightJournal(user, formRequest.getCurrentWeight()));
+                weightJournalRepository.save(new WeightJournal(user, formRequest.getCurrentWeight(), LocalDate.now(clock)));
                 dietGenerator.rewriteDiet(user, formRequest.getCurrentWeight());
                 return FormUpdateStatus.UPDATED_DIET;
 
             } else if (!user.getGoal().equals(userFromBD.getGoal())) {
                 user = userRepository.save(user);
-                weightJournalRepository.save(new WeightJournal(user, formRequest.getCurrentWeight()));
+                weightJournalRepository.save(new WeightJournal(user, formRequest.getCurrentWeight(), LocalDate.now(clock)));
                 dietGenerator.rewriteDiet(user, formRequest.getCurrentWeight());
                 trainingGenerator.regenerateTrainingProgram(user, startDate);
                 return FormUpdateStatus.UPDATED_ALL;
@@ -124,7 +126,7 @@ public class FormService {
             }
 
             user = userRepository.save(user);
-            weightJournalRepository.save(new WeightJournal(user, formRequest.getCurrentWeight()));
+            weightJournalRepository.save(new WeightJournal(user, formRequest.getCurrentWeight(), LocalDate.now(clock)));
             dietGenerator.rewriteDiet(user, formRequest.getCurrentWeight());
             trainingGenerator.regenerateTrainingProgram(user, startDate);
             return FormUpdateStatus.UPDATED_ALL;
@@ -138,7 +140,7 @@ public class FormService {
         String login = jwtService.extractUsername(token);
         User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
 
-        TrainingDay trainingDay = trainingDayRepository.findTrainingDayByUserAndTrainingDate(user, LocalDate.now());
+        TrainingDay trainingDay = trainingDayRepository.findTrainingDayByUserAndTrainingDate(user, LocalDate.now(clock));
         if (trainingDay == null) {
             return false;
         }
@@ -151,10 +153,10 @@ public class FormService {
         String login = jwtService.extractUsername(token);
         User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
 
-        DietDayUser foundDietDayUser = dietDayUserRepository.findDietDayUserByDayDateAndUser(LocalDate.now(), user);
+        DietDayUser foundDietDayUser = dietDayUserRepository.findDietDayUserByDayDateAndUser(LocalDate.now(clock), user);
         if (foundDietDayUser == null) {
             dietGenerator.continueDiet(user);
-            foundDietDayUser = dietDayUserRepository.findDietDayUserByDayDateAndUser(LocalDate.now(), user);
+            foundDietDayUser = dietDayUserRepository.findDietDayUserByDayDateAndUser(LocalDate.now(clock), user);
         }
 
         Double rate = foundDietDayUser.getRate();
@@ -187,10 +189,10 @@ public class FormService {
         String login = jwtService.extractUsername(token);
         User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
 
-        TrainingDay trainingDay = trainingDayRepository.findTrainingDayByUserAndTrainingDate(user, LocalDate.now());
+        TrainingDay trainingDay = trainingDayRepository.findTrainingDayByUserAndTrainingDate(user, LocalDate.now(clock));
         List<ExerciseDto> exerciseDtos = ExerciseMapper.toDtos(exerciseTrainingDayRepository.findExerciseTrainingDaysByTrainingDayOrderById(trainingDay));
 
-        return new TrainingResponse(exerciseDtos, LocalDate.now());
+        return new TrainingResponse(exerciseDtos, LocalDate.now(clock));
     }
 
 
@@ -198,7 +200,7 @@ public class FormService {
         String login = jwtService.extractUsername(token);
         User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
 
-        List<TrainingDay> trainingDays = trainingDayRepository.findTrainingDaysByUserAndTrainingDateGreaterThanEqual(user, LocalDate.now());
+        List<TrainingDay> trainingDays = trainingDayRepository.findTrainingDaysByUserAndTrainingDateGreaterThanEqual(user, LocalDate.now(clock));
 
         List<TrainingResponse> trainingResponses = trainingDays.stream()
                 .map(trainingDay -> {
@@ -229,5 +231,22 @@ public class FormService {
                 .toList();
 
         return new WeightProgressResponse(weightJournalDtos);
+    }
+
+    public TrainingProgramResponse getTrainingHistory(String token){
+        String login = jwtService.extractUsername(token);
+        User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<TrainingDay> trainingDays = trainingDayRepository.findTrainingDaysByUserAndTrainingDateBefore(user, LocalDate.now(clock));
+
+        List<TrainingResponse> trainingResponses = trainingDays.stream()
+                .map(trainingDay -> {
+                    List<ExerciseDto> exerciseDtos = ExerciseMapper.toDtos(
+                            exerciseTrainingDayRepository.findExerciseTrainingDaysByTrainingDayOrderById(trainingDay)
+                    );
+                    return new TrainingResponse(exerciseDtos, trainingDay.getTrainingDate(), trainingDay.getIsCompleted());
+                })
+                .toList();
+        return new TrainingProgramResponse(trainingResponses);
     }
 }
