@@ -77,8 +77,8 @@ CREATE TABLE IF NOT EXISTS exercise_training_day (
                                                      training_day_id INT REFERENCES training_day(training_day_id) ON DELETE CASCADE,
                                                      exercise_id INT REFERENCES exercises(exercise_id) ON DELETE CASCADE,
 						     exercise_number INT NOT NULL,
-						     sets INT NOT NULL,
-						     repetitions INT NOT NULL
+						     sets INT,
+						     repetitions INT
 );
 
 -- Таблица питания

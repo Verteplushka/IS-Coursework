@@ -1,6 +1,7 @@
 package progym2004.backend.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import progym2004.backend.config.JwtService;
@@ -10,6 +11,7 @@ import progym2004.backend.mapper.MealMapper;
 import progym2004.backend.repository.*;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -27,6 +29,7 @@ public class FormService {
     private final TrainingGenerator trainingGenerator;
     private final TrainingDayRepository trainingDayRepository;
     private final ExerciseTrainingDayRepository exerciseTrainingDayRepository;
+    private final int daysBeforeProgramEnds = 7;
 
     @Autowired
     public FormService(JwtService jwtService,
@@ -50,7 +53,7 @@ public class FormService {
         this.exerciseTrainingDayRepository = exerciseTrainingDayRepository;
     }
 
-    public FormRequest getUserParams(String token){
+    public UserParamsResponse getUserParams(String token){
         String login = jwtService.extractUsername(token);
         User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
         WeightJournal weightJournal = weightJournalRepository.findTopByUserOrderByIdDesc(user);
@@ -58,8 +61,10 @@ public class FormService {
         Set<Long> allergyIds = user.getAllergies().stream()
                 .map(Allergy::getId)
                 .collect(Collectors.toSet());
+        LocalDate lastTrainingDate = trainingDayRepository.findTopByUserOrderByTrainingDateDesc(user).getTrainingDate();
+        boolean isEndingSoon = lastTrainingDate.equals(LocalDate.now());
 
-        return new FormRequest(user.getBirthDate(), user.getGender(), user.getHeight(), weight, user.getGoal(), user.getFitnessLevel(), user.getActivityLevel(), user.getAvailableDays(), allergyIds, user.getStartTraining());
+        return new UserParamsResponse(user.getBirthDate(), user.getGender(), user.getHeight(), weight, user.getGoal(), user.getFitnessLevel(), user.getActivityLevel(), user.getAvailableDays(), allergyIds, user.getStartTraining(), isEndingSoon);
     }
 
     @Transactional
@@ -82,6 +87,7 @@ public class FormService {
             user.setStartTraining(formRequest.getStartTraining());
 
             WeightJournal prevWeight = weightJournalRepository.findTopByUserOrderByIdDesc(user);
+            LocalDate startDate = formRequest.getStartTraining().isBefore(LocalDate.now()) ? LocalDate.now() : formRequest.getStartTraining();
 
             if (user.getAvailableDays().equals(userFromBD.getAvailableDays())
                     && user.getFitnessLevel().equals(userFromBD.getFitnessLevel())
@@ -105,7 +111,7 @@ public class FormService {
                 user = userRepository.save(user);
                 weightJournalRepository.save(new WeightJournal(user, formRequest.getCurrentWeight()));
                 dietGenerator.rewriteDiet(user, formRequest.getCurrentWeight());
-                trainingGenerator.regenerateTrainingProgram(user, formRequest.getStartTraining());
+                trainingGenerator.regenerateTrainingProgram(user, startDate);
                 return FormUpdateStatus.UPDATED_ALL;
             } else if (prevWeight != null) {
                 if (prevWeight.getWeight().equals(formRequest.getCurrentWeight())
@@ -114,7 +120,7 @@ public class FormService {
                         && user.getActivityLevel().equals(userFromBD.getActivityLevel())
                         && user.getAllergies().equals(userFromBD.getAllergies())) {
                     user = userRepository.save(user);
-                    trainingGenerator.regenerateTrainingProgram(user, formRequest.getStartTraining());
+                    trainingGenerator.regenerateTrainingProgram(user, startDate);
                     return FormUpdateStatus.UPDATED_TRAINING;
                 }
             }
@@ -122,7 +128,7 @@ public class FormService {
             user = userRepository.save(user);
             weightJournalRepository.save(new WeightJournal(user, formRequest.getCurrentWeight()));
             dietGenerator.rewriteDiet(user, formRequest.getCurrentWeight());
-            trainingGenerator.regenerateTrainingProgram(user, formRequest.getStartTraining());
+            trainingGenerator.regenerateTrainingProgram(user, startDate);
             return FormUpdateStatus.UPDATED_ALL;
         } catch (Exception e) {
             e.printStackTrace();

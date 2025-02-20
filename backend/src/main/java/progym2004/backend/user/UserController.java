@@ -15,7 +15,7 @@ public class UserController {
     }
 
     @GetMapping("/get_user_params")
-    public ResponseEntity<FormRequest> getUserParams(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<UserParamsResponse> getUserParams(@RequestHeader("Authorization") String token) {
         String jwtToken = token.substring(7);
         return ResponseEntity.ok(formService.getUserParams(jwtToken));
     }

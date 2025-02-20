@@ -42,9 +42,9 @@ public class Allergy {
 
     @ManyToMany
     @JoinTable(
-            name = "allergy_meal", // имя промежуточной таблицы
-            joinColumns = @JoinColumn(name = "allergy_id"), // внешний ключ для Allergy
-            inverseJoinColumns = @JoinColumn(name = "meal_id") // внешний ключ для Meal
+            name = "allergy_meal",
+            joinColumns = @JoinColumn(name = "allergy_id"),
+            inverseJoinColumns = @JoinColumn(name = "meal_id")
     )
     private Set<Meal> meals;
 
