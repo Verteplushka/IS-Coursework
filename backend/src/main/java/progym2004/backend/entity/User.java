@@ -150,6 +150,7 @@ public class User implements UserDetails {
         this.availableDays = other.availableDays;
         this.role = other.role;
         this.startTraining = other.startTraining;
+        this.dietPreference = other.dietPreference;
         this.allergies = other.allergies != null ? new HashSet<>(other.allergies) : null;
         this.achievements = other.achievements != null ? new HashSet<>(other.achievements) : null;
     }
