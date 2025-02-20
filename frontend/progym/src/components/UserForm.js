@@ -14,6 +14,9 @@ import {
   FormControlLabel,
   Switch,
   Grid,
+  CircularProgress,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import axios from "axios";
 import Header from "./Header"; // Импортируем шапку
@@ -45,6 +48,9 @@ const UserForm = () => {
     startTraining: "",
     dietPreference: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false); // Для отслеживания загрузки
+  const [submitStatus, setSubmitStatus] = useState(null); // Для статуса отправки (success/error)
+  const [snackbarOpen, setSnackbarOpen] = useState(false); // Для управления Snackbar
 
   useEffect(() => {
     const today = new Date();
@@ -102,7 +108,6 @@ const UserForm = () => {
         });
     }
   }, []);
-  console.log(allergies);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -248,8 +253,10 @@ const UserForm = () => {
     // Если есть ошибки, отображаем их
     setValidationErrors(errors);
 
-    // Если ошибок нет, отправляем данные
     if (Object.keys(errors).length === 0) {
+      setIsSubmitting(true); // Начинаем загрузку
+      setSubmitStatus(null); // Сбрасываем статус отправки
+
       const requestData = {
         ...formData,
         allergiesIds: selectedAllergies,
@@ -262,11 +269,16 @@ const UserForm = () => {
           },
         })
         .then(() => {
-          console.log("Данные сохранены успешно.");
-          alert("Данные сохранены успешно.");
+          setSubmitStatus("success"); // Устанавливаем статус успеха
+          setSnackbarOpen(true); // Открываем Snackbar
         })
         .catch((err) => {
           console.error("Ошибка при сохранении данных.", err);
+          setSubmitStatus("error"); // Устанавливаем статус ошибки
+          setSnackbarOpen(true); // Открываем Snackbar
+        })
+        .finally(() => {
+          setIsSubmitting(false); // Завершаем загрузку
         });
     }
   };
@@ -525,10 +537,36 @@ const UserForm = () => {
         </Grid>
 
         <Box display="flex" justifyContent="center" width="100%" mt={3} mb={5}>
-          <Button variant="contained" color="primary" onClick={handleSubmit}>
-            Сохранить
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              "Сохранить"
+            )}
           </Button>
         </Box>
+
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={2000}
+          onClose={() => setSnackbarOpen(false)}
+          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        >
+          <Alert
+            onClose={() => setSnackbarOpen(false)}
+            severity={submitStatus === "success" ? "success" : "error"}
+            sx={{ width: "100%" }}
+          >
+            {submitStatus === "success"
+              ? "Данные успешно сохранены!"
+              : "Ошибка при сохранении данных."}
+          </Alert>
+        </Snackbar>
       </Container>
     </>
   );
