@@ -165,7 +165,7 @@ public class FormService {
         List<MealDto> mealDtos = mealDietDayAdminRepository.findMealDietDayAdminsByDietDayAdmin(dietDayAdmin)
                 .stream()
                 .map(mealDietDayAdmin -> {
-                    MealDto mealDto = MealMapper.toDto(mealDietDayAdmin.getMeal());
+                    MealDto mealDto = MealMapper.toDto(mealDietDayAdmin.getMeal(), mealDietDayAdmin.getMealPosition());
                     Double portion = mealDietDayAdmin.getPortionSize() * rate;
                     mealDto.setPortionSize(portion);
 
@@ -326,7 +326,7 @@ public class FormService {
             List<MealDto> meals = mealDietDayAdminRepository.findMealDietDayAdminsByDietDayAdmin(dietDayUser.getDietDayAdmin())
                     .stream()
                     .map(mealDietDayAdmin -> {
-                        MealDto mealDto = MealMapper.toDto(mealDietDayAdmin.getMeal());
+                        MealDto mealDto = MealMapper.toDto(mealDietDayAdmin.getMeal(), mealDietDayAdmin.getMealPosition());
                         Double portion = mealDietDayAdmin.getPortionSize() * dietDayUser.getRate();
                         mealDto.setPortionSize(portion);
 
@@ -372,7 +372,7 @@ public class FormService {
                     double rate = dietDayUser.getRate();
                     return mealDietDayAdminRepository.findMealDietDayAdminsByDietDayAdmin(dietDayUser.getDietDayAdmin()).stream()
                             .map(mealDietDayAdmin -> {
-                                MealDto mealDto = MealMapper.toDto(mealDietDayAdmin.getMeal());
+                                MealDto mealDto = MealMapper.toDto(mealDietDayAdmin.getMeal(), mealDietDayAdmin.getMealPosition());
                                 Double portion = mealDietDayAdmin.getPortionSize() * rate;
                                 mealDto.setPortionSize(portion);
 
@@ -392,7 +392,7 @@ public class FormService {
                     double rate = dietDayUser.getRate();
                     return mealDietDayAdminRepository.findMealDietDayAdminsByDietDayAdmin(dietDayUser.getDietDayAdmin()).stream()
                             .map(mealDietDayAdmin -> {
-                                MealDto mealDto = MealMapper.toDto(mealDietDayAdmin.getMeal());
+                                MealDto mealDto = MealMapper.toDto(mealDietDayAdmin.getMeal(), mealDietDayAdmin.getMealPosition());
                                 Double portion = mealDietDayAdmin.getPortionSize() * rate;
                                 mealDto.setPortionSize(portion);
 
@@ -412,7 +412,7 @@ public class FormService {
                     double rate = dietDayUser.getRate();
                     return mealDietDayAdminRepository.findMealDietDayAdminsByDietDayAdmin(dietDayUser.getDietDayAdmin()).stream()
                             .map(mealDietDayAdmin -> {
-                                MealDto mealDto = MealMapper.toDto(mealDietDayAdmin.getMeal());
+                                MealDto mealDto = MealMapper.toDto(mealDietDayAdmin.getMeal(), mealDietDayAdmin.getMealPosition());
                                 Double portion = mealDietDayAdmin.getPortionSize() * rate;
                                 mealDto.setPortionSize(portion);
 
@@ -432,7 +432,7 @@ public class FormService {
                     double rate = dietDayUser.getRate();
                     return mealDietDayAdminRepository.findMealDietDayAdminsByDietDayAdmin(dietDayUser.getDietDayAdmin()).stream()
                             .map(mealDietDayAdmin -> {
-                                MealDto mealDto = MealMapper.toDto(mealDietDayAdmin.getMeal());
+                                MealDto mealDto = MealMapper.toDto(mealDietDayAdmin.getMeal(), mealDietDayAdmin.getMealPosition());
                                 Double portion = mealDietDayAdmin.getPortionSize() * rate;
                                 mealDto.setPortionSize(portion);
 

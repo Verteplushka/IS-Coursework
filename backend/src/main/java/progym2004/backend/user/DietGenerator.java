@@ -119,6 +119,9 @@ public class DietGenerator {
         if (user.getGoal() == Goal.WEIGHT_LOSS) {
             return dietDay.getDietType() == DietType.LOW_CARB;
         }
+        if(user.getGoal() == Goal.MAINTENANCE){
+            return dietDay.getDietType() == DietType.OMNIVORE;
+        }
 
         return true;
     }
