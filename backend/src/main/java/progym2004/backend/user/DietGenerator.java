@@ -2,6 +2,7 @@ package progym2004.backend.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import progym2004.backend.entity.*;
 import progym2004.backend.repository.*;
 import progym2004.backend.repository.DietDayUserRepository;
@@ -19,7 +20,7 @@ public class DietGenerator {
     private final MealDietDayAdminRepository mealDietDayAdminRepository;
     private final DietDayUserRepository dietDayUserRepository;
     private final WeightJournalRepository weightJournalRepository;
-    private final int generatedDaysAmount = 30;
+    private final int generatedDaysAmount = 1;
 
     @Autowired
     public DietGenerator(Clock clock, DietDayAdminRepository dietDayAdminRepository,
@@ -33,74 +34,62 @@ public class DietGenerator {
         this.weightJournalRepository = weightJournalRepository;
     }
 
+    @Transactional
     public void continueDiet(User user) {
         Double weight = weightJournalRepository.findTopByUserOrderByIdDesc(user).getWeight();
         List<DietDayAdmin> availableDietDays = dietDayAdminRepository.findAll();
 
-        // Фильтруем доступные диеты, оставляя только те, где нет аллергенов
+        // Фильтрация диет: исключаем аллергенные и оставляем только подходящие по цели
         List<DietDayAdmin> filteredDietDays = availableDietDays.stream()
                 .filter(dietDay -> !hasAllergenMeals(dietDay, user))
+                .filter(dietDay -> isDietSuitable(dietDay, user))
                 .collect(Collectors.toList());
 
-        // Если после фильтрации список пустой, значит нет подходящей диеты
         if (filteredDietDays.isEmpty()) {
-            throw new IllegalStateException("Нет доступных диет без аллергенов для пользователя " + user.getId());
+            throw new IllegalStateException("Нет доступных диет для пользователя " + user.getId());
         }
 
-        int currentlyGeneratedDays = 0;
-        while (currentlyGeneratedDays < generatedDaysAmount) {
-            for (DietDayAdmin dietDay : filteredDietDays) {
-                Double dailyCalories = calculateDailyCalories(user, weight);
-                Double rate = dailyCalories / dietDay.getCalories();
-                LocalDate dietDate = LocalDate.now(clock).plusDays(currentlyGeneratedDays);
-
-                dietDayUserRepository.save(new DietDayUser(user, dietDay, rate, dietDate));
-                currentlyGeneratedDays++;
-
-                if (currentlyGeneratedDays == generatedDaysAmount) {
-                    break;
-                }
-            }
-        }
+        generateDiet(user, weight, filteredDietDays);
     }
 
-
+    @Transactional
     public void rewriteDiet(User user, Double weight) {
-        // Удаляем все будущие и текущие DietDayUser для пользователя
+        // Удаляем будущие и текущие DietDayUser для пользователя
         dietDayUserRepository.deleteAllByUserAndDayDateGreaterThanEqual(user, LocalDate.now(clock));
 
         List<DietDayAdmin> availableDietDays = dietDayAdminRepository.findAll();
 
-        // Фильтруем доступные диеты, исключая те, где есть аллергены
+        // Фильтрация доступных диет
         List<DietDayAdmin> filteredDietDays = availableDietDays.stream()
                 .filter(dietDay -> !hasAllergenMeals(dietDay, user))
+                .filter(dietDay -> isDietSuitable(dietDay, user))
                 .collect(Collectors.toList());
 
-        // Если нет подходящих диет, выбрасываем исключение
         if (filteredDietDays.isEmpty()) {
-            throw new IllegalStateException("Нет доступных диет без аллергенов для пользователя " + user.getId());
+            throw new IllegalStateException("Нет доступных диет для пользователя " + user.getId());
         }
 
+        generateDiet(user, weight, filteredDietDays);
+    }
+
+    private void generateDiet(User user, Double weight, List<DietDayAdmin> dietDays) {
         int currentlyGeneratedDays = 0;
+        Collections.shuffle(dietDays);
         while (currentlyGeneratedDays < generatedDaysAmount) {
-            for (DietDayAdmin dietDay : filteredDietDays) {
+            for (DietDayAdmin dietDay : dietDays) {
                 Double dailyCalories = calculateDailyCalories(user, weight);
                 Double rate = dailyCalories / dietDay.getCalories();
                 LocalDate dietDate = LocalDate.now(clock).plusDays(currentlyGeneratedDays);
 
-                // Создаём новый `DietDayUser`
                 dietDayUserRepository.save(new DietDayUser(user, dietDay, rate, dietDate));
                 currentlyGeneratedDays++;
 
-                // Если уже сгенерировали нужное количество дней — выходим из цикла
                 if (currentlyGeneratedDays == generatedDaysAmount) {
                     break;
                 }
             }
         }
     }
-
-
 
     private boolean hasAllergenMeals(DietDayAdmin dietDay, User user) {
         Set<MealDietDayAdmin> mealDietDayAdmins = mealDietDayAdminRepository.findMealDietDayAdminsByDietDayAdmin(dietDay);
@@ -113,6 +102,27 @@ public class DietGenerator {
         return user.getAllergies().stream()
                 .anyMatch(allergy -> meal.getAllergies().contains(allergy));
     }
+
+    private boolean isDietSuitable(DietDayAdmin dietDay, User user) {
+        DietPreference preference = user.getDietPreference();
+
+        if (preference == DietPreference.VEGAN) {
+            return dietDay.getDietType() == DietType.VEGAN;
+        } else if (preference == DietPreference.VEGETARIAN) {
+            return dietDay.getDietType() == DietType.VEGETARIAN || dietDay.getDietType() == DietType.VEGAN;
+        }
+
+        if (user.getGoal() == Goal.MUSCLE_GAIN) {
+            return dietDay.getDietType() == DietType.HIGH_PROTEIN;
+        }
+
+        if (user.getGoal() == Goal.WEIGHT_LOSS) {
+            return dietDay.getDietType() == DietType.LOW_CARB;
+        }
+
+        return true;
+    }
+
 
     private Double calculateDailyCalories(User user, Double weight) {
         int age = Period.between(user.getBirthDate(), LocalDate.now(clock)).getYears();

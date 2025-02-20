@@ -464,4 +464,32 @@ public class FormService {
                 averageMealsPerDay
         );
     }
+
+    @Transactional
+    public boolean regenerateTodayDiet(String token) {
+        String login = jwtService.extractUsername(token);
+        User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
+
+        try {
+            dietGenerator.rewriteDiet(user, weightJournalRepository.findTopByUserOrderByIdDesc(user).getWeight());
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Transactional
+    public boolean regenerateTodayTraining(String token) {
+        String login = jwtService.extractUsername(token);
+        User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
+
+        try {
+            trainingGenerator.regenerateTodayTraining(user);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

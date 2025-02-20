@@ -14,7 +14,8 @@ CREATE TABLE IF NOT EXISTS users (
                                      activity_level INT CHECK (activity_level BETWEEN 1 AND 5),
                                      available_days INT CHECK (available_days BETWEEN 1 AND 7),
                                      role VARCHAR NOT NULL,
-				     start_training DATE
+				     start_training DATE,
+				     diet_preference VARCHAR(20) NOT NULL DEFAULT 'OMNIVORE'
 );
 
 -- Таблица журнала веса
@@ -92,6 +93,7 @@ CREATE TABLE IF NOT EXISTS meals (
                                      fats REAL CHECK (fats BETWEEN 0 AND 100),
                                      carbs REAL CHECK (carbs BETWEEN 0 AND 100)
 );
+
 -- Таблица аллергий
 CREATE TABLE IF NOT EXISTS allergies (
                                          allergy_id SERIAL PRIMARY KEY,
@@ -119,8 +121,9 @@ CREATE TABLE IF NOT EXISTS diet_day_admin (
                                               created_by INT REFERENCES users(user_id) ON DELETE CASCADE,
                                               when_created DATE DEFAULT CURRENT_DATE,
                                               calories REAL NOT NULL CHECK (calories BETWEEN 0 AND 5000),
-                                              name VARCHAR(50) NOT NULL
-    );
+                                              name VARCHAR(50) NOT NULL,
+					      diet_type VARCHAR(20) NOT NULL DEFAULT 'OMNIVORE'
+);
 -- Таблица блюд для диетических дней админа
 CREATE TABLE IF NOT EXISTS meal_diet_day_admin (
                                                    meal_diet_day_admin_id SERIAL PRIMARY KEY,

@@ -35,6 +35,11 @@ public class DietDayAdmin {
     @Column(name = "name", nullable = false)
     private String name;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "diet_type", nullable = false)
+    private DietType dietType;
+
+
     public DietDayAdmin(User user, String name, LocalDate whenCreated){
         this.createdBy = user;
         this.name = name;

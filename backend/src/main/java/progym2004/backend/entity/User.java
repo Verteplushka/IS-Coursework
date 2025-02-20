@@ -92,6 +92,10 @@ public class User implements UserDetails {
     )
     private Set<Achievement> achievements;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "diet_preference", nullable = false)
+    private DietPreference dietPreference = DietPreference.OMNIVORE;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));

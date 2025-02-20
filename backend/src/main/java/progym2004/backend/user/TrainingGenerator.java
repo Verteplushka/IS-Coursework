@@ -2,6 +2,7 @@ package progym2004.backend.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import progym2004.backend.entity.*;
 import progym2004.backend.repository.ExerciseRepository;
 import progym2004.backend.repository.ExerciseTrainingDayRepository;
@@ -27,6 +28,7 @@ public class TrainingGenerator {
         this.exerciseTrainingDayRepository = exerciseTrainingDayRepository;
     }
 
+    @Transactional
     public void regenerateTrainingProgram(User user, LocalDate trainingStartDate) {
         int availableDaysPerWeek = user.getAvailableDays();
         LocalDate startDate = trainingStartDate;
@@ -75,6 +77,30 @@ public class TrainingGenerator {
             startDate = startDate.plusDays(1);
         }
     }
+
+    @Transactional
+    public void regenerateTodayTraining(User user) {
+        LocalDate today = LocalDate.now(clock);
+
+        // Удаляем тренировку за сегодняшний день
+        trainingDayRepository.deleteByUserAndTrainingDate(user, today);
+
+        int exercisesPerTraining = calculateExercisesPerTraining(user.getFitnessLevel(), user.getAvailableDays());
+
+        // Получаем список всех мышечных групп
+        List<MuscleGroup> allMuscleGroups = Arrays.stream(MuscleGroup.values())
+                .filter(mg -> mg != MuscleGroup.CARDIO)
+                .toList();
+
+        // Выбираем случайные мышечные группы для сегодняшней тренировки
+        Collections.shuffle(allMuscleGroups);
+        List<MuscleGroup> selectedMuscleGroups = allMuscleGroups.subList(0, Math.min(2, allMuscleGroups.size()));
+
+        // Создаем новую тренировку
+        TrainingDay trainingDay = generateTrainingDay(user, today, exercisesPerTraining, selectedMuscleGroups);
+        trainingDayRepository.save(trainingDay);
+    }
+
 
     private List<Integer> calculateTrainingDaysOfWeek(int availableDaysPerWeek, LocalDate trainingStartDate) {
         List<Integer> trainingDaysOfWeek = new ArrayList<>();

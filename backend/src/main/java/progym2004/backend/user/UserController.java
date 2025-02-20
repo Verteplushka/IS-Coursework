@@ -27,13 +27,16 @@ public class UserController {
     }
 
     @PostMapping("/complete_training")
-    public ResponseEntity<Void> completeTraining(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<String> completeTraining(@RequestHeader("Authorization") String token) {
         String jwtToken = token.substring(7);
-        if (formService.completeTraining(jwtToken)) {
-            return ResponseEntity.ok().build();
+        boolean success = formService.completeTraining(jwtToken);
+
+        if (success) {
+            return ResponseEntity.ok("Training has been successfully completed.");
         }
-        return ResponseEntity.status(400).build();
+        return ResponseEntity.badRequest().body("Failed to complete the training.");
     }
+
 
     @GetMapping("/get_today_diet")
     public ResponseEntity<DietResponse> getDiet(@RequestHeader("Authorization") String token) {
@@ -82,4 +85,26 @@ public class UserController {
         String jwtToken = token.substring(7);
         return ResponseEntity.ok(formService.getDietStatistics(jwtToken));
     }
+    @GetMapping("/regenerate_today_diet")
+    public ResponseEntity<String> regenerateTodayDiet(@RequestHeader("Authorization") String token) {
+        String jwtToken = token.substring(7);
+        boolean success = formService.regenerateTodayDiet(jwtToken);
+
+        if (success) {
+            return ResponseEntity.ok("Today's diet has been successfully regenerated.");
+        }
+        return ResponseEntity.badRequest().body("Failed to regenerate today's diet.");
+    }
+
+    @GetMapping("/regenerate_today_training")
+    public ResponseEntity<String> regenerateTodayTraining(@RequestHeader("Authorization") String token) {
+        String jwtToken = token.substring(7);
+        boolean success = formService.regenerateTodayTraining(jwtToken);
+
+        if (success) {
+            return ResponseEntity.ok("Today's training has been successfully regenerated.");
+        }
+        return ResponseEntity.badRequest().body("Failed to regenerate today's training.");
+    }
+
 }
