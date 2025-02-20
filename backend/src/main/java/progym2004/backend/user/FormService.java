@@ -152,6 +152,19 @@ public class FormService {
         return true;
     }
 
+    public boolean uncompleteTraining(String token) {
+        String login = jwtService.extractUsername(token);
+        User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
+
+        TrainingDay trainingDay = trainingDayRepository.findTrainingDayByUserAndTrainingDate(user, LocalDate.now(clock));
+        if (trainingDay == null) {
+            return false;
+        }
+        trainingDay.setIsCompleted(false);
+        trainingDayRepository.save(trainingDay);
+        return true;
+    }
+
     public DietResponse getTodayDiet(String token) {
         String login = jwtService.extractUsername(token);
         User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
