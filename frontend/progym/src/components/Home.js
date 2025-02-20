@@ -10,14 +10,78 @@ import {
   Divider,
   Grid,
   Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from "@mui/material";
 import Header from "./Header";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const HomePage = () => {
   const [diet, setDiet] = useState(null);
   const [training, setTraining] = useState(null);
   const [isTrainingCompleted, setIsTrainingCompleted] = useState(false); // Состояние для отслеживания завершенности тренировки
+  const [isEndingSoon, setIsEndingSoon] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
   const token = localStorage.getItem("access_token");
+  const navigate = useNavigate();
+  const [userParams, setUserParams] = useState(null);
+  useEffect(() => {
+    if (!token) return;
+
+    fetch("http://localhost:8080/api/user/get_user_params", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Полученные данные пользователя:", data); // Лог для отладки
+        setUserParams(data); // Сохраняем параметры пользователя в состояние
+        setIsEndingSoon(data.endingSoon);
+        if (data.endingSoon) {
+          console.log("Тренировойный план все, нужно предложить новый: ",data.endingSoon); // Лог для отладки
+          setOpenDialog(true);
+        }
+      })
+      .catch(console.error);
+  }, [token]);
+
+  const handleContinue = async () => {
+    try {
+      const dayResponse = await axios.get("http://localhost:8080/api/general/get_day", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+  
+      if (userParams) {
+        const updatedParams = { ...userParams, startTraining: dayResponse.data };
+  
+        await axios.post("http://localhost:8080/api/user/sendForm", updatedParams, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+  
+        // После успешного обновления данных пользователя запрашиваем актуальные тренировки и рацион
+        await Promise.all([
+          axios.get("http://localhost:8080/api/user/get_today_training", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axios.get("http://localhost:8080/api/user/get_today_diet", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
+      }
+  
+      setOpenDialog(false);
+    } catch (error) {
+      console.error("Ошибка при обновлении данных пользователя:", error);
+    }
+  };
+  
+
+  const handleUpdate = () => {
+    navigate("/userform");
+  };
 
   // Функция для обновления диеты
   const regenerateDiet = () => {
@@ -123,6 +187,23 @@ const HomePage = () => {
       <Header />
       <Container maxWidth="md" sx={{ mt: 4 }}>
         <Grid container spacing={10}>
+          {/* Всплывающее окно */}
+          <Dialog open={openDialog} onClose={handleContinue}>
+            <DialogTitle>Обновление данных</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                Ваши тренировки скоро закончатся, а может и уже закончились. Хотите продолжить с текущими данными или обновить информацию?
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleContinue} color="primary">
+                Продолжить
+              </Button>
+              <Button onClick={handleUpdate} color="secondary">
+                Обновить
+              </Button>
+            </DialogActions>
+          </Dialog>
           {/* Блок с тренировкой */}
           <Grid item xs={12} md={6}>
             <Card sx={{ p: 2 }}>
