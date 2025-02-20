@@ -45,8 +45,8 @@ const Header = ({ userName }) => {
     navigate("/userform");
   };
 
-  const handleTrainingHistoryClick = () => {
-    navigate("/training-history");
+  const handleHistoryClick = () => {
+    navigate("/history");
   };
 
   return (
@@ -68,16 +68,17 @@ const Header = ({ userName }) => {
           alignItems="center"
           flexGrow={1}
           justifyContent="center"
+          sx={{ gap: 10 }} // Это задает равномерные промежутки между элементами
         >
           <IconButton color="inherit" onClick={handleUserFormClick}>
-            <Typography variant="body1" color="inherit" sx={{ mr: 2 }}>
-              Форма пользователя
+            <Typography variant="body1" color="inherit">
+              Изменить данные
             </Typography>
           </IconButton>
 
-          <IconButton color="inherit" onClick={handleTrainingHistoryClick}>
-            <Typography variant="body1" color="inherit" sx={{ mr: 2 }}>
-              История тренировок
+          <IconButton color="inherit" onClick={handleHistoryClick}>
+            <Typography variant="body1" color="inherit">
+              История
             </Typography>
           </IconButton>
         </Box>
