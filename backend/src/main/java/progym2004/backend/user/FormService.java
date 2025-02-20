@@ -358,4 +358,112 @@ public class FormService {
 
         return new DietHistoryResponse(dietResponses);
     }
+
+    public DietStatisticsResponse getDietStatistics(String token) {
+        String login = jwtService.extractUsername(token);
+        User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<DietDayUser> dietDays = dietDayUserRepository.findDietDayUserByUserAndDayDateBefore(user, LocalDate.now(clock));
+
+        long totalDietDays = dietDays.size();
+
+        double totalCalories = dietDays.stream()
+                .flatMap(dietDayUser -> {
+                    double rate = dietDayUser.getRate();
+                    return mealDietDayAdminRepository.findMealDietDayAdminsByDietDayAdmin(dietDayUser.getDietDayAdmin()).stream()
+                            .map(mealDietDayAdmin -> {
+                                MealDto mealDto = MealMapper.toDto(mealDietDayAdmin.getMeal());
+                                Double portion = mealDietDayAdmin.getPortionSize() * rate;
+                                mealDto.setPortionSize(portion);
+
+                                mealDto.setCalories(mealDto.getCalories() * portion);
+                                mealDto.setProtein(mealDto.getProtein() * portion);
+                                mealDto.setFats(mealDto.getFats() * portion);
+                                mealDto.setCarbs(mealDto.getCarbs() * portion);
+
+                                return mealDto.getCalories();
+                            });
+                })
+                .mapToDouble(Double::doubleValue)
+                .sum();
+
+        double totalProtein = dietDays.stream()
+                .flatMap(dietDayUser -> {
+                    double rate = dietDayUser.getRate();
+                    return mealDietDayAdminRepository.findMealDietDayAdminsByDietDayAdmin(dietDayUser.getDietDayAdmin()).stream()
+                            .map(mealDietDayAdmin -> {
+                                MealDto mealDto = MealMapper.toDto(mealDietDayAdmin.getMeal());
+                                Double portion = mealDietDayAdmin.getPortionSize() * rate;
+                                mealDto.setPortionSize(portion);
+
+                                mealDto.setCalories(mealDto.getCalories() * portion);
+                                mealDto.setProtein(mealDto.getProtein() * portion);
+                                mealDto.setFats(mealDto.getFats() * portion);
+                                mealDto.setCarbs(mealDto.getCarbs() * portion);
+
+                                return mealDto.getProtein();
+                            });
+                })
+                .mapToDouble(Double::doubleValue)
+                .sum();
+
+        double totalFats = dietDays.stream()
+                .flatMap(dietDayUser -> {
+                    double rate = dietDayUser.getRate();
+                    return mealDietDayAdminRepository.findMealDietDayAdminsByDietDayAdmin(dietDayUser.getDietDayAdmin()).stream()
+                            .map(mealDietDayAdmin -> {
+                                MealDto mealDto = MealMapper.toDto(mealDietDayAdmin.getMeal());
+                                Double portion = mealDietDayAdmin.getPortionSize() * rate;
+                                mealDto.setPortionSize(portion);
+
+                                mealDto.setCalories(mealDto.getCalories() * portion);
+                                mealDto.setProtein(mealDto.getProtein() * portion);
+                                mealDto.setFats(mealDto.getFats() * portion);
+                                mealDto.setCarbs(mealDto.getCarbs() * portion);
+
+                                return mealDto.getFats();
+                            });
+                })
+                .mapToDouble(Double::doubleValue)
+                .sum();
+
+        double totalCarbs = dietDays.stream()
+                .flatMap(dietDayUser -> {
+                    double rate = dietDayUser.getRate();
+                    return mealDietDayAdminRepository.findMealDietDayAdminsByDietDayAdmin(dietDayUser.getDietDayAdmin()).stream()
+                            .map(mealDietDayAdmin -> {
+                                MealDto mealDto = MealMapper.toDto(mealDietDayAdmin.getMeal());
+                                Double portion = mealDietDayAdmin.getPortionSize() * rate;
+                                mealDto.setPortionSize(portion);
+
+                                mealDto.setCalories(mealDto.getCalories() * portion);
+                                mealDto.setProtein(mealDto.getProtein() * portion);
+                                mealDto.setFats(mealDto.getFats() * portion);
+                                mealDto.setCarbs(mealDto.getCarbs() * portion);
+
+                                return mealDto.getCarbs();
+                            });
+                })
+                .mapToDouble(Double::doubleValue)
+                .sum();
+
+        double averageCaloriesPerDay = totalDietDays > 0 ? totalCalories / totalDietDays : 0;
+
+        double averageMealsPerDay = dietDays.stream()
+                .mapToInt(dietDayUser -> mealDietDayAdminRepository.findMealDietDayAdminsByDietDayAdmin(dietDayUser.getDietDayAdmin()).size())
+                .average()
+                .orElse(0);
+
+        return new DietStatisticsResponse(
+                totalDietDays,
+                totalCalories,
+                totalProtein,
+                totalFats,
+                totalCarbs,
+                averageCaloriesPerDay,
+                averageMealsPerDay
+        );
+    }
+
+
 }

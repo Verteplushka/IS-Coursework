@@ -76,4 +76,10 @@ public class UserController {
         String jwtToken = token.substring(7);
         return ResponseEntity.ok(formService.getDietHistory(jwtToken));
     }
+
+    @GetMapping("/get_diet_statistics")
+    public ResponseEntity<DietStatisticsResponse> getDietStatistics(@RequestHeader("Authorization") String token) {
+        String jwtToken = token.substring(7);
+        return ResponseEntity.ok(formService.getDietStatistics(jwtToken));
+    }
 }
