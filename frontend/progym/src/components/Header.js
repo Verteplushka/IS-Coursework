@@ -1,6 +1,14 @@
-// src/components/Header.js
 import React, { useState } from "react";
-import { AppBar, Toolbar, Typography, IconButton, Menu, MenuItem, Avatar, Box } from "@mui/material";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  IconButton,
+  Menu,
+  MenuItem,
+  Avatar,
+  Box,
+} from "@mui/material";
 import { AccountCircle, ExitToApp, Home } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 
@@ -33,18 +41,46 @@ const Header = ({ userName }) => {
     navigate("/home"); // Переход на домашнюю страницу (или другую вкладку)
   };
 
+  const handleUserFormClick = () => {
+    navigate("/userform");
+  };
+
+  const handleTrainingHistoryClick = () => {
+    navigate("/training-history");
+  };
+
   return (
     <AppBar position="sticky">
-      <Toolbar>
-        <Box display="flex" alignItems="center" flexGrow={1}>
+      <Toolbar sx={{ paddingRight: 0 }}>
+        {" "}
+        {/* Убираем лишний отступ справа */}
+        <Box display="flex" alignItems="center">
           <IconButton color="inherit" onClick={handleHomeClick}>
             <Home />
           </IconButton>
-          <Typography variant="h6" noWrap>
+          <Typography variant="h6" noWrap sx={{ flexGrow: 1 }}>
             ProGym2004
           </Typography>
         </Box>
+        {/* Меню навигации: ссылки по центру */}
+        <Box
+          display="flex"
+          alignItems="center"
+          flexGrow={1}
+          justifyContent="center"
+        >
+          <IconButton color="inherit" onClick={handleUserFormClick}>
+            <Typography variant="body1" color="inherit" sx={{ mr: 2 }}>
+              Форма пользователя
+            </Typography>
+          </IconButton>
 
+          <IconButton color="inherit" onClick={handleTrainingHistoryClick}>
+            <Typography variant="body1" color="inherit" sx={{ mr: 2 }}>
+              История тренировок
+            </Typography>
+          </IconButton>
+        </Box>
         {/* Имя пользователя и иконки */}
         <Box display="flex" alignItems="center">
           <Typography variant="body1" color="inherit" sx={{ mr: 2 }}>
