@@ -1,13 +1,36 @@
 import React, { useEffect, useState } from "react";
-import { Container, Typography, Card, CardContent, List, ListItem, Divider, Box } from "@mui/material";
-import { LocalizationProvider, PickersDay, StaticDatePicker } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import dayjs from "dayjs";
-import Header from "./Header";
 
-const TrainingCalendar = () => {
+import {
+  Container,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from "@mui/material";
+import dayjs from "dayjs";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import isoWeek from "dayjs/plugin/isoWeek";
+
+import Header from "./Header"; // Импортируем компонент Header
+
+dayjs.extend(isoWeek);
+dayjs.extend(isSameOrBefore);
+dayjs.extend(isSameOrAfter);
+
+const TrainingSchedule = () => {
   const [trainings, setTrainings] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(dayjs());
+  const [currentWeekStart, setCurrentWeekStart] = useState(null);
+  const [selectedTraining, setSelectedTraining] = useState(null);
   const token = localStorage.getItem("access_token");
 
   useEffect(() => {
@@ -18,95 +41,95 @@ const TrainingCalendar = () => {
     })
       .then((res) => res.json())
       .then((data) => {
-        if (Array.isArray(data.trainings)) {
-          setTrainings(data.trainings);
+        const sortedTrainings = (data.trainings || []).sort((a, b) =>
+          dayjs(a.trainingDate).diff(dayjs(b.trainingDate))
+        );
+        setTrainings(sortedTrainings);
+        if (sortedTrainings.length > 0) {
+          setCurrentWeekStart(dayjs(sortedTrainings[0].trainingDate).startOf("isoWeek"));
         }
       })
       .catch(console.error);
   }, [token]);
 
-  const selectedTraining = trainings.find((t) => 
-    dayjs(t.trainingDate, "YYYY-MM-DD").isSame(selectedDate, "day")
-  );
+  const nextWeek = () => setCurrentWeekStart(currentWeekStart.add(1, "week"));
+  const prevWeek = () => setCurrentWeekStart(currentWeekStart.subtract(1, "week"));
+
+  const renderTable = () => {
+    if (!currentWeekStart || trainings.length === 0) return null;
+
+    const weekDays = Array.from({ length: 7 }, (_, i) => currentWeekStart.add(i, "day"));
+    
+    return (
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              {weekDays.map((day) => (
+                <TableCell key={day.format("YYYY-MM-DD")} align="center">
+                  {day.format("DD.MM ddd")}
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            <TableRow>
+              {weekDays.map((day) => {
+                const training = trainings.find((t) => dayjs(t.trainingDate).isSame(day, "day"));
+                const isFirst = training && dayjs(training.trainingDate).isSame(trainings[0].trainingDate, "day");
+                const isLast = training && dayjs(training.trainingDate).isSame(trainings[trainings.length - 1].trainingDate, "day");
+                return (
+                  <TableCell key={day.format("YYYY-MM-DD")} align="center" sx={{
+                    backgroundColor: training ? (isFirst ? "#a5d6a7" : isLast ? "#ef9a9a" : "#ffecb3") : "inherit",
+                    cursor: training ? "pointer" : "default",
+                  }}
+                    onClick={() => training && setSelectedTraining(training)}
+                  >
+                    {training ? "Тренировка" : "Нет тренировки"}
+                  </TableCell>
+                );
+              })}
+            </TableRow>
+          </TableBody>
+        </Table>
+      </TableContainer>
+    );
+  };
 
   return (
     <>
-      <Header />
+      <Header /> {/* Добавили Header в начало страницы */}
       <Container maxWidth="md" sx={{ mt: 4 }}>
         <Typography variant="h4" gutterBottom>
-          Календарь тренировок
+          Расписание тренировок
         </Typography>
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <StaticDatePicker
-            displayStaticWrapperAs="desktop"
-            value={selectedDate}
-            onChange={(newDate) => setSelectedDate(newDate)}
-            renderDay={(day, _selectedDays, pickersDayProps) => {
-              const isTrainingDay = trainings.some((t) =>
-                dayjs(t.trainingDate, "YYYY-MM-DD").isSame(day, "day")
-              );
-              const isSelected = day.isSame(selectedDate, "day");
+        {renderTable()}
+        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 16 }}>
+          <Button onClick={prevWeek} disabled={!currentWeekStart || dayjs(currentWeekStart).isSameOrBefore(dayjs(trainings[0]?.trainingDate), "week")}>Предыдущая неделя</Button>
+          <Button onClick={nextWeek} disabled={!currentWeekStart || dayjs(currentWeekStart).isSameOrAfter(dayjs(trainings[trainings.length - 1]?.trainingDate), "week")}>Следующая неделя</Button>
+        </div>
 
-              return (
-                <PickersDay
-                  {...pickersDayProps}
-                  sx={{
-                    backgroundColor: isSelected
-                      ? "#1976d2"
-                      : isTrainingDay
-                      ? "#ffecb3"
-                      : "inherit",
-                    borderRadius: "50%",
-                    position: "relative",
-                  }}
-                >
-                  {isTrainingDay && !isSelected && (
-                    <Box
-                      sx={{
-                        width: 6,
-                        height: 6,
-                        borderRadius: "50%",
-                        backgroundColor: "#ff9800",
-                        position: "absolute",
-                        bottom: 4,
-                        left: "50%",
-                        transform: "translateX(-50%)",
-                      }}
-                    />
-                  )}
-                </PickersDay>
-              );
-            }}
-          />
-        </LocalizationProvider>
-
-        <Card sx={{ mt: 2, p: 2 }}>
-          <CardContent>
-            <Typography variant="h5" gutterBottom>
-              Детали тренировки на {selectedDate.format("DD.MM.YYYY")}
-            </Typography>
-            {selectedTraining ? (
-              <List>
-                {selectedTraining.exercises.map((exercise, index) => (
-                  <ListItem key={index} sx={{ display: "flex", flexDirection: "column", alignItems: "start" }}>
-                    <Typography variant="body1" sx={{ fontWeight: "bold" }}>{exercise.name}</Typography>
-                    <Typography variant="body2">Группа мышц: {exercise.muscleGroup}</Typography>
-                    <Typography variant="body2">Описание: {exercise.description}</Typography>
-                    <Typography variant="body2">
-                      Подходы: {exercise.sets || "не указано"}, Повторения: {exercise.repetitions || "не указано"}
-                    </Typography>
-                    <Divider sx={{ my: 1, width: "100%" }} />
-                  </ListItem>
+        {/* Модальное окно с деталями тренировки */}
+        <Dialog open={!!selectedTraining} onClose={() => setSelectedTraining(null)}>
+          <DialogTitle>Детали тренировки</DialogTitle>
+          <DialogContent>
+            {selectedTraining && (
+              <>
+                <Typography>Дата: {dayjs(selectedTraining.trainingDate).format("DD.MM.YYYY")}</Typography>
+                <Typography variant="h6" sx={{ mt: 2 }}>Упражнения:</Typography>
+                {selectedTraining.exercises.map((ex, index) => (
+                  <Typography key={index}>{ex.name} ({ex.muscleGroup})</Typography>
                 ))}
-              </List>
-            ) : (
-              <Typography sx={{ fontStyle: "italic", color: "gray" }}>Нет тренировки в этот день</Typography>
+              </>
             )}
-          </CardContent>
-        </Card>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setSelectedTraining(null)}>Закрыть</Button>
+          </DialogActions>
+        </Dialog>
       </Container>
     </>
   );
 };
 
-export default TrainingCalendar;
+export default TrainingSchedule;
