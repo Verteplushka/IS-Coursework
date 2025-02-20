@@ -156,7 +156,9 @@ const UserForm = () => {
     // Проверка даты начала тренировок
     const startTrainingObj = new Date(startTraining);
     const twoWeeksFromNow = new Date();
-    twoWeeksFromNow.setDate(currentDate.getDate() + 14);
+    twoWeeksFromNow.setDate(currentDate.getDate() + 7);
+    startTrainingObj.setHours(0, 0, 0, 0);
+    currentDate.setHours(0, 0, 0, 0);
 
     if (!startTraining) {
       errors.startTraining = "Пожалуйста, укажите дату начала тренировок.";
