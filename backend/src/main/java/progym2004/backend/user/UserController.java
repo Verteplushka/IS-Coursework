@@ -70,4 +70,10 @@ public class UserController {
         String jwtToken = token.substring(7);
         return ResponseEntity.ok(formService.getTrainingStatistics(jwtToken));
     }
+
+    @GetMapping("/get_diet_history")
+    public ResponseEntity<DietHistoryResponse> getDietHistory(@RequestHeader("Authorization") String token) {
+        String jwtToken = token.substring(7);
+        return ResponseEntity.ok(formService.getDietHistory(jwtToken));
+    }
 }

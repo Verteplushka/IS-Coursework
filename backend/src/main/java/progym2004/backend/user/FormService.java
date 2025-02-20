@@ -1,7 +1,6 @@
 package progym2004.backend.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import progym2004.backend.config.JwtService;
@@ -316,4 +315,47 @@ public class FormService {
         );
     }
 
+    public DietHistoryResponse getDietHistory(String token) {
+        String login = jwtService.extractUsername(token);
+        User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<DietDayUser> dietDays = dietDayUserRepository.findDietDayUserByUserAndDayDateBefore(user, LocalDate.now(clock));
+
+        List<DietResponse> dietResponses = dietDays.stream().map(dietDayUser -> {
+            // Для каждого дня получаем все приемы пищи
+            List<MealDto> meals = mealDietDayAdminRepository.findMealDietDayAdminsByDietDayAdmin(dietDayUser.getDietDayAdmin())
+                    .stream()
+                    .map(mealDietDayAdmin -> {
+                        MealDto mealDto = MealMapper.toDto(mealDietDayAdmin.getMeal());
+                        Double portion = mealDietDayAdmin.getPortionSize() * dietDayUser.getRate();
+                        mealDto.setPortionSize(portion);
+
+                        mealDto.setCalories(mealDto.getCalories() * portion);
+                        mealDto.setProtein(mealDto.getProtein() * portion);
+                        mealDto.setFats(mealDto.getFats() * portion);
+                        mealDto.setCarbs(mealDto.getCarbs() * portion);
+
+                        return mealDto;
+                    })
+                    .toList();
+
+            // Рассчитываем общее количество калорий, белков, жиров и углеводов для этого дня
+            Double totalCalories = meals.stream().mapToDouble(MealDto::getCalories).sum();
+            Double totalProtein = meals.stream().mapToDouble(MealDto::getProtein).sum();
+            Double totalFats = meals.stream().mapToDouble(MealDto::getFats).sum();
+            Double totalCarbs = meals.stream().mapToDouble(MealDto::getCarbs).sum();
+
+            // Создаем DietResponse для этого дня
+            return new DietResponse(
+                    dietDayUser.getDietDayAdmin().getName(),
+                    meals,
+                    totalCalories,
+                    totalProtein,
+                    totalFats,
+                    totalCarbs
+            );
+        }).toList();
+
+        return new DietHistoryResponse(dietResponses);
+    }
 }

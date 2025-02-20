@@ -19,7 +19,7 @@ public class DietGenerator {
     private final MealDietDayAdminRepository mealDietDayAdminRepository;
     private final DietDayUserRepository dietDayUserRepository;
     private final WeightJournalRepository weightJournalRepository;
-    private final int generatedDaysAmount = 2;
+    private final int generatedDaysAmount = 30;
 
     @Autowired
     public DietGenerator(Clock clock, DietDayAdminRepository dietDayAdminRepository,
