@@ -85,7 +85,7 @@ const HomePage = () => {
 
   return (
     <>
-      <Header userName="Иван" />
+      <Header />
       <Container maxWidth="md" sx={{ mt: 4 }}>
         <Grid container spacing={3}>
           {/* Блок с тренировкой */}
