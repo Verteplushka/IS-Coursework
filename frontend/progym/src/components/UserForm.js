@@ -247,7 +247,7 @@ const UserForm = () => {
 
   return (
     <>
-      <Header userName="Иван" />
+      <Header/>
 
       <Container
         maxWidth="md"
