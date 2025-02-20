@@ -62,7 +62,7 @@ public class FormService {
                 .map(Allergy::getId)
                 .collect(Collectors.toSet());
         LocalDate lastTrainingDate = trainingDayRepository.findTopByUserOrderByTrainingDateDesc(user).getTrainingDate();
-        boolean isEndingSoon = lastTrainingDate.equals(LocalDate.now(clock));
+        boolean isEndingSoon = lastTrainingDate.isBefore(LocalDate.now(clock)) || lastTrainingDate.equals(LocalDate.now(clock));
 
         return new UserParamsResponse(user.getBirthDate(), user.getGender(), user.getHeight(), weight, user.getGoal(), user.getFitnessLevel(), user.getActivityLevel(), user.getAvailableDays(), allergyIds, user.getStartTraining(), user.getDietPreference(), isEndingSoon);
     }
