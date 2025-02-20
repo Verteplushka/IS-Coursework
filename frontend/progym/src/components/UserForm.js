@@ -1,8 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { Container, TextField, Button, Typography, Box, FormControl, InputLabel, Select, MenuItem, Checkbox, FormGroup, FormControlLabel } from "@mui/material";
+import {
+  Container,
+  TextField,
+  Button,
+  Typography,
+  Box,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Checkbox,
+  FormGroup,
+  FormControlLabel,
+} from "@mui/material";
 import axios from "axios";
 import Header from "./Header"; // Импортируем шапку
-
 
 const UserForm = () => {
   const [formData, setFormData] = useState({
@@ -16,11 +28,21 @@ const UserForm = () => {
     availableDays: "",
     allergies: [],
     startTraining: "",
+    isVegan: false,
+    isVegetarian: false,
   });
   const [allergies, setAllergies] = useState([]);
   const [selectedAllergies, setSelectedAllergies] = useState([]);
-  const [error, setError] = useState("");
-  const [validationErrors, setValidationErrors] = useState([]);
+  const [validationErrors, setValidationErrors] = useState({
+    birthDate: "",
+    height: "",
+    currentWeight: "",
+    goal: "",
+    fitnessLevel: "",
+    activityLevel: "",
+    availableDays: "",
+    startTraining: "",
+  });
 
   useEffect(() => {
     const token = localStorage.getItem("access_token");
@@ -32,13 +54,16 @@ const UserForm = () => {
           },
         })
         .then((response) => {
-          setAllergies(Object.entries(response.data.allergies).map(([id, name]) => ({ id, name })));
+          setAllergies(
+            Object.entries(response.data.allergies).map(([id, name]) => ({
+              id,
+              name,
+            }))
+          );
         })
         .catch((err) => {
-          setError("Не удалось загрузить аллергии.");
+          console.error("Не удалось загрузить аллергии.", err);
         });
-    } else {
-      setError("Токен отсутствует.");
     }
   }, []);
 
@@ -47,6 +72,14 @@ const UserForm = () => {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
+    }));
+  };
+
+  const handleCheckboxChange = (e) => {
+    const { name, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: checked,
     }));
   };
 
@@ -60,7 +93,6 @@ const UserForm = () => {
   const handleSubmit = () => {
     const {
       birthDate,
-      gender,
       height,
       currentWeight,
       goal,
@@ -70,7 +102,7 @@ const UserForm = () => {
       startTraining,
     } = formData;
 
-    let errors = [];
+    let errors = {};
 
     // Проверка даты рождения
     const birthDateObj = new Date(birthDate);
@@ -78,32 +110,45 @@ const UserForm = () => {
     const minBirthDate = new Date("1900-01-01");
     const maxBirthDate = new Date(currentDate);
     maxBirthDate.setFullYear(currentDate.getFullYear() - 7);
-    
-    if (birthDateObj > maxBirthDate) {
-      errors.push("Дата рождения должна быть более 7 лет назад.");
-    }
 
-    if (birthDateObj < minBirthDate) {
-      errors.push("Дата рождения не может быть раньше 1900-01-01.");
+    if (birthDateObj > maxBirthDate) {
+      errors.birthDate = "Дата рождения должна быть более 7 лет назад.";
+    } else if (birthDateObj < minBirthDate) {
+      errors.birthDate = "Дата рождения не может быть раньше 1900-01-01.";
     }
 
     // Проверка роста
-  const heightValue = parseInt(height);
-  if (!Number.isInteger(heightValue) || heightValue < 100 || heightValue > 250) {
-    errors.push("Рост должен быть целым числом в пределах от 100 до 250 см.");
-  }
+    const heightValue = parseInt(height);
+    if (
+      !Number.isInteger(heightValue) ||
+      heightValue < 100 ||
+      heightValue > 250
+    ) {
+      errors.height =
+        "Рост должен быть целым числом в пределах от 100 до 250 см.";
+    }
 
     // Проверка доступных дней
-  const availableDaysValue = parseInt(availableDays);
-  if (!Number.isInteger(availableDaysValue) || availableDaysValue < 1 || availableDaysValue > 7) {
-    errors.push("Количество доступных дней должно быть целым числом между 1 и 7.");
-  }
+    const availableDaysValue = parseInt(availableDays);
+    if (
+      !Number.isInteger(availableDaysValue) ||
+      availableDaysValue < 1 ||
+      availableDaysValue > 7
+    ) {
+      errors.availableDays =
+        "Количество доступных дней должно быть целым числом между 1 и 7.";
+    }
 
     // Проверка веса
-  const weightValue = parseInt(currentWeight);
-  if (!Number.isInteger(weightValue) || weightValue < 0 || weightValue > 400) {
-    errors.push("Вес должен быть целым числом в пределах от 0 до 400 кг.");
-  }
+    const weightValue = parseInt(currentWeight);
+    if (
+      !Number.isInteger(weightValue) ||
+      weightValue < 0 ||
+      weightValue > 400
+    ) {
+      errors.currentWeight =
+        "Вес должен быть целым числом в пределах от 0 до 400 кг.";
+    }
 
     // Проверка даты начала тренировок
     const startTrainingObj = new Date(startTraining);
@@ -111,24 +156,34 @@ const UserForm = () => {
     twoWeeksFromNow.setDate(currentDate.getDate() + 14);
 
     if (startTrainingObj < currentDate) {
-      errors.push("Дата начала тренировок не может быть в прошлом.");
+      errors.startTraining = "Дата начала тренировок не может быть в прошлом.";
     }
 
     if (startTrainingObj > twoWeeksFromNow) {
-      errors.push("Дата начала тренировок должна быть в пределах ближайших 2 недель.");
+      errors.startTraining =
+        "Дата начала тренировок должна быть в пределах ближайших 2 недель.";
     }
 
-    if (!birthDate || !gender || !height || !currentWeight || !goal || !fitnessLevel || !activityLevel || !availableDays || !startTraining) {
-      errors.push("Пожалуйста, заполните все поля.");
+    // Проверка на обязательность заполнения всех полей
+    if (
+      !birthDate ||
+      !gender ||
+      !height ||
+      !currentWeight ||
+      !goal ||
+      !fitnessLevel ||
+      !activityLevel ||
+      !availableDays ||
+      !startTraining
+    ) {
+      errors.general = "Пожалуйста, заполните все поля.";
     }
 
-    // Если есть ошибки, выводим их, иначе отправляем данные
-    if (errors.length > 0) {
-      setValidationErrors(errors);
-    } else {
-        // Очищаем ошибки перед отправкой
-  setValidationErrors([]);
-  setError("");
+    // Если есть ошибки, отображаем их
+    setValidationErrors(errors);
+
+    // Если ошибок нет, отправляем данные
+    if (Object.keys(errors).length === 0) {
       const requestData = {
         ...formData,
         allergiesIds: selectedAllergies,
@@ -141,183 +196,202 @@ const UserForm = () => {
           },
         })
         .then(() => {
-         console.log("Данные сохранены успешно."); // Добавьте для отладки
+          console.log("Данные сохранены успешно.");
           alert("Данные сохранены успешно.");
         })
         .catch((err) => {
-          setError("Ошибка при сохранении данных.");
+          console.error("Ошибка при сохранении данных.", err);
         });
     }
   };
 
   return (
     <>
-   <Header userName="Иван" /> {/* добавь тут текущее имя */}
-    <Container maxWidth="xs">
-      <Box display="flex" flexDirection="column" alignItems="center" mt={8}>
-        <Typography variant="h4" gutterBottom>
-          Заполните данные
-        </Typography>
-        {error && <Typography color="error">{error}</Typography>}
-        {validationErrors.length > 0 && (
-          <Box mb={2}>
-            <Typography color="error">
-              {validationErrors.map((error, index) => (
-                <div key={index}>{error}</div>
-              ))}
-            </Typography>
-          </Box>
-        )}
-        
-        {/* Поле для даты рождения */}
-        <TextField
-          label="Дата рождения"
-          variant="outlined"
-          fullWidth
-          margin="normal"
-          name="birthDate"
-          type="date"
-          value={formData.birthDate}
-          onChange={handleChange}
-          InputLabelProps={{
-            shrink: true,
-          }}
-        />
+      <Header userName="Иван" />
+      <Container maxWidth="xs">
+        <Box display="flex" flexDirection="column" alignItems="center" mt={8}>
+          <Typography variant="h4" gutterBottom>
+            Заполните данные
+          </Typography>
+          {validationErrors.general && (
+            <Typography color="error">{validationErrors.general}</Typography>
+          )}
 
-        {/* Поле для роста */}
-        <TextField
-          label="Рост (см)"
-          variant="outlined"
-          fullWidth
-          margin="normal"
-          name="height"
-          value={formData.height}
-          onChange={handleChange}
-        />
-        
-        {/* Поле для веса */}
-        <TextField
-          label="Вес (кг)"
-          variant="outlined"
-          fullWidth
-          margin="normal"
-          name="currentWeight"
-          value={formData.currentWeight}
-          onChange={handleChange}
-        />
-        
-        {/* Поле для выбора пола */}
-        <FormControl fullWidth margin="normal">
-          <InputLabel>Пол</InputLabel>
-          <Select
-            name="gender"
-            value={formData.gender}
+          {/* Поле для даты рождения */}
+          <TextField
+            label="Дата рождения"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            name="birthDate"
+            type="date"
+            value={formData.birthDate}
             onChange={handleChange}
-            label="Пол"
-          >
-            <MenuItem value="MALE">Мужской</MenuItem>
-            <MenuItem value="FEMALE">Женский</MenuItem>
-          </Select>
-        </FormControl>
+            InputLabelProps={{ shrink: true }}
+            error={!!validationErrors.birthDate}
+            helperText={validationErrors.birthDate}
+          />
 
-        {/* Поле для выбора цели */}
-        <FormControl fullWidth margin="normal">
-          <InputLabel>Цель</InputLabel>
-          <Select
-            name="goal"
-            value={formData.goal}
+          {/* Поле для роста */}
+          <TextField
+            label="Рост (см)"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            name="height"
+            value={formData.height}
             onChange={handleChange}
-            label="Цель"
-          >
-            <MenuItem value="WEIGHT_LOSS">Похудеть</MenuItem>
-            <MenuItem value="MUSCLE_GAIN">Набрать мышечную массу</MenuItem>
-            <MenuItem value="MAINTENANCE">Поддержание веса</MenuItem>
-          </Select>
-        </FormControl>
+            error={!!validationErrors.height}
+            helperText={validationErrors.height}
+          />
 
-        {/* Поле для уровня подготовки */}
-        <FormControl fullWidth margin="normal">
-          <InputLabel>Уровень подготовки</InputLabel>
-          <Select
-            name="fitnessLevel"
-            value={formData.fitnessLevel}
+          {/* Поле для веса */}
+          <TextField
+            label="Вес (кг)"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            name="currentWeight"
+            value={formData.currentWeight}
             onChange={handleChange}
-            label="Уровень подготовки"
-          >
-            <MenuItem value="1">Низкий</MenuItem>
-            <MenuItem value="2">Средний</MenuItem>
-            <MenuItem value="3">Высокий</MenuItem>
-          </Select>
-        </FormControl>
+            error={!!validationErrors.currentWeight}
+            helperText={validationErrors.currentWeight}
+          />
 
-        {/* Поле для уровня активности */}
-        <FormControl fullWidth margin="normal">
-          <InputLabel>Уровень активности</InputLabel>
-          <Select
-            name="activityLevel"
-            value={formData.activityLevel}
+          {/* Поле для выбора пола */}
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Пол</InputLabel>
+            <Select
+              name="gender"
+              value={formData.gender}
+              onChange={handleChange}
+              label="Пол"
+            >
+              <MenuItem value="MALE">Мужской</MenuItem>
+              <MenuItem value="FEMALE">Женский</MenuItem>
+            </Select>
+          </FormControl>
+
+          {/* Поле для выбора цели */}
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Цель</InputLabel>
+            <Select
+              name="goal"
+              value={formData.goal}
+              onChange={handleChange}
+              label="Цель"
+            >
+              <MenuItem value="WEIGHT_LOSS">Похудеть</MenuItem>
+              <MenuItem value="MUSCLE_GAIN">Набрать мышечную массу</MenuItem>
+              <MenuItem value="MAINTENANCE">Поддержание веса</MenuItem>
+            </Select>
+          </FormControl>
+
+          {/* Поле для выбора уровня активности */}
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Уровень активности</InputLabel>
+            <Select
+              name="activityLevel"
+              value={formData.activityLevel}
+              onChange={handleChange}
+              label="Уровень активности"
+            >
+              <MenuItem value="1">Сидячий</MenuItem>
+              <MenuItem value="2">Легкий</MenuItem>
+              <MenuItem value="3">Средний</MenuItem>
+              <MenuItem value="4">Активный</MenuItem>
+              <MenuItem value="5">Очень активный</MenuItem>
+            </Select>
+          </FormControl>
+
+          {/* Поле для выбора доступных дней */}
+          <FormControl fullWidth margin="normal">
+            <InputLabel>Доступные дни</InputLabel>
+            <Select
+              name="availableDays"
+              value={formData.availableDays}
+              onChange={handleChange}
+              label="Доступные дни"
+            >
+              <MenuItem value="1">1 день</MenuItem>
+              <MenuItem value="2">2 дня</MenuItem>
+              <MenuItem value="3">3 дня</MenuItem>
+              <MenuItem value="4">4 дня</MenuItem>
+              <MenuItem value="5">5 дней</MenuItem>
+              <MenuItem value="6">6 дней</MenuItem>
+              <MenuItem value="7">7 дней</MenuItem>
+            </Select>
+          </FormControl>
+
+          {/* Поле для начала тренировок */}
+          <TextField
+            label="Дата начала тренировок"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            name="startTraining"
+            type="date"
+            value={formData.startTraining}
             onChange={handleChange}
-            label="Уровень активности"
-          >
-            <MenuItem value="1">Сидячий</MenuItem>
-            <MenuItem value="2">Легкий</MenuItem>
-            <MenuItem value="3">Средний</MenuItem>
-            <MenuItem value="4">Активный</MenuItem>
-            <MenuItem value="5">Очень активный</MenuItem>
-          </Select>
-        </FormControl>
+            InputLabelProps={{ shrink: true }}
+            error={!!validationErrors.startTraining}
+            helperText={validationErrors.startTraining}
+          />
 
-        {/* Поле для доступных дней */}
-        <TextField
-          label="Доступные дни (1-7)"
-          variant="outlined"
-          fullWidth
-          margin="normal"
-          name="availableDays"
-          value={formData.availableDays}
-          onChange={handleChange}
-        />
-
-        {/* Поле для начала тренировок */}
-        <TextField
-          label="Дата начала тренировок"
-          variant="outlined"
-          fullWidth
-          margin="normal"
-          name="startTraining"
-          type="date"
-          value={formData.startTraining}
-          onChange={handleChange}
-          InputLabelProps={{
-            shrink: true,
-          }}
-        />
-
-        {/* Чекбоксы для аллергий */}
-        <Typography variant="h6" gutterBottom>
-          Аллергии
-        </Typography>
-        <FormGroup>
-          {allergies.map((allergy) => (
+          {/* Чекбоксы для вегана/вегетарианца */}
+          <FormGroup row>
             <FormControlLabel
-              key={allergy.id}
               control={
                 <Checkbox
-                  value={allergy.id}
-                  onChange={handleAllergyChange}
-                  checked={selectedAllergies.includes(allergy.id)}
+                  checked={formData.isVegan}
+                  onChange={handleCheckboxChange}
+                  name="isVegan"
                 />
               }
-              label={allergy.name}
+              label="Веган"
             />
-          ))}
-        </FormGroup>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={formData.isVegetarian}
+                  onChange={handleCheckboxChange}
+                  name="isVegetarian"
+                />
+              }
+              label="Вегетарианец"
+            />
+          </FormGroup>
 
-        <Button variant="contained" color="primary" fullWidth onClick={handleSubmit}>
-          Сохранить
-        </Button>
-      </Box>
-    </Container>
+          {/* Чекбоксы для аллергий */}
+          <Typography variant="h6" gutterBottom>
+            Аллергии
+          </Typography>
+          <FormGroup>
+            {allergies.map((allergy) => (
+              <FormControlLabel
+                key={allergy.id}
+                control={
+                  <Checkbox
+                    value={allergy.id}
+                    onChange={handleAllergyChange}
+                    checked={selectedAllergies.includes(allergy.id)}
+                  />
+                }
+                label={allergy.name}
+              />
+            ))}
+          </FormGroup>
+
+          <Button
+            variant="contained"
+            color="primary"
+            fullWidth
+            onClick={handleSubmit}
+          >
+            Сохранить
+          </Button>
+        </Box>
+      </Container>
     </>
   );
 };
