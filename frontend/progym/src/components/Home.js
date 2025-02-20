@@ -16,8 +16,7 @@ import Header from "./Header";
 const HomePage = () => {
   const [diet, setDiet] = useState(null);
   const [training, setTraining] = useState(null);
-  const [isTrainingCompleted, setIsTrainingCompleted] = useState(false);
-  const [isTrainingCancelled, setIsTrainingCancelled] = useState(false); // Новое состояние для отслеживания отмены тренировки
+  const [isTrainingCompleted, setIsTrainingCompleted] = useState(false); // Состояние для отслеживания завершенности тренировки
   const token = localStorage.getItem("access_token");
 
   // Функция для обновления диеты
@@ -51,16 +50,26 @@ const HomePage = () => {
     })
       .then((res) => res.text())
       .then((message) => {
-        alert(message);
-        setIsTrainingCompleted(true);
+        alert(message); 
+        setIsTrainingCompleted(true); // Помечаем тренировку как завершенную
       })
       .catch(console.error);
   };
 
-  // Функция для отмены тренировки
-  const cancelTraining = () => {
-    setIsTrainingCancelled(true); // Отмечаем, что тренировка отменена
-    setIsTrainingCompleted(false); // Возвращаем тренировку в не завершенное состояние
+  // Функция для отмены статуса тренировки
+  const uncompleteTraining = () => {
+    fetch("http://localhost:8080/api/user/uncomplete_training", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.text())
+      .then((message) => {
+        alert(message); 
+        setIsTrainingCompleted(false); // Сбрасываем статус тренировки
+      })
+      .catch(console.error);
   };
 
   // Запрашиваем данные о диете
@@ -81,7 +90,7 @@ const HomePage = () => {
       .then((res) => res.json())
       .then((data) => {
         setTraining(data);
-        setIsTrainingCompleted(data.isCompleted); // Устанавливаем состояние выполнения тренировки
+        setIsTrainingCompleted(data.isCompleted); // Инициализируем статус тренировки
       })
       .catch(console.error);
   };
@@ -163,16 +172,8 @@ const HomePage = () => {
                   </Typography>
                 )}
 
-                {/* Показать текст и кнопки в зависимости от состояния тренировки */}
-                {isTrainingCompleted ? (
-                  <Typography sx={{ color: "green", fontWeight: "bold" }}>
-                    Отличная работа! Ты выполнил тренировку! 🎉
-                  </Typography>
-                ) : isTrainingCancelled ? (
-                  <Typography sx={{ color: "red", fontWeight: "bold" }}>
-                    Ой, ты не выполнил тренировку. Но ничего, не переживай, тренировка отменена! 😂
-                  </Typography>
-                ) : (
+                {/* Кнопки только если тренировка не завершена */}
+                {!isTrainingCompleted ? (
                   <>
                     <Button onClick={regenerateTraining} variant="contained" sx={{ mt: 2 }}>
                       Обновить тренировку
@@ -186,18 +187,20 @@ const HomePage = () => {
                       Завершить тренировку
                     </Button>
                   </>
-                )}
-
-                {/* Кнопка для отмены тренировки */}
-                {isTrainingCompleted && !isTrainingCancelled && (
-                  <Button
-                    onClick={cancelTraining}
-                    variant="contained"
-                    color="error"
-                    sx={{ mt: 2, ml: 2 }}
-                  >
-                    Я не выполнил тренировку
-                  </Button>
+                ) : (
+                  <>
+                    <Typography variant="body1" sx={{ fontStyle: "italic", color: "green" }}>
+                      Молодец! Ты выполнил тренировку! 🎉
+                    </Typography>
+                    <Button
+                      onClick={uncompleteTraining}
+                      variant="contained"
+                      color="error"
+                      sx={{ mt: 2 }}
+                    >
+                      Я не выполнил тренировку
+                    </Button>
+                  </>
                 )}
               </CardContent>
             </Card>
