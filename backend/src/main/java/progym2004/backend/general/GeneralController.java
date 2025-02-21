@@ -19,6 +19,11 @@ public class GeneralController {
         return ResponseEntity.ok(generalService.getAllAllergies());
     }
 
+    @GetMapping("/get_all_meals")
+    public ResponseEntity<MealsResponse> getAllMeals(){
+        return ResponseEntity.ok(generalService.getAllMeals());
+    }
+
     @GetMapping("/get_user")
     public ResponseEntity<UserResponse> getUser(@RequestHeader("Authorization") String token){
         String jwtToken = token.substring(7);
