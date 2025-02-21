@@ -36,7 +36,7 @@ public class Allergy {
 
     @ManyToMany
     @JoinTable(
-            name = "allergy_meal",
+                name = "allergy_meal",
             joinColumns = @JoinColumn(name = "allergy_id"),
             inverseJoinColumns = @JoinColumn(name = "meal_id")
     )

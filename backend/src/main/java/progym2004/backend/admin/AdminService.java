@@ -3,12 +3,14 @@ package progym2004.backend.admin;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import progym2004.backend.config.JwtService;
 import progym2004.backend.entity.*;
 import progym2004.backend.repository.*;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -60,12 +62,16 @@ public class AdminService {
         return allergyRepository.save(allergy);
     }
 
+//    @Transactional
     public Meal saveMeal(MealRequest mealRequest, String token) {
         String login = jwtService.extractUsername(token);
         User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
 
         Meal meal = new Meal(user, mealRequest.getName(), mealRequest.getCalories(), mealRequest.getProtein(), mealRequest.getFats(), mealRequest.getCarbs(), LocalDate.now(clock));
-        return mealRepository.save(meal);
+        Set<Allergy> allergies = allergyRepository.findAllByIdIn(mealRequest.getAllergiesIds());
+        meal.setAllergies(allergies);
+        Meal savedMeal = mealRepository.save(meal);
+        return savedMeal;
     }
 
     public DietDayAdmin saveDietDay(DietDayRequest dietDayRequest, String token) {
