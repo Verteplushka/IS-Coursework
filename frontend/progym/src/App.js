@@ -10,6 +10,7 @@ import Profile from "./components/Profile"; // Импортируем стран
 import TrainingCalendar from "./components/TrainingCalendar"; // Импортируем страницу по заполнению данных пользователя
 import CreateExercise from "./components/CreateExercise"; // Импортируем страницу по заполнению данных пользователя
 import CreateMeal from "./components/CreateMeal"; // Импортируем страницу по заполнению данных пользователя
+import CreateDietDay from "./components/CreateDietDay"; // Импортируем страницу по заполнению данных пользователя
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
         <Route path="/TrainingCalendar" element={<TrainingCalendar />} />
         <Route path="/CreateExercise" element={<CreateExercise />} />
         <Route path="/CreateMeal" element={<CreateMeal />} />
+        <Route path="/CreateDietDay" element={<CreateDietDay />} />
       </Routes>
     </Router>
   );
