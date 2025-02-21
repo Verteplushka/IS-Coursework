@@ -11,7 +11,7 @@ const CreateExercise = () => {
   const [formData, setFormData] = useState({
     name: "",
     muscleGroup: "CHEST",
-    isCompound: false,
+    сompound: false,
     description: "",
     executionInstructions: "",
   });
@@ -53,7 +53,7 @@ const CreateExercise = () => {
       setFormData({
         name: "",
         muscleGroup: "CHEST",
-        isCompound: false,
+        сompound: false,
         description: "",
         executionInstructions: "",
       });
@@ -93,7 +93,7 @@ const CreateExercise = () => {
           </Select>
         </FormControl>
         <FormControlLabel
-          control={<Checkbox checked={formData.isCompound} onChange={handleChange} name="isCompound" />}
+          control={<Checkbox checked={formData.сompound} onChange={handleChange} name="сompound" />}
           label="Сложное упражнение (Compound)"
         />
         <TextField
