@@ -35,6 +35,7 @@ const UserForm = () => {
     startTraining: "",
     dietPreference: "",
   });
+  const [currentDay, setCurrentDay] = useState("");
   const [allergies, setAllergies] = useState([]);
   const [selectedAllergies, setSelectedAllergies] = useState([]);
   const [validationErrors, setValidationErrors] = useState({
@@ -53,14 +54,14 @@ const UserForm = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false); // Для управления Snackbar
 
   useEffect(() => {
-    const today = new Date();
-    today.setUTCHours(0, 0, 0, 0); // Убираем время с учетом UTC
-    const todayString = today.toISOString().split("T")[0]; // Преобразуем в формат yyyy-mm-dd
+    // const today = new Date();
+    // today.setUTCHours(0, 0, 0, 0); // Убираем время с учетом UTC
+    // const todayString = today.toISOString().split("T")[0]; // Преобразуем в формат yyyy-mm-dd
 
-    setFormData((prevData) => ({
-      ...prevData,
-      startTraining: todayString,
-    }));
+    // setFormData((prevData) => ({
+    //   ...prevData,
+    //   startTraining: todayString,
+    // }));
 
     const token = localStorage.getItem("access_token");
     if (token) {
@@ -80,6 +81,33 @@ const UserForm = () => {
         })
         .catch((err) => {
           console.error("Не удалось загрузить аллергии.", err);
+        });
+    }
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    if (token) {
+      // Получаем дату начала тренировок с бэкенда
+      axios
+        .get("http://localhost:8080/api/general/get_day", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((response) => {
+          const trainingStartDate = response.data; // Дата начала тренировок
+
+          setFormData((prevData) => ({
+            ...prevData,
+            startTraining: trainingStartDate, // Устанавливаем дату начала тренировок
+          }));
+
+          // Сохраняем сегодняшнюю дату в состоянии
+          setCurrentDay(response.data);
+        })
+        .catch((err) => {
+          console.error("Не удалось загрузить дату начала тренировок.", err);
         });
     }
   }, []);
@@ -150,7 +178,7 @@ const UserForm = () => {
 
     // Проверка даты рождения
     const birthDateObj = new Date(birthDate);
-    const currentDate = new Date();
+    const currentDate = new Date(currentDay);
     currentDate.setHours(0, 0, 0, 0);
     const minBirthDate = new Date("1900-01-01");
     const maxBirthDate = new Date(currentDate);
@@ -187,8 +215,9 @@ const UserForm = () => {
     }
 
     // Проверка даты начала тренировок
-    const oneWeeksFromNow = new Date();
-    oneWeeksFromNow.setDate(currentDate.getDate() + 6);
+    const oneWeeksFromNow = new Date(currentDay);
+    oneWeeksFromNow.setDate(oneWeeksFromNow.getDate() + 6);
+    oneWeeksFromNow.setHours(0, 0, 0, 0);
     const startTrainingObj = new Date(startTraining);
     startTrainingObj.setHours(0, 0, 0, 0);
 
