@@ -44,27 +44,7 @@ const Profile = () => {
   const [dietStats, setDietStats] = useState(null);
   const [weightProgress, setWeightProgress] = useState(null); // Состояние для веса
   const [loading, setLoading] = useState(true);
-  const [isLazy, setIsLazy] = useState(false); // Состояние для проверки ленивости
-  const [openMotivationalDialog, setOpenMotivationalDialog] = useState(false); // Состояние для управления диалогом
-  const [motivationalLink, setMotivationalLink] = useState(""); // Ссылка на мотивационное видео
-
   const token = localStorage.getItem("access_token");
-
-  // Список мотивационных видео
-  const motivationalVideos = [
-    "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-    "https://www.youtube.com/watch?v=1K1U4sRnsKw",
-    "https://www.youtube.com/watch?v=xfq_A8yR3A0",
-    "https://www.youtube.com/watch?v=MtN1YnoL46Q",
-  ];
-
-  // Мотивационные фразы
-  const motivationalMessages = [
-    "Ты не один, продолжай двигаться, впереди только успех! 🚀",
-    "Не останавливайся, ты на правильном пути! 💪",
-    "Ты можешь больше! Продолжай идти, и успех будет твоим! 🌟",
-    "Каждый шаг важен! Ты делаешь большие изменения! 🔥",
-  ];
 
   useEffect(() => {
     const fetchStatistics = async () => {
@@ -111,37 +91,9 @@ const Profile = () => {
         );
         const weightData = await weightResponse.json();
 
-        // Запрос для проверки ленивости пользователя
-        const lazyResponse = await fetch(
-          "http://localhost:8080/api/user/is_user_lazy",
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        const isLazy = await lazyResponse.json();
-
-        // Выводим результат в консоль
-        console.log("Weight Progress Data:", weightData);
-        console.log("Is user lazy?", isLazy);
-
         setTrainingStats(trainingData);
         setDietStats(dietData);
         setWeightProgress(weightData); // Сохраняем прогресс по весу в состояние
-        setIsLazy(isLazy); // Сохраняем результат проверки ленивости
-
-        // Если пользователь ленивый, открываем диалог
-        if (isLazy) {
-          const randomLink =
-            motivationalVideos[
-              Math.floor(Math.random() * motivationalVideos.length)
-            ];
-          setMotivationalLink(randomLink);
-          setOpenMotivationalDialog(true);
-        }
       } catch (error) {
         console.error("Ошибка при загрузке статистики:", error);
       } finally {
@@ -151,11 +103,6 @@ const Profile = () => {
 
     fetchStatistics();
   }, [token]);
-
-  // Закрытие диалога
-  const handleCloseMotivationalDialog = () => {
-    setOpenMotivationalDialog(false);
-  };
 
   if (loading) {
     return (

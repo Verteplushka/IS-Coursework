@@ -17,7 +17,6 @@ import {
   CircularProgress,
   Snackbar,
   Alert,
-  ListSubheader,
 } from "@mui/material";
 import axios from "axios";
 import Header from "./Header"; // Импортируем шапку
@@ -122,7 +121,7 @@ const UserForm = () => {
     const { checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-      dietPreference: checked ? "VEGETARIAN" : "OMNIVORE", // Устанавливаем соответствующее значение в dietPreference
+      dietPreference: checked ? "VEGETARIAN" : "OMNIVORE",
     }));
   };
 
@@ -231,10 +230,6 @@ const UserForm = () => {
       errors.availableDays = "Пожалуйста, укажите количество доступных дней.";
     }
 
-    if (!dietPreference) {
-      errors.dietPreference = "Пожалуйста, выберите приоритет в диете.";
-    }
-
     // Проверка на обязательность заполнения всех полей
     if (
       !birthDate ||
@@ -245,8 +240,7 @@ const UserForm = () => {
       !fitnessLevel ||
       !activityLevel ||
       !availableDays ||
-      !startTraining ||
-      !dietPreference
+      !startTraining
     ) {
       errors.general = "Пожалуйста, заполните все поля.";
     }
@@ -261,6 +255,7 @@ const UserForm = () => {
       const requestData = {
         ...formData,
         allergiesIds: selectedAllergies,
+        dietPreference: "OMNIVORE",
       };
 
       axios
