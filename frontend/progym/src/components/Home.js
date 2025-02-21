@@ -29,6 +29,7 @@ const HomePage = () => {
   const token = localStorage.getItem("access_token");
   const navigate = useNavigate();
   const [userParams, setUserParams] = useState(null);
+
   useEffect(() => {
     if (!token) return;
 
@@ -41,7 +42,10 @@ const HomePage = () => {
         setUserParams(data); // Сохраняем параметры пользователя в состояние
         setIsEndingSoon(data.endingSoon);
         if (data.endingSoon) {
-          console.log("Тренировойный план все, нужно предложить новый: ",data.endingSoon); // Лог для отладки
+          console.log(
+            "Тренировойный план все, нужно предложить новый: ",
+            data.endingSoon
+          ); // Лог для отладки
           setOpenDialog(true);
         }
       })
@@ -50,27 +54,35 @@ const HomePage = () => {
 
   const handleContinue = async () => {
     try {
-      const dayResponse = await axios.get("http://localhost:8080/api/general/get_day", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-  
-      if (userParams) {
-        const updatedParams = { ...userParams, startTraining: dayResponse.data };
-  
-        await axios.post("http://localhost:8080/api/user/sendForm", updatedParams, {
+      const dayResponse = await axios.get(
+        "http://localhost:8080/api/general/get_day",
+        {
           headers: { Authorization: `Bearer ${token}` },
-        });
-   // Перезагружаем страницу после успешного запроса
-   window.location.reload();
-        
+        }
+      );
+
+      if (userParams) {
+        const updatedParams = {
+          ...userParams,
+          startTraining: dayResponse.data,
+        };
+
+        await axios.post(
+          "http://localhost:8080/api/user/sendForm",
+          updatedParams,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        // Перезагружаем страницу после успешного запроса
+        window.location.reload();
       }
-  
+
       setOpenDialog(false);
     } catch (error) {
       console.error("Ошибка при обновлении данных пользователя:", error);
     }
   };
-  
 
   const handleUpdate = () => {
     navigate("/userform");
@@ -150,8 +162,76 @@ const HomePage = () => {
       .catch(console.error);
   };
 
+  const [isLazy, setIsLazy] = useState(false); // Состояние для проверки ленивости
+  const [openMotivationalDialog, setOpenMotivationalDialog] = useState(false); // Состояние для управления диалогом
+  const [loading, setLoading] = useState(true);
+  const [motivationalLink, setMotivationalLink] = useState(""); // Ссылка на мотивационное видео
+
+  // Список мотивационных видео
+  const motivationalVideos = [
+    "https://www.youtube.com/watch?v=8Y1HcUOr8io",
+    "https://www.youtube.com/watch?v=RJQisT_dndc",
+    "https://www.youtube.com/watch?v=DFJcnag8S0c",
+    "https://www.youtube.com/watch?v=7cSHcUP-8Os",
+  ];
+
+  // Мотивационные фразы
+  const motivationalMessages = [
+    "«Чемпионами становятся не в тренажёрных залах. Чемпиона рождает то, что у человека внутри — желания, мечты, цели», — Мухаммед Али 🚀",
+    "«Я никогда не понимал значение слова «сдаться»», — Жан-Клод Ван Дамм 💪",
+    "«Тот, кто хочет добиться убедительных побед, обязан пытаться прыгнуть выше головы», — Лев Яшин 🌟",
+    "«Тренируйся с теми, кто сильнее. Не сдавайся там, где сдаются другие. И победишь там, где победить нельзя», — Брюс Ли 🔥",
+    "«Сильный характер выковывается, только когда преодолеваешь сопротивление — и в спортивном зале, и в жизни», — Арнольд Шварценеггер 💪",
+  ];
+
+  const fetchStatistics = async () => {
+    if (!token) {
+      console.error("Токен отсутствует");
+      return;
+    }
+
+    try {
+      // Запрос для проверки ленивости пользователя
+      const lazyResponse = await fetch(
+        "http://localhost:8080/api/user/is_user_lazy",
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!lazyResponse.ok) {
+        throw new Error("Ошибка при запросе данных о ленивости");
+      }
+
+      const isLazy = await lazyResponse.json();
+
+      console.log("Is user lazy?", isLazy);
+
+      setIsLazy(isLazy); // Сохраняем результат проверки ленивости
+
+      // Если пользователь ленивый, открываем диалог
+      if (isLazy) {
+        const randomLink =
+          motivationalVideos[
+            Math.floor(Math.random() * motivationalVideos.length)
+          ];
+        setMotivationalLink(randomLink);
+        setOpenMotivationalDialog(true);
+      }
+    } catch (error) {
+      console.error("Ошибка при загрузке статистики:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!token) return;
+    fetchStatistics();
 
     fetchDiet();
     fetchTraining();
@@ -179,13 +259,47 @@ const HomePage = () => {
     <>
       <Header />
       <Container maxWidth="md" sx={{ mt: 4 }}>
+        {/* Элемент для ленивых пользователей */}
+        {isLazy && (
+          <Box sx={{ mb: 4 }}>
+            <Card sx={{ p: 2 }}>
+              <CardContent>
+                <Typography variant="h5" gutterBottom>
+                  🚨 Мы заметили, что ты немного облинился, так не пойдет!
+                </Typography>
+
+                <Typography variant="body1" sx={{ mb: 2 }}>
+                  {
+                    motivationalMessages[
+                      Math.floor(Math.random() * motivationalMessages.length)
+                    ]
+                  }
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 2 }}>
+                  Наша команда progym2004 подобрала это мотивационное видео
+                  специально для тебя!
+                </Typography>
+                <iframe
+                  width="100%"
+                  height="315"
+                  src={motivationalLink.replace("watch?v=", "embed/")} // Преобразуем ссылку для встраивания
+                  title="Motivational Video"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+              </CardContent>
+            </Card>
+          </Box>
+        )}
         <Grid container spacing={10}>
           {/* Всплывающее окно */}
           <Dialog open={openDialog} onClose={handleContinue}>
             <DialogTitle>Обновление данных</DialogTitle>
             <DialogContent>
               <DialogContentText>
-                Ваши тренировки скоро закончатся, а может и уже закончились. Хотите продолжить с текущими данными или обновить информацию?
+                Ваши тренировки скоро закончатся, а может и уже закончились.
+                Хотите продолжить с текущими данными или обновить информацию?
               </DialogContentText>
             </DialogContent>
             <DialogActions>

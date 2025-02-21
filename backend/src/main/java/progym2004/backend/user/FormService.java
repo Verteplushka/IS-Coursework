@@ -253,7 +253,7 @@ public class FormService {
         String login = jwtService.extractUsername(token);
         User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
 
-        List<TrainingDay> trainingDays = trainingDayRepository.findTrainingDaysByUserAndTrainingDateBefore(user, LocalDate.now(clock));
+        List<TrainingDay> trainingDays = trainingDayRepository.findTrainingDaysByUserAndTrainingDateBeforeOrderByTrainingDateDesc(user, LocalDate.now(clock));
 
         List<TrainingResponse> trainingResponses = trainingDays.stream()
                 .map(trainingDay -> {
@@ -271,7 +271,7 @@ public class FormService {
         User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
 
         // Получаем все тренировки пользователя до текущей даты
-        List<TrainingDay> trainingDays = trainingDayRepository.findTrainingDaysByUserAndTrainingDateBefore(user, LocalDate.now(clock));
+        List<TrainingDay> trainingDays = trainingDayRepository.findTrainingDaysByUserAndTrainingDateBeforeOrderByTrainingDateDesc(user, LocalDate.now(clock));
 
         // Количество всех тренировок
         long totalTrainings = trainingDays.size();
@@ -335,7 +335,7 @@ public class FormService {
         String login = jwtService.extractUsername(token);
         User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
 
-        List<DietDayUser> dietDays = dietDayUserRepository.findDietDayUserByUserAndDayDateBefore(user, LocalDate.now(clock));
+        List<DietDayUser> dietDays = dietDayUserRepository.findDietDayUserByUserAndDayDateBeforeOrderByDayDateDesc(user, LocalDate.now(clock));
 
         List<DietResponse> dietResponses = dietDays.stream().map(dietDayUser -> {
             // Для каждого дня получаем все приемы пищи
@@ -380,7 +380,7 @@ public class FormService {
         String login = jwtService.extractUsername(token);
         User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
 
-        List<DietDayUser> dietDays = dietDayUserRepository.findDietDayUserByUserAndDayDateBefore(user, LocalDate.now(clock));
+        List<DietDayUser> dietDays = dietDayUserRepository.findDietDayUserByUserAndDayDateBeforeOrderByDayDateDesc(user, LocalDate.now(clock));
 
         long totalDietDays = dietDays.size();
 
@@ -508,5 +508,24 @@ public class FormService {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public boolean isUserLazy(String token) {
+        String login = jwtService.extractUsername(token);
+        User user = userRepository.findByLogin(login)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        int trainingsAmountToBeLazy = 3;
+        List<TrainingDay> lastTrainings = trainingDayRepository
+                .findTrainingDaysByUserAndTrainingDateBeforeOrderByTrainingDateDesc(user, LocalDate.now(clock));
+
+        // Если тренировок меньше трёх, пользователь не считается ленивым
+        if (lastTrainings.size() < trainingsAmountToBeLazy) {
+            return false;
+        }
+
+        // Пользователь ленивый, если все последние три тренировки не завершены
+        return lastTrainings.subList(0, trainingsAmountToBeLazy).stream()
+                .noneMatch(TrainingDay::getIsCompleted);
     }
 }
