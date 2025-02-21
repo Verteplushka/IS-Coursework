@@ -11,7 +11,7 @@ public interface TrainingDayRepository extends JpaRepository<TrainingDay, Long> 
     TrainingDay findTrainingDayByUserAndTrainingDate(User user, LocalDate trainingDate);
     void deleteAllByUserAndTrainingDateGreaterThanEqual(User user, LocalDate trainingDate);
     List<TrainingDay> findTrainingDaysByUserAndTrainingDateGreaterThanEqual(User user, LocalDate trainingDate);
-    List<TrainingDay> findTrainingDaysByUserAndTrainingDateBefore(User user, LocalDate trainingDate);
+    List<TrainingDay> findTrainingDaysByUserAndTrainingDateBeforeOrderByTrainingDateDesc(User user, LocalDate trainingDate);
     TrainingDay findTopByUserOrderByTrainingDateDesc(User user);
     void deleteByUserAndTrainingDate(User user, LocalDate trainingDate);
 }

@@ -118,4 +118,9 @@ public class UserController {
         return ResponseEntity.badRequest().body("Failed to regenerate today's training.");
     }
 
+    @GetMapping("/is_user_lazy")
+    public ResponseEntity<Boolean> isUserLazy(@RequestHeader("Authorization") String token) {
+        String jwtToken = token.substring(7);
+        return ResponseEntity.ok(formService.isUserLazy(jwtToken));
+    }
 }
