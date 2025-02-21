@@ -10,9 +10,11 @@ import progym2004.backend.repository.*;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class AdminService {
@@ -83,9 +85,31 @@ public class AdminService {
         User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
 
         DietDayAdmin dietDayAdmin = dietDayAdminRepository.save(new DietDayAdmin(user, dietDayRequest.getName(), LocalDate.now(clock), dietDayRequest.getDietType()));
-        for (Map.Entry<Long, Double> mealPortion : dietDayRequest.getMealPortions().entrySet()) {
-            Meal meal = mealRepository.findById(mealPortion.getKey()).orElseThrow(() -> new RuntimeException("Meal with id = " + mealPortion.getKey() + " not found"));
-            mealDietDayAdminRepository.save(new MealDietDayAdmin(dietDayAdmin, meal, mealPortion.getValue()));
+
+        // Собираем все Meal по их id
+        List<Long> mealIds = dietDayRequest.getMeals().stream()
+                .map(MealDietDayDto::getId)
+                .collect(Collectors.toList());
+
+        // Получаем все соответствующие Meal из базы данных
+        List<Meal> meals = mealRepository.findAllById(mealIds);
+
+        // Создаем MealDietDayAdmin для каждого MealDietDayDto
+        for (MealDietDayDto dto : dietDayRequest.getMeals()) {
+            Meal meal = meals.stream()
+                    .filter(m -> m.getId().equals(dto.getId()))
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("Meal with id = " + dto.getId() + " not found"));
+
+            MealDietDayAdmin mealDietDayAdmin = new MealDietDayAdmin(
+                    dietDayAdmin,          // Связываем с DietDayAdmin
+                    meal,                  // Добавляем найденный Meal
+                    dto.getPortionSize(),   // Устанавливаем размер порции
+                    dto.getMealPosition()
+            );
+
+            // Сохраняем MealDietDayAdmin в базе данных
+            mealDietDayAdminRepository.save(mealDietDayAdmin);
         }
 
         return dietDayAdmin;
