@@ -66,15 +66,12 @@ const Header = () => {
     navigate("/CreateExercise");
   };
 
-  const handleCreateDietClick = () => {
-    navigate("/CreateDiet");
+  const handleCreateMealClick = () => {
+    navigate("/CreateMeal");
   };
 
   const handleCreateDietDayClick = () => {
     navigate("/CreateDietDay");
-  };
-  const handleCreateTrainingDayClick = () => {
-    navigate("/CreateTrainingDay");
   };
   const handleCreateAllergyClick = () => {
     navigate("/CreateAllergy");
@@ -103,7 +100,7 @@ const Header = () => {
             </Typography>
           </IconButton>
 
-          <IconButton color="inherit" onClick={handleCreateDietClick}>
+          <IconButton color="inherit" onClick={handleCreateMealClick}>
             <Typography variant="body1" color="inherit">
             Блюдо
             </Typography>
@@ -112,11 +109,6 @@ const Header = () => {
           <IconButton color="inherit" onClick={handleCreateDietDayClick}>
             <Typography variant="body1" color="inherit">
             Диетический день
-            </Typography>
-          </IconButton>
-          <IconButton color="inherit" onClick={handleCreateTrainingDayClick}>
-            <Typography variant="body1" color="inherit">
-            Тренировочный день
             </Typography>
           </IconButton>
           <IconButton color="inherit" onClick={handleCreateAllergyClick}>

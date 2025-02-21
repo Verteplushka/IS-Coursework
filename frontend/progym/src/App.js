@@ -9,6 +9,7 @@ import History from "./components/History"; // Импортируем стран
 import Profile from "./components/Profile"; // Импортируем страницу по заполнению данных пользователя
 import TrainingCalendar from "./components/TrainingCalendar"; // Импортируем страницу по заполнению данных пользователя
 import CreateExercise from "./components/CreateExercise"; // Импортируем страницу по заполнению данных пользователя
+import CreateMeal from "./components/CreateMeal"; // Импортируем страницу по заполнению данных пользователя
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         <Route path="/Profile" element={<Profile />} />
         <Route path="/TrainingCalendar" element={<TrainingCalendar />} />
         <Route path="/CreateExercise" element={<CreateExercise />} />
+        <Route path="/CreateMeal" element={<CreateMeal />} />
       </Routes>
     </Router>
   );
