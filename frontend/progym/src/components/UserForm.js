@@ -426,7 +426,11 @@ const UserForm = () => {
                 </Select>
               </FormControl>
 
-              <FormControl fullWidth margin="normal">
+              <FormControl
+                fullWidth
+                margin="normal"
+                error={!!validationErrors.fitnessLevel}
+              >
                 <InputLabel>Уровень подготовки</InputLabel>
                 <Select
                   name="fitnessLevel"
@@ -475,7 +479,11 @@ const UserForm = () => {
                 </Select>
               </FormControl>
               {/* Поле для выбора уровня активности */}
-              <FormControl fullWidth margin="normal">
+              <FormControl
+                fullWidth
+                margin="normal"
+                error={!!validationErrors.activityLevel}
+              >
                 <InputLabel>Уровень активности</InputLabel>
                 <Select
                   name="activityLevel"
