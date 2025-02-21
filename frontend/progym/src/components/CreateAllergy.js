@@ -133,7 +133,7 @@ const CreateAllergy = () => {
             >
               {filteredMeals.map((meal) => (
                 <MenuItem key={meal.id} value={meal.id}>
-                  {meal.name} ({meal.calories} ккал)
+                  {meal.name}
                 </MenuItem>
               ))}
             </Select>
