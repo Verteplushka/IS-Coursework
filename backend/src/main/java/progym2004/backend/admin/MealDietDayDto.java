@@ -12,7 +12,6 @@ import progym2004.backend.entity.MealPosition;
 @AllArgsConstructor
 public class MealDietDayDto {
     private Long id;
-    private String name;
     private Double portionSize;
     private MealPosition mealPosition;
 }

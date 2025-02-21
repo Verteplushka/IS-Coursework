@@ -61,8 +61,16 @@ public class AdminService {
 
         Set<Meal> meals = mealRepository.findAllByIdIn(allergyRequest.getAllergyMealsIds());
         Allergy allergy = new Allergy(user, allergyRequest.getName(), meals, LocalDate.now(clock));
-        return allergyRepository.save(allergy);
+        allergy = allergyRepository.save(allergy);
+
+        for (Meal meal : meals) {
+            meal.getAllergies().add(allergy);
+            mealRepository.save(meal);
+        }
+
+        return allergy;
     }
+
 
 //    @Transactional
     public Meal saveMeal(MealRequest mealRequest, String token) {
