@@ -2,27 +2,17 @@ import React, { useState, useEffect } from "react";
 import {
   Container,
   TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   Button,
   Typography,
   Alert,
   Box,
   List,
   ListItem,
-  ListItemText,
   Checkbox,
+  FormControlLabel,
 } from "@mui/material";
 import axios from "axios";
 import AdminHeader from "./AdminHeader";
-
-const token = localStorage.getItem("access_token");
-if (!token) {
-  setError("Ошибка: отсутствует токен аутентификации");
-  return;
-}
 
 const CreateAllergy = () => {
   const [formData, setFormData] = useState({
@@ -30,56 +20,27 @@ const CreateAllergy = () => {
     allergyMealsIds: [],
   });
 
-  const [meals, setMeals] = useState([]);
+  const [meals, setMeals] = useState([]); // Все блюда
+  const [searchQuery, setSearchQuery] = useState(""); // Поисковый запрос
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    const fetchMeals = async () => {
-      try {
-
-        const response = await axios.get(
-          "http://localhost:8080/api/general/get_all_meals",
-          formData,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        setMeals(response.data);
-      } catch (err) {
-        console.error("Ошибка при загрузке блюд", err);
-      }
-    };
-
-    fetchMeals();
-  }, []);
-
   const token = localStorage.getItem("access_token");
-  if (token) {
-    axios
-      .get("api/general/get_all_allergies", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((response) => {
-        setAllergies(
-          Object.entries(response.data.allergies).map(([id, name]) => ({
-            id,
-            name,
-          }))
-        );
-      })
-      .catch((err) => {
-        console.error("Не удалось загрузить аллергии.", err);
-      });
-  }
-}, [];
 
+  // Загрузка всех блюд
+  useEffect(() => {
+    axios
+      .get("http://localhost:8080/api/general/get_all_meals", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => setMeals(res.data.meals))
+      .catch((err) => console.error("Ошибка загрузки блюд", err));
+  }, [token]);
+
+  // Фильтрация блюд по поисковому запросу
+  const filteredMeals = meals.filter((meal) =>
+    meal.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -156,8 +117,16 @@ const CreateAllergy = () => {
           <Typography variant="h6" gutterBottom>
             Выберите блюда, которые вызывают аллергию:
           </Typography>
+          {/* Поле для поиска блюд */}
+          <TextField
+            label="Поиск блюд"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            fullWidth
+            sx={{ mb: 2 }}
+          />
           <List>
-            {meals.map((meal) => (
+            {filteredMeals.map((meal) => (
               <ListItem key={meal.id}>
                 <FormControlLabel
                   control={
