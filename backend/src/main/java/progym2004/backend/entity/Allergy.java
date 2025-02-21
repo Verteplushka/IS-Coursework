@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -34,13 +35,8 @@ public class Allergy {
     @ManyToMany(mappedBy = "allergies")
     private Set<User> users;
 
-    @ManyToMany
-    @JoinTable(
-                name = "allergy_meal",
-            joinColumns = @JoinColumn(name = "allergy_id"),
-            inverseJoinColumns = @JoinColumn(name = "meal_id")
-    )
-    private Set<Meal> meals;
+    @ManyToMany(mappedBy = "allergies") // Указываем, что владельцем связи является Meal
+    private Set<Meal> meals = new HashSet<>();
 
     public Allergy(User user, String name, Set<Meal> meals, LocalDate whenCreated){
         this.createdBy = user;

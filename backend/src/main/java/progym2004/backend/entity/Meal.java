@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -51,8 +52,13 @@ public class Meal {
     @Column(name = "carbs")
     private Double carbs;
 
-    @ManyToMany(mappedBy = "meals")
-    private Set<Allergy> allergies;
+    @ManyToMany
+    @JoinTable(
+            name = "allergy_meal",
+            joinColumns = @JoinColumn(name = "meal_id"),
+            inverseJoinColumns = @JoinColumn(name = "allergy_id")
+    )
+    private Set<Allergy> allergies = new HashSet<>();
 
     public Meal(User user, String name, Double calories, Double protein, Double fats, Double carbs, LocalDate whenCreated){
         this.createdBy = user;
