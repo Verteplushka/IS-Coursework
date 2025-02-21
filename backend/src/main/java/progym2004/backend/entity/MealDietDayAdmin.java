@@ -35,10 +35,11 @@ public class MealDietDayAdmin {
     @Column(name = "meal_position", nullable = false)
     private MealPosition mealPosition;
 
-    public MealDietDayAdmin(DietDayAdmin dietDayAdmin, Meal meal, Double portionSize){
+    public MealDietDayAdmin(DietDayAdmin dietDayAdmin, Meal meal, Double portionSize, MealPosition mealPosition){
         this.dietDayAdmin = dietDayAdmin;
         this.meal = meal;
         this.portionSize = portionSize;
+        this.mealPosition = mealPosition;
     }
 }
 

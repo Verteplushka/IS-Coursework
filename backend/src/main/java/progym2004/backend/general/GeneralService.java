@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import progym2004.backend.config.JwtService;
 import progym2004.backend.entity.Allergy;
+import progym2004.backend.entity.DietType;
 import progym2004.backend.entity.Meal;
 import progym2004.backend.entity.User;
 import progym2004.backend.mapper.MealMapper;
@@ -15,6 +16,8 @@ import progym2004.backend.user.MealResponse;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -58,5 +61,9 @@ public class GeneralService {
                 .map(MealMapper::toResponse)
                 .toList();
         return new MealsResponse(mealResponses);
+    }
+
+    public List<DietType> getAllDietTypes(){
+        return Arrays.asList(DietType.values());
     }
 }
