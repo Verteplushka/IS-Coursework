@@ -131,6 +131,22 @@ const Profile = () => {
     }
   };
 
+  // Проверка на null перед использованием weightProgress.weights
+  if (
+    !weightProgress ||
+    !weightProgress.weights ||
+    weightProgress.weights.length === 0
+  ) {
+    return (
+      <>
+        <Header />
+        <Typography sx={{ p: 4, textAlign: "center" }}>
+          Заполните форму и наслаждайтесь статистикой в профиле!
+        </Typography>
+      </>
+    );
+  }
+
   // Мотивация по прогрессу по весу
   const getWeightMotivation = () => {
     const weightChanges = weightProgress.weights;
