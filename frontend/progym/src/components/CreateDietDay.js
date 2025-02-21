@@ -32,6 +32,7 @@ const AddDietDay = () => {
 
   const token = localStorage.getItem("access_token");
 
+
   useEffect(() => {
     if (!token) return;
 
@@ -66,6 +67,7 @@ const AddDietDay = () => {
       name,
       dietType: selectedDietType,
       meals: Object.entries(selectedMeals).flatMap(([position, meals]) =>
+        meals.map((meal) => ({ ...meal, mealPosition: position }))
         meals.map((meal) => ({ ...meal, mealPosition: position }))
       ),
     };
