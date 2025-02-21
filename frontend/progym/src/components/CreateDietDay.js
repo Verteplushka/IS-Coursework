@@ -71,9 +71,13 @@ const AddDietDay = () => {
     };
 
     try {
-      await axios.post("http://localhost:8080/api/admin/add_diet_day", requestData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.post(
+        "http://localhost:8080/api/admin/add_diet_day",
+        requestData,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       setMessage("Диетический день успешно добавлен!");
     } catch (err) {
       setError("Ошибка при добавлении диетического дня");
@@ -83,7 +87,10 @@ const AddDietDay = () => {
   return (
     <>
       <AdminHeader />
-      <Container maxWidth="sm" sx={{ mt: 4, p: 3, bgcolor: "#f5f5f5", borderRadius: 2, boxShadow: 3 }}>
+      <Container
+        maxWidth="sm"
+        sx={{ mt: 4, p: 3, bgcolor: "#f5f5f5", borderRadius: 2, boxShadow: 3 }}
+      >
         <Typography variant="h4" gutterBottom textAlign="center">
           Добавление диетического дня
         </Typography>
@@ -92,7 +99,11 @@ const AddDietDay = () => {
         {error && <Alert severity="error">{error}</Alert>}
 
         {token ? (
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3, display: "flex", flexDirection: "column", gap: 2 }}>
+          <Box
+            component="form"
+            onSubmit={handleSubmit}
+            sx={{ mt: 3, display: "flex", flexDirection: "column", gap: 2 }}
+          >
             <TextField
               label="Название"
               value={name}
@@ -103,7 +114,11 @@ const AddDietDay = () => {
 
             <FormControl fullWidth required>
               <InputLabel>Тип диеты</InputLabel>
-              <Select value={selectedDietType} onChange={(e) => setSelectedDietType(e.target.value)}>
+              <Select
+                value={selectedDietType}
+                onChange={(e) => setSelectedDietType(e.target.value)}
+                input={<OutlinedInput label={"Тип диеты"} />}
+              >
                 <MenuItem value="">Выберите тип диеты</MenuItem>
                 {dietTypes.map((type) => (
                   <MenuItem key={type} value={type}>
@@ -125,7 +140,12 @@ const AddDietDay = () => {
                     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
                       {selected.map((mealId) => {
                         const meal = meals.find((m) => m.id === mealId);
-                        return meal ? <Chip key={mealId} label={`${meal.name} (${meal.calories} ккал)`} /> : null;
+                        return meal ? (
+                          <Chip
+                            key={mealId}
+                            label={`${meal.name} (${meal.calories} ккал)`}
+                          />
+                        ) : null;
                       })}
                     </Box>
                   )}

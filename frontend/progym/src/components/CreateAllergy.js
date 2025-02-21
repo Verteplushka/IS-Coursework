@@ -6,10 +6,12 @@ import {
   Typography,
   Alert,
   Box,
-  List,
-  ListItem,
-  Checkbox,
-  FormControlLabel,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  OutlinedInput,
+  Chip,
 } from "@mui/material";
 import axios from "axios";
 import AdminHeader from "./AdminHeader";
@@ -19,7 +21,6 @@ const CreateAllergy = () => {
     name: "",
     allergyMealsIds: [],
   });
-
   const [meals, setMeals] = useState([]); // Все блюда
   const [searchQuery, setSearchQuery] = useState(""); // Поисковый запрос
   const [message, setMessage] = useState("");
@@ -50,16 +51,12 @@ const CreateAllergy = () => {
     }));
   };
 
-  const handleCheckboxChange = (mealId) => {
-    setFormData((prev) => {
-      const newAllergyMealsIds = prev.allergyMealsIds.includes(mealId)
-        ? prev.allergyMealsIds.filter((id) => id !== mealId)
-        : [...prev.allergyMealsIds, mealId];
-      return {
-        ...prev,
-        allergyMealsIds: newAllergyMealsIds,
-      };
-    });
+  const handleMealChange = (e) => {
+    const { value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      allergyMealsIds: value, // Обновляем список выбранных блюд
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -114,32 +111,34 @@ const CreateAllergy = () => {
             fullWidth
             required
           />
-          <Typography variant="h6" gutterBottom>
-            Выберите блюда, которые вызывают аллергию:
-          </Typography>
-          {/* Поле для поиска блюд */}
-          <TextField
-            label="Поиск блюд"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            fullWidth
-            sx={{ mb: 2 }}
-          />
-          <List>
-            {filteredMeals.map((meal) => (
-              <ListItem key={meal.id}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={formData.allergyMealsIds.includes(meal.id)}
-                      onChange={() => handleCheckboxChange(meal.id)}
-                    />
-                  }
-                  label={meal.name}
-                />
-              </ListItem>
-            ))}
-          </List>
+
+          {/* Множественный выбор для блюд */}
+          <FormControl fullWidth required>
+            <InputLabel>Выберите блюда</InputLabel>
+            <Select
+              multiple
+              value={formData.allergyMealsIds}
+              onChange={handleMealChange}
+              input={<OutlinedInput label="Выберите блюда" />}
+              renderValue={(selected) => (
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                  {selected.map((mealId) => {
+                    const meal = meals.find((m) => m.id === mealId);
+                    return meal ? (
+                      <Chip key={mealId} label={`${meal.name}`} />
+                    ) : null;
+                  })}
+                </Box>
+              )}
+            >
+              {filteredMeals.map((meal) => (
+                <MenuItem key={meal.id} value={meal.id}>
+                  {meal.name} ({meal.calories} ккал)
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
           <Button type="submit" variant="contained" color="primary" fullWidth>
             Создать аллергию
           </Button>
