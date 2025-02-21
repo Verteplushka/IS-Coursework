@@ -28,9 +28,15 @@ const CreateExercise = () => {
 
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [descriptionError, setDescriptionError] = useState("");
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    if (name === "description" && value.length > 200) {
+      setDescriptionError("Описание не должно превышать 200 символов");
+    } else {
+      setDescriptionError("");
+    }
     setFormData((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
@@ -41,6 +47,11 @@ const CreateExercise = () => {
     e.preventDefault();
     setMessage("");
     setError("");
+
+    if (formData.description.length > 200) {
+      setError("Описание превышает 200 символов");
+      return;
+    }
 
     const token = localStorage.getItem("access_token");
     if (!token) {
@@ -106,18 +117,7 @@ const CreateExercise = () => {
               onChange={handleChange}
               input={<OutlinedInput label={"Группа мышц"} />}
             >
-              {[
-                "CHEST",
-                "BACK",
-                "SHOULDERS",
-                "BICEPS",
-                "TRICEPS",
-                "LEGS",
-                "CORE",
-                "GLUTES",
-                "FOREARMS",
-                "CARDIO",
-              ].map((group) => (
+              {["CHEST", "BACK", "SHOULDERS", "BICEPS", "TRICEPS", "LEGS", "CORE", "GLUTES", "FOREARMS", "CARDIO"].map((group) => (
                 <MenuItem key={group} value={group}>
                   {group}
                 </MenuItem>
@@ -143,6 +143,8 @@ const CreateExercise = () => {
             multiline
             rows={3}
             required
+            error={!!descriptionError}
+            helperText={descriptionError}
           />
           <TextField
             label="Инструкции по выполнению"

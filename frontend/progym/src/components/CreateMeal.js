@@ -12,12 +12,12 @@ const CreateMeal = () => {
     protein: "",
     fats: "",
     carbs: "",
-    allergiesIds: [] // Список ID аллергий
+    allergiesIds: []
   });
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [token, setToken] = useState("");
-  const [allergies, setAllergies] = useState([]); // Доступные аллергии
+  const [allergies, setAllergies] = useState([]);
 
   useEffect(() => {
     const storedToken = localStorage.getItem("access_token");
@@ -37,7 +37,6 @@ const CreateMeal = () => {
         }
       });
       if (response.data && response.data.allergies) {
-        // Конвертируем объект {id: "название"} в массив [{id, name}]
         const allergiesArray = Object.entries(response.data.allergies).map(([id, name]) => ({
           id: parseInt(id),
           name
@@ -52,6 +51,12 @@ const CreateMeal = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+    if (name === "name" && value.length > 50) {
+      setError("Название блюда не должно превышать 50 символов");
+      return;
+    }
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -115,13 +120,21 @@ const CreateMeal = () => {
         
         {token ? (
           <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3, display: "flex", flexDirection: "column", gap: 2 }}>
-            <TextField label="Название блюда" name="name" value={formData.name} onChange={handleChange} fullWidth required />
+            <TextField 
+              label="Название блюда" 
+              name="name" 
+              value={formData.name} 
+              onChange={handleChange} 
+              fullWidth 
+              required 
+              inputProps={{ maxLength: 50 }} 
+              helperText={formData.name.length > 50 ? "Максимальная длина — 50 символов" : ""}
+            />
             <TextField label="Калории (ккал)" name="calories" type="number" value={formData.calories} onChange={handleChange} fullWidth required />
             <TextField label="Белки (г)" name="protein" type="number" value={formData.protein} onChange={handleChange} fullWidth required />
             <TextField label="Жиры (г)" name="fats" type="number" value={formData.fats} onChange={handleChange} fullWidth required />
             <TextField label="Углеводы (г)" name="carbs" type="number" value={formData.carbs} onChange={handleChange} fullWidth required />
 
-            {/* Выбор аллергий */}
             <FormControl fullWidth>
               <InputLabel>Аллергии</InputLabel>
               <Select
