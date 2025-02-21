@@ -68,9 +68,13 @@ public class AdminService {
         User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
 
         Meal meal = new Meal(user, mealRequest.getName(), mealRequest.getCalories(), mealRequest.getProtein(), mealRequest.getFats(), mealRequest.getCarbs(), LocalDate.now(clock));
+        System.out.println("saveMeal, meal: "+meal);
         Set<Allergy> allergies = allergyRepository.findAllByIdIn(mealRequest.getAllergiesIds());
+        System.out.println("allergies: "+allergies);
         meal.setAllergies(allergies);
+        System.out.println("newMeal: "+meal);
         Meal savedMeal = mealRepository.save(meal);
+        System.out.println("savedMeal: "+savedMeal);
         return savedMeal;
     }
 
