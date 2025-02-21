@@ -82,7 +82,7 @@ public class AdminService {
         String login = jwtService.extractUsername(token);
         User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
 
-        DietDayAdmin dietDayAdmin = dietDayAdminRepository.save(new DietDayAdmin(user, dietDayRequest.getName(), LocalDate.now(clock)));
+        DietDayAdmin dietDayAdmin = dietDayAdminRepository.save(new DietDayAdmin(user, dietDayRequest.getName(), LocalDate.now(clock), dietDayRequest.getDietType()));
         for (Map.Entry<Long, Double> mealPortion : dietDayRequest.getMealPortions().entrySet()) {
             Meal meal = mealRepository.findById(mealPortion.getKey()).orElseThrow(() -> new RuntimeException("Meal with id = " + mealPortion.getKey() + " not found"));
             mealDietDayAdminRepository.save(new MealDietDayAdmin(dietDayAdmin, meal, mealPortion.getValue()));
