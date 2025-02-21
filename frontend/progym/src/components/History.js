@@ -231,64 +231,40 @@ const History = () => {
                         </Box>
 
                         {expandedDietIndex === idx && (
-                          <Box
-                            sx={{ display: "flex", flexDirection: "column" }}
-                          >
-                            {/* Информация о калориях и БЖУ */}
-                            <Box
-                              sx={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                              }}
-                            >
-                              <Box sx={{ flex: 1 }}>
-                                <Typography variant="body2">
-                                  <strong>Калории:</strong>{" "}
-                                  {Math.round(diet.calories)} ккал
-                                </Typography>
-                                <Typography variant="body2">
-                                  <strong>Белки:</strong>{" "}
-                                  {Math.round(diet.protein)} г
-                                </Typography>
-                                <Typography variant="body2">
-                                  <strong>Жиры:</strong> {Math.round(diet.fats)}{" "}
-                                  г
-                                </Typography>
-                                <Typography variant="body2">
-                                  <strong>Углеводы:</strong>{" "}
-                                  {Math.round(diet.carbs)} г
-                                </Typography>
-                              </Box>
+                            <Box sx={{ mt: 2, width: "100%" }}>
+                              {/* Информация о калориях и БЖУ */}
+                              <Typography variant="body2">
+                                <strong>Калории:</strong> {Math.round(diet.calories)} ккал
+                              </Typography>
+                              <Typography variant="body2">
+                                <strong>Белки:</strong> {Math.round(diet.protein)} г
+                              </Typography>
+                              <Typography variant="body2">
+                                <strong>Жиры:</strong> {Math.round(diet.fats)} г
+                              </Typography>
+                              <Typography variant="body2">
+                                <strong>Углеводы:</strong> {Math.round(diet.carbs)} г
+                              </Typography>
 
-                              {/* Правая колонка с блюдами */}
-                              <Box sx={{ flex: 1 }}>
-                                <Typography
-                                  variant="body2"
-                                  sx={{
-                                    mt: 2,
-                                    fontWeight: "bold",
-                                    textAlign: "center",
-                                  }}
-                                >
-                                  <strong>Блюда:</strong>
-                                </Typography>
-                                <List>
-                                  {diet.meals.map((meal, mealIndex) => (
-                                    <ListItem
-                                      key={mealIndex}
-                                      sx={{ paddingLeft: 0 }}
-                                    >
-                                      <Typography variant="body2">
-                                        {meal.name} <br /> (
-                                        {Math.round(meal.calories)} ккал)
-                                      </Typography>
-                                    </ListItem>
-                                  ))}
-                                </List>
-                              </Box>
+                              {/* Список блюд */}
+                              <Typography
+                                variant="body2"
+                                sx={{ mt: 2, fontWeight: "bold" }}
+                              >
+                                <strong>Блюда:</strong>
+                              </Typography>
+                              <List>
+                                {diet.meals.map((meal, mealIndex) => (
+                                  <ListItem key={mealIndex} sx={{ paddingLeft: 0 }}>
+                                    <Typography variant="body2">
+                                      {meal.name} ({Math.round(meal.calories)} ккал)
+                                    </Typography>
+                                  </ListItem>
+                                ))}
+                              </List>
                             </Box>
-                          </Box>
-                        )}
+                          )}
+
                       </ListItem>
                     ))}
                   </List>

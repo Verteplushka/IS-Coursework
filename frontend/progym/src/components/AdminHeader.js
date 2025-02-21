@@ -132,9 +132,6 @@ const Header = () => {
               open={Boolean(anchorEl)}
               onClose={handleMenuClose}
             >
-              <MenuItem onClick={handleProfileClick}>
-                <AccountCircle sx={{ mr: 1 }} /> Профиль
-              </MenuItem>
               <MenuItem onClick={handleLogoutClick}>
                 <ExitToApp sx={{ mr: 1 }} /> Выйти
               </MenuItem>

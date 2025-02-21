@@ -340,7 +340,7 @@ const HomePage = () => {
                         </Typography>
                         <Box sx={{ height: 10 }} />
                         <Typography variant="body2">
-                          <strong>Инструкция:</strong>
+                          <strong>Инструкция:</strong>{" "}
                           {exercise.execution_instructions}
                         </Typography>
                         {exercise.sets && exercise.repetitions ? (

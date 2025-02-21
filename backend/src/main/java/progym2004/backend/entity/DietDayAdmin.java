@@ -40,11 +40,12 @@ public class DietDayAdmin {
     private DietType dietType;
 
 
-    public DietDayAdmin(User user, String name, LocalDate whenCreated){
+    public DietDayAdmin(User user, String name, LocalDate whenCreated, DietType dietType){
         this.createdBy = user;
         this.name = name;
         this.calories = 0.0;
         this.whenCreated = whenCreated;
+        this.dietType = dietType;
     }
 }
 
