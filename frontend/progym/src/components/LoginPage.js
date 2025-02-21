@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { Container, TextField, Button, Typography, Box, Link } from "@mui/material";
 import axios from "axios";
-import { useNavigate } from "react-router-dom"; // Используем useNavigate для перенаправления
+import { useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const navigate = useNavigate(); // Инициализируем navigate
+  const navigate = useNavigate();
 
   const handleLogin = async () => {
     try {
@@ -15,9 +15,23 @@ const LoginPage = () => {
         login,
         password,
       });
-      localStorage.setItem("access_token", response.data.access_token);
+      
+      const accessToken = response.data.access_token;
+      localStorage.setItem("access_token", accessToken);
       localStorage.setItem("refresh_token", response.data.refresh_token);
-      window.location.href = "/Home";
+      
+      // Получаем роль пользователя
+      const userResponse = await axios.get("/api/general/get_user", {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      
+      const userRole = userResponse.data.role;
+      
+      if (userRole === "ADMIN") {
+        navigate("/CreateExercise");
+      } else {
+        navigate("/home");
+      }
     } catch (err) {
       setError("Ошибка авторизации. Проверьте логин и пароль.");
     }
@@ -53,11 +67,7 @@ const LoginPage = () => {
         <Box mt={2}>
           <Typography variant="body2" align="center">
             Нет аккаунта?{" "}
-            <Link
-              component="button"
-              variant="body2"
-              onClick={() => navigate("/register")} // Переход на страницу регистрации
-            >
+            <Link component="button" variant="body2" onClick={() => navigate("/register")}>
               Зарегистрироваться
             </Link>
           </Typography>
