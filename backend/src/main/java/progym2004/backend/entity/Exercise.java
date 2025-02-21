@@ -54,7 +54,7 @@ public class Exercise {
     @OneToMany(mappedBy = "exercise")
     private Set<ExerciseTrainingDay> exerciseTrainingDays;
 
-    public Exercise(User user, String name, MuscleGroup muscleGroup, String description, String executionInstructions, boolean isCompound, LocalDate whenCreated) {
+    public Exercise(User user, String name, MuscleGroup muscleGroup, String description, String executionInstructions, boolean isCompound, LocalDate whenCreated, Integer recommendedRepetitions) {
         this.createdBy = user;
         this.name = name;
         this.muscleGroup = muscleGroup;
@@ -62,5 +62,6 @@ public class Exercise {
         this.executionInstructions = executionInstructions;
         this.isCompound = isCompound;
         this.whenCreated = whenCreated;
+        this.recommendedRepetitions = recommendedRepetitions;
     }
 }

@@ -47,7 +47,7 @@ public class AdminService {
         String login = jwtService.extractUsername(token);
         User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
 
-        Exercise exercise = new Exercise(user, exerciseRequest.getName(), exerciseRequest.getMuscleGroup(), exerciseRequest.getDescription(), exerciseRequest.getExecutionInstructions(), exerciseRequest.isCompound(), LocalDate.now(clock));
+        Exercise exercise = new Exercise(user, exerciseRequest.getName(), exerciseRequest.getMuscleGroup(), exerciseRequest.getDescription(), exerciseRequest.getExecutionInstructions(), exerciseRequest.isCompound(), LocalDate.now(clock), exerciseRequest.getRecommendedRepetitions());
         return exerciseRepository.save(exercise);
     }
 
