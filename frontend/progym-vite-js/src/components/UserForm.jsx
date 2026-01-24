@@ -261,7 +261,6 @@ const UserForm = () => {
       const requestData = {
         ...formData,
         allergiesIds: selectedAllergies,
-        dietPreference: "OMNIVORE",
       };
 
       sendUserForm(requestData)

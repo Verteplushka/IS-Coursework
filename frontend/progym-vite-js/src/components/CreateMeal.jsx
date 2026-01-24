@@ -13,7 +13,6 @@ import {
   OutlinedInput,
   Chip,
 } from "@mui/material";
-import axios from "axios";
 import AdminHeader from "./AdminHeader";
 import { getAllAllergies } from "../api/general/Allergies";
 import { addMeal } from "../api/general/Meals";
@@ -44,9 +43,9 @@ const CreateMeal = () => {
 
   const fetchAllergies = async (token) => {
     try {
-      const response = await getAllAllergies();
-      if (response.data && response.data.allergies) {
-        const allergiesArray = Object.entries(response.data.allergies).map(
+      const data = await getAllAllergies();
+      if (data && data.allergies) {
+        const allergiesArray = Object.entries(data.allergies).map(
           ([id, name]) => ({
             id: parseInt(id),
             name,
