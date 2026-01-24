@@ -2,7 +2,7 @@ import api from "../Axios";
 
 export const getAllAllergies = async () => {
   try {
-    const res = await api.get("/general/get_all_allergies");
+    const res = await api.get("/allergies");
     return res.data;
   } catch (err) {
     console.error(err);
@@ -11,7 +11,7 @@ export const getAllAllergies = async () => {
 
 export const addAllergy = async (allergyData) => {
   try {
-    const res = await api.post("/general/add_allergy", allergyData);
+    const res = await api.post("/admin/allergies", allergyData);
     return res.data;
   } catch (err) {
     console.error(err);

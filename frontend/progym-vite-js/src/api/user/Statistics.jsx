@@ -2,7 +2,7 @@ import api from "../Axios";
 
 export const getTrainingStatistics = async (data) => {
   try {
-    const res = await api.get("/user/get_training_statistics", data);
+    const res = await api.get("/users/me/trainings/statistics", data);
     return res.data;
   } catch (err) {
     console.error(err);
@@ -11,7 +11,7 @@ export const getTrainingStatistics = async (data) => {
 
 export const getDietStatistics = async (data) => {
   try {
-    const res = await api.get("/user/get_diet_statistics", data);
+    const res = await api.get("/users/me/diet/statistics", data);
     return res.data;
   } catch (err) {
     console.error(err);
@@ -20,7 +20,7 @@ export const getDietStatistics = async (data) => {
 
 export const getWeightProgress = async (data) => {
   try {
-    const res = await api.get("/user/get_weight_progress", data);
+    const res = await api.get("/users/me/weight-progress", data);
     return res.data;
   } catch (err) {
     console.error(err);

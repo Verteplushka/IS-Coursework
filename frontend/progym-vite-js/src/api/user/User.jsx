@@ -2,7 +2,7 @@ import api from "../Axios";
 
 export const getCurrentUser = async () => {
   try {
-    const res = await api.get("/general/get_user");
+    const res = await api.get("/users");
     return res.data;
   } catch (err) {
     console.error(err);
@@ -11,7 +11,7 @@ export const getCurrentUser = async () => {
 
 export const getUserParams = async () => {
   try {
-    const res = await api.get("/user/get_user_params");
+    const res = await api.get("/users/me/params");
     return res.data;
   } catch (err) {
     console.error(err);
@@ -20,7 +20,7 @@ export const getUserParams = async () => {
 
 export const getCurrentDay = async () => {
   try {
-    const res = await api.get("/general/get_day");
+    const res = await api.get("/day");
     return res.data;
   } catch (err) {
     console.error(err);
@@ -29,7 +29,7 @@ export const getCurrentDay = async () => {
 
 export const sendUserForm = async (data) => {
   try {
-    const res = await api.post("/user/sendForm", data);
+    const res = await api.post("/users/me/form", data);
     return res.data;
   } catch (err) {
     console.error(err);
@@ -38,7 +38,7 @@ export const sendUserForm = async (data) => {
 
 export const isUserLazy = async (data) => {
   try {
-    const res = await api.get("/user/is_user_lazy", data);
+    const res = await api.get("/users/me/status/lazy", data);
     return res.data;
   } catch (err) {
     console.error(err);
