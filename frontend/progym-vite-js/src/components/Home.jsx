@@ -18,12 +18,24 @@ import {
 } from "@mui/material";
 import Header from "./Header";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import {
+  getUserParams,
+  getCurrentDay,
+  sendUserForm,
+  isUserLazy,
+} from "../api/user/User";
+import { regenerateTodayDiet, getTodayDiet } from "../api/user/Diet";
+import {
+  regenerateTodayTraining,
+  completeTodayTraining,
+  uncompleteTodayTraining,
+  getTodayTraining,
+} from "../api/user/Training";
 
 const HomePage = () => {
   const [diet, setDiet] = useState(null);
   const [training, setTraining] = useState(null);
-  const [isTrainingCompleted, setIsTrainingCompleted] = useState(false); // Состояние для отслеживания завершенности тренировки
+  const [isTrainingCompleted, setIsTrainingCompleted] = useState(false);
   const [isEndingSoon, setIsEndingSoon] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const token = localStorage.getItem("access_token");
@@ -33,19 +45,16 @@ const HomePage = () => {
   useEffect(() => {
     if (!token) return;
 
-    fetch("http://localhost:8080/api/user/get_user_params", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
+    getUserParams()
       .then((data) => {
-        console.log("Полученные данные пользователя:", data); // Лог для отладки
-        setUserParams(data); // Сохраняем параметры пользователя в состояние
+        console.log("Полученные данные пользователя:", data);
+        setUserParams(data);
         setIsEndingSoon(data.endingSoon);
         if (data.endingSoon) {
           console.log(
             "Тренировойный план все, нужно предложить новый: ",
-            data.endingSoon
-          ); // Лог для отладки
+            data.endingSoon,
+          );
           setOpenDialog(true);
         }
       })
@@ -54,12 +63,7 @@ const HomePage = () => {
 
   const handleContinue = async () => {
     try {
-      const dayResponse = await axios.get(
-        "http://localhost:8080/api/general/get_day",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const dayResponse = getCurrentDay();
 
       if (userParams) {
         const updatedParams = {
@@ -67,14 +71,7 @@ const HomePage = () => {
           startTraining: dayResponse.data,
         };
 
-        await axios.post(
-          "http://localhost:8080/api/user/sendForm",
-          updatedParams,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        // Перезагружаем страницу после успешного запроса
+        sendUserForm(updatedParams);
         window.location.reload();
       }
 
@@ -88,86 +85,50 @@ const HomePage = () => {
     navigate("/userform");
   };
 
-  // Функция для обновления диеты
   const regenerateDiet = () => {
-    fetch("http://localhost:8080/api/user/regenerate_today_diet", {
-      method: "GET",
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    regenerateTodayDiet()
       .then(() => fetchDiet())
       .catch(console.error);
   };
 
-  // Функция для обновления тренировки
   const regenerateTraining = () => {
-    fetch("http://localhost:8080/api/user/regenerate_today_training", {
-      method: "GET",
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(() => fetchTraining())
-      .catch(console.error);
+    regenerateTodayTraining.then(() => fetchTraining()).catch(console.error);
   };
 
-  // Функция для пометки тренировки как выполненной
   const completeTraining = () => {
-    fetch("http://localhost:8080/api/user/complete_training", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    })
-      .then((res) => res.text())
+    completeTodayTraining()
       .then((message) => {
-        setIsTrainingCompleted(true); // Помечаем тренировку как завершенную
+        setIsTrainingCompleted(true);
       })
       .catch(console.error);
   };
 
-  // Функция для отмены статуса тренировки
   const uncompleteTraining = () => {
-    fetch("http://localhost:8080/api/user/uncomplete_training", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => res.text())
+    uncompleteTodayTraining()
       .then((message) => {
-        setIsTrainingCompleted(false); // Сбрасываем статус тренировки
+        setIsTrainingCompleted(false);
       })
       .catch(console.error);
   };
 
-  // Запрашиваем данные о диете
   const fetchDiet = () => {
-    fetch("http://localhost:8080/api/user/get_today_diet", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
-      .then(setDiet)
-      .catch(console.error);
+    getTodayDiet().then(setDiet).catch(console.error);
   };
 
-  // Запрашиваем данные о тренировке
   const fetchTraining = () => {
-    fetch("http://localhost:8080/api/user/get_today_training", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
+    getTodayTraining()
       .then((data) => {
         setTraining(data);
-        setIsTrainingCompleted(data.completed); // Инициализируем статус тренировки
+        setIsTrainingCompleted(data.completed);
       })
       .catch(console.error);
   };
 
-  const [isLazy, setIsLazy] = useState(false); // Состояние для проверки ленивости
-  const [openMotivationalDialog, setOpenMotivationalDialog] = useState(false); // Состояние для управления диалогом
+  const [isLazy, setIsLazy] = useState(false);
+  const [openMotivationalDialog, setOpenMotivationalDialog] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [motivationalLink, setMotivationalLink] = useState(""); // Ссылка на мотивационное видео
+  const [motivationalLink, setMotivationalLink] = useState("");
 
-  // Список мотивационных видео
   const motivationalVideos = [
     "https://www.youtube.com/watch?v=8Y1HcUOr8io",
     "https://www.youtube.com/watch?v=RJQisT_dndc",
@@ -175,7 +136,6 @@ const HomePage = () => {
     "https://www.youtube.com/watch?v=7cSHcUP-8Os",
   ];
 
-  // Мотивационные фразы
   const motivationalMessages = [
     "«Чемпионами становятся не в тренажёрных залах. Чемпиона рождает то, что у человека внутри — желания, мечты, цели», — Мухаммед Али 🚀",
     "«Я никогда не понимал значение слова «сдаться»», — Жан-Клод Ван Дамм 💪",
@@ -191,29 +151,10 @@ const HomePage = () => {
     }
 
     try {
-      // Запрос для проверки ленивости пользователя
-      const lazyResponse = await fetch(
-        "http://localhost:8080/api/user/is_user_lazy",
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (!lazyResponse.ok) {
-        throw new Error("Ошибка при запросе данных о ленивости");
-      }
-
-      const isLazy = await lazyResponse.json();
-
+      const isLazy = await isUserLazy();
       console.log("Is user lazy?", isLazy);
+      setIsLazy(isLazy);
 
-      setIsLazy(isLazy); // Сохраняем результат проверки ленивости
-
-      // Если пользователь ленивый, открываем диалог
       if (isLazy) {
         const randomLink =
           motivationalVideos[
@@ -237,7 +178,6 @@ const HomePage = () => {
     fetchTraining();
   }, [token]);
 
-  // Группируем приемы пищи по категориям
   const mealGroups = diet
     ? diet.meals.reduce((acc, meal) => {
         if (!acc[meal.mealPosition]) {
@@ -259,7 +199,6 @@ const HomePage = () => {
     <>
       <Header />
       <Container maxWidth="md" sx={{ mt: 4 }}>
-        {/* Элемент для ленивых пользователей */}
         {isLazy && (
           <Box sx={{ mb: 4 }}>
             <Card sx={{ p: 2 }}>
@@ -282,7 +221,7 @@ const HomePage = () => {
                 <iframe
                   width="100%"
                   height="315"
-                  src={motivationalLink.replace("watch?v=", "embed/")} // Преобразуем ссылку для встраивания
+                  src={motivationalLink.replace("watch?v=", "embed/")}
                   title="Motivational Video"
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -293,7 +232,6 @@ const HomePage = () => {
           </Box>
         )}
         <Grid container spacing={10}>
-          {/* Всплывающее окно */}
           <Dialog open={openDialog} onClose={handleContinue}>
             <DialogTitle>Обновление данных</DialogTitle>
             <DialogContent>
@@ -311,7 +249,6 @@ const HomePage = () => {
               </Button>
             </DialogActions>
           </Dialog>
-          {/* Блок с тренировкой */}
           <Grid item xs={12} md={6}>
             <Card sx={{ p: 2 }}>
               <CardContent>
@@ -366,7 +303,6 @@ const HomePage = () => {
                   </Typography>
                 )}
 
-                {/* Кнопки только если тренировка не завершена и данные о тренировке есть */}
                 {training &&
                   training.exercises.length > 0 &&
                   !isTrainingCompleted && (
@@ -403,7 +339,6 @@ const HomePage = () => {
                     </>
                   )}
 
-                {/* Кнопки только если тренировка завершена */}
                 {isTrainingCompleted && (
                   <>
                     <Typography
@@ -426,7 +361,6 @@ const HomePage = () => {
             </Card>
           </Grid>
 
-          {/* Блок с диетой */}
           <Grid item xs={12} md={6}>
             <Card sx={{ mb: 3, p: 2 }}>
               <CardContent>
@@ -512,7 +446,6 @@ const HomePage = () => {
                   </Typography>
                 )}
 
-                {/* Кнопка обновления диеты только если данные о диете есть */}
                 {diet && (
                   <Button
                     onClick={regenerateDiet}

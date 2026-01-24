@@ -34,18 +34,15 @@ public class TrainingGenerator {
         LocalDate startDate = trainingStartDate;
         LocalDate endDate = startDate.plusMonths(1);
 
-        // Удаляем все существующие тренировочные дни пользователя в этом периоде
         trainingDayRepository.deleteAllByUserAndTrainingDateGreaterThanEqual(user, LocalDate.now(clock));
 
         List<Integer> trainingDaysOfWeek = calculateTrainingDaysOfWeek(availableDaysPerWeek, trainingStartDate);
         int exercisesPerTraining = calculateExercisesPerTraining(user.getFitnessLevel(), user.getAvailableDays());
 
-        // Получаем список всех мышечных групп
         List<MuscleGroup> allMuscleGroups = Arrays.stream(MuscleGroup.values())
                 .filter(mg -> mg != MuscleGroup.CARDIO)
                 .toList();
 
-        // Считаем, сколько мышечных групп должно быть в каждой тренировке
         int muscleGroupsPerTraining = Math.max(1, allMuscleGroups.size() / availableDaysPerWeek);
 
         int trainingDayCount = 0;
@@ -95,7 +92,6 @@ public class TrainingGenerator {
         Collections.shuffle(allMuscleGroups);
         List<MuscleGroup> selectedMuscleGroups = allMuscleGroups.subList(0, Math.min(2, allMuscleGroups.size()));
 
-        // Создаем новую тренировку
         TrainingDay trainingDay = generateTrainingDay(user, today, exercisesPerTraining, selectedMuscleGroups);
         trainingDayRepository.save(trainingDay);
     }
@@ -103,8 +99,6 @@ public class TrainingGenerator {
 
     private List<Integer> calculateTrainingDaysOfWeek(int availableDaysPerWeek, LocalDate trainingStartDate) {
         List<Integer> trainingDaysOfWeek = new ArrayList<>();
-
-        // День недели начала тренировок
         int startDayOfWeek = trainingStartDate.getDayOfWeek().getValue();
 
         // Конфигурации для разных дней недели (с учетом доступных дней)

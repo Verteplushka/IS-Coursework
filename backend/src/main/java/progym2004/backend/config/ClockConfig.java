@@ -10,7 +10,6 @@ import java.time.ZoneId;
 
 @Configuration
 public class ClockConfig {
-//    @Primary
     @Bean
     public Clock systemClock() {
         return Clock.systemDefaultZone();
@@ -19,7 +18,7 @@ public class ClockConfig {
     @Primary
     @Bean
     public Clock fixedClock() {
-        return Clock.fixed(LocalDate.of(2025, 3, 23).atStartOfDay(ZoneId.systemDefault()).toInstant(), ZoneId.systemDefault());
+        return Clock.fixed(LocalDate.of(2025, 12, 19).atStartOfDay(ZoneId.systemDefault()).toInstant(), ZoneId.systemDefault());
     }
 }
 

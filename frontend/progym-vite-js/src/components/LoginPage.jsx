@@ -7,8 +7,9 @@ import {
   Box,
   Link,
 } from "@mui/material";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { getCurrentUser } from "../api/user/User";
+import { sendLogin } from "../api/auth/Auth";
 
 const LoginPage = () => {
   const [login, setLogin] = useState("");
@@ -18,27 +19,14 @@ const LoginPage = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post(
-        "http://localhost:8080/api/auth/authenticate",
-        {
-          login,
-          password,
-        }
-      );
+      const response = await sendLogin(login, password);
 
-      const accessToken = response.data.access_token;
+      const accessToken = response.access_token;
       localStorage.setItem("access_token", accessToken);
-      localStorage.setItem("refresh_token", response.data.refresh_token);
+      localStorage.setItem("refresh_token", response.refresh_token);
 
-      // Получаем роль пользователя
-      const userResponse = await axios.get(
-        "http://localhost:8080/api/general/get_user",
-        {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        }
-      );
-
-      const userRole = userResponse.data.role;
+      const userResponseData = getCurrentUser();
+      const userRole = userResponseData.role;
 
       if (userRole === "ADMIN") {
         navigate("/CreateExercise");

@@ -11,12 +11,9 @@ import progym2004.backend.mapper.MealMapper;
 import progym2004.backend.repository.AllergyRepository;
 import progym2004.backend.repository.MealRepository;
 import progym2004.backend.repository.UserRepository;
-import progym2004.backend.user.MealDto;
-import progym2004.backend.user.MealResponse;
 
 import java.time.Clock;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;

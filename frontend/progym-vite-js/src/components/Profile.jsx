@@ -28,7 +28,6 @@ import {
   Legend,
 } from "chart.js";
 
-// Регистрируем необходимые компоненты для Chart.js
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -36,13 +35,18 @@ ChartJS.register(
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
 );
+import {
+  getTrainingStatistics,
+  getDietStatistics,
+  getWeightProgress,
+} from "../api/user/Statistics";
 
 const Profile = () => {
   const [trainingStats, setTrainingStats] = useState(null);
   const [dietStats, setDietStats] = useState(null);
-  const [weightProgress, setWeightProgress] = useState(null); // Состояние для веса
+  const [weightProgress, setWeightProgress] = useState(null);
   const [loading, setLoading] = useState(true);
   const token = localStorage.getItem("access_token");
 
@@ -54,46 +58,15 @@ const Profile = () => {
       }
 
       try {
-        const trainingResponse = await fetch(
-          "http://localhost:8080/api/user/get_training_statistics",
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        const trainingData = await trainingResponse.json();
+        const trainingData = await getTrainingStatistics();
+        const dietData = await getDietStatistics();
+        const weightData = await getWeightProgress();
 
-        const dietResponse = await fetch(
-          "http://localhost:8080/api/user/get_diet_statistics",
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        const dietData = await dietResponse.json();
-
-        // Новый запрос для получения прогресса по весу
-        const weightResponse = await fetch(
-          "http://localhost:8080/api/user/get_weight_progress",
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        const weightData = await weightResponse.json();
+        console.log(trainingData, dietData, weightData);
 
         setTrainingStats(trainingData);
         setDietStats(dietData);
-        setWeightProgress(weightData); // Сохраняем прогресс по весу в состояние
+        setWeightProgress(weightData);
       } catch (error) {
         console.error("Ошибка при загрузке статистики:", error);
       } finally {
@@ -112,12 +85,10 @@ const Profile = () => {
     );
   }
 
-  // Проверка на наличие данных перед их отображением
   if (!trainingStats || !dietStats || !weightProgress) {
     return <Typography sx={{ p: 4 }}>Ошибка загрузки статистики.</Typography>;
   }
 
-  // Мотивационные речи
   const getMotivationalMessage = () => {
     const completionPercentage = trainingStats.completionPercentage;
     if (completionPercentage >= 90) {
@@ -131,7 +102,6 @@ const Profile = () => {
     }
   };
 
-  // Мотивация по прогрессу по весу
   const getWeightMotivation = () => {
     const weightChanges = weightProgress.weights;
     const latestWeight = weightChanges[weightChanges.length - 1].weight;
@@ -142,7 +112,7 @@ const Profile = () => {
 
     if (latestWeight < previousWeight) {
       return `Красава! Ты скинул ${Math.abs(
-        previousWeight - latestWeight
+        previousWeight - latestWeight,
       ).toFixed(2)} кг! 💪 Продолжай в том же духе!`;
     } else if (latestWeight > previousWeight) {
       return `Ооо, немного набрал вес. Все будет ок, главное не сдаваться! 🚀 Следующий шаг - сбросить это!`;
@@ -151,11 +121,9 @@ const Profile = () => {
     }
   };
 
-  // Данные для графика
   const weightDates = weightProgress.weights.map((entry) => entry.weightDate);
   const weightValues = weightProgress.weights.map((entry) => entry.weight);
 
-  // Данные для графика
   const data = {
     labels: weightDates,
     datasets: [
@@ -173,7 +141,6 @@ const Profile = () => {
     <div>
       <Header />
       <Container maxWidth="md" sx={{ mt: 4 }}>
-        {/* Мотивационная речь */}
         <Box sx={{ mb: 4, textAlign: "center" }}>
           <Typography variant="h4" gutterBottom>
             Твой прогресс
@@ -187,7 +154,6 @@ const Profile = () => {
         </Box>
 
         <Grid container spacing={3}>
-          {/* Статистика тренировок */}
           <Grid item xs={12} md={6}>
             <Card sx={{ p: 2 }}>
               <CardContent>
@@ -223,7 +189,6 @@ const Profile = () => {
             </Card>
           </Grid>
 
-          {/* Статистика питания */}
           <Grid item xs={12} md={6}>
             <Card sx={{ p: 2 }}>
               <CardContent>
@@ -239,13 +204,15 @@ const Profile = () => {
                   {dietStats.totalCalories.toFixed(2)}
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 1 }}>
-                  <strong>Белки:</strong> {dietStats.totalProtein.toFixed(2)} г{" "}
+                  <strong>Белки:</strong> {dietStats.totalProtein.toFixed(2)}{" "}
+                  г{" "}
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 1 }}>
                   <strong>Жиры:</strong> {dietStats.totalFats.toFixed(2)} г{" "}
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 1 }}>
-                  <strong>Углеводы:</strong> {dietStats.totalCarbs.toFixed(2)} г{" "}
+                  <strong>Углеводы:</strong> {dietStats.totalCarbs.toFixed(2)}{" "}
+                  г{" "}
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 1 }}>
                   <strong>Средняя калорийность за день:</strong>{" "}
@@ -259,7 +226,6 @@ const Profile = () => {
             </Card>
           </Grid>
 
-          {/* График прогресса по весу */}
           <Grid item xs={12}>
             <Card sx={{ p: 2 }}>
               <CardContent>

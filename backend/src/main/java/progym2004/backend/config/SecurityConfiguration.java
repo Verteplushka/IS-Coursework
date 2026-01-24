@@ -76,11 +76,10 @@ public class SecurityConfiguration {
         return http.build();
     }
 
-    // 🔥 Добавляем CORS конфигурацию
     @Bean
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000")); // Разрешаем React-клиенту
+        config.setAllowedOrigins(List.of("http://5.39.255.241"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         config.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
         config.setAllowCredentials(true);
@@ -90,7 +89,6 @@ public class SecurityConfiguration {
         return source;
     }
 
-    // 🔥 Добавляем CORS фильтр
     @Bean
     public CorsFilter corsFilter() {
         return new CorsFilter(corsConfigurationSource());

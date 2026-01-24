@@ -15,6 +15,9 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import AdminHeader from "./AdminHeader";
+import { addDietDay } from "../api/general/DietDay";
+import { getAllMeals } from "../api/general/Meals";
+import { getDietTypes } from "../api/general/General";
 
 const AddDietDay = () => {
   const [name, setName] = useState("");
@@ -35,18 +38,12 @@ const AddDietDay = () => {
   useEffect(() => {
     if (!token) return;
 
-    axios
-      .get("http://localhost:8080/api/general/get_all_meals", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => setMeals(res.data.meals))
+    getAllMeals()
+      .then((data) => setMeals(data.meals))
       .catch((err) => setError("Ошибка загрузки блюд"));
 
-    axios
-      .get("http://localhost:8080/api/general/get_diet_types", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => setDietTypes(res.data))
+    getDietTypes()
+      .then((data) => setDietTypes(data))
       .catch((err) => setError("Ошибка загрузки типов диет"));
   }, [token]);
 
@@ -66,18 +63,12 @@ const AddDietDay = () => {
       name,
       dietType: selectedDietType,
       meals: Object.entries(selectedMeals).flatMap(([position, meals]) =>
-        meals.map((meal) => ({ ...meal, mealPosition: position }))
+        meals.map((meal) => ({ ...meal, mealPosition: position })),
       ),
     };
 
     try {
-      await axios.post(
-        "http://localhost:8080/api/admin/add_diet_day",
-        requestData,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      await addDietDay(requestData);
       setMessage("Диетический день успешно добавлен!");
     } catch (err) {
       setError("Ошибка при добавлении диетического дня");

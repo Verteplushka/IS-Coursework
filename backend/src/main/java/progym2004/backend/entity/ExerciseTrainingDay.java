@@ -2,10 +2,6 @@ package progym2004.backend.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import progym2004.backend.user.ExerciseDto;
-import progym2004.backend.user.TrainingGenerator;
-
-import java.time.LocalDate;
 
 @Entity
 @Table(name = "exercise_training_day")

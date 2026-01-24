@@ -1,9 +1,22 @@
 import { useState, useEffect } from "react";
 import {
-  Container, TextField, Button, Typography, Alert, Box, Select, MenuItem, InputLabel, FormControl, OutlinedInput, Chip
+  Container,
+  TextField,
+  Button,
+  Typography,
+  Alert,
+  Box,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+  OutlinedInput,
+  Chip,
 } from "@mui/material";
 import axios from "axios";
 import AdminHeader from "./AdminHeader";
+import { getAllAllergies } from "../api/general/Allergies";
+import { addMeal } from "../api/general/Meals";
 
 const CreateMeal = () => {
   const [formData, setFormData] = useState({
@@ -12,12 +25,12 @@ const CreateMeal = () => {
     protein: "",
     fats: "",
     carbs: "",
-    allergiesIds: [] // Список ID аллергий
+    allergiesIds: [],
   });
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [token, setToken] = useState("");
-  const [allergies, setAllergies] = useState([]); // Доступные аллергии
+  const [allergies, setAllergies] = useState([]);
 
   useEffect(() => {
     const storedToken = localStorage.getItem("access_token");
@@ -31,17 +44,14 @@ const CreateMeal = () => {
 
   const fetchAllergies = async (token) => {
     try {
-      const response = await axios.get("http://localhost:8080/api/general/get_all_allergies", {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      const response = await getAllAllergies();
       if (response.data && response.data.allergies) {
-        // Конвертируем объект {id: "название"} в массив [{id, name}]
-        const allergiesArray = Object.entries(response.data.allergies).map(([id, name]) => ({
-          id: parseInt(id),
-          name
-        }));
+        const allergiesArray = Object.entries(response.data.allergies).map(
+          ([id, name]) => ({
+            id: parseInt(id),
+            name,
+          }),
+        );
         setAllergies(allergiesArray);
       }
     } catch (err) {
@@ -61,7 +71,7 @@ const CreateMeal = () => {
   const handleAllergyChange = (event) => {
     setFormData((prev) => ({
       ...prev,
-      allergiesIds: event.target.value
+      allergiesIds: event.target.value,
     }));
   };
 
@@ -76,16 +86,7 @@ const CreateMeal = () => {
     }
 
     try {
-      const response = await axios.post(
-        "http://localhost:8080/api/admin/add_meal",
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await addMeal(formData);
       setMessage("Блюдо успешно добавлено");
       setFormData({
         name: "",
@@ -93,7 +94,7 @@ const CreateMeal = () => {
         protein: "",
         fats: "",
         carbs: "",
-        allergiesIds: []
+        allergiesIds: [],
       });
     } catch (err) {
       if (err.response && err.response.status === 403) {
@@ -108,20 +109,67 @@ const CreateMeal = () => {
   return (
     <>
       <AdminHeader />
-      <Container maxWidth="sm" sx={{ mt: 4, p: 3, bgcolor: "#f5f5f5", borderRadius: 2, boxShadow: 3 }}>
-        <Typography variant="h4" gutterBottom textAlign="center">Добавить блюдо</Typography>
+      <Container
+        maxWidth="sm"
+        sx={{ mt: 4, p: 3, bgcolor: "#f5f5f5", borderRadius: 2, boxShadow: 3 }}
+      >
+        <Typography variant="h4" gutterBottom textAlign="center">
+          Добавить блюдо
+        </Typography>
         {message && <Alert severity="success">{message}</Alert>}
         {error && <Alert severity="error">{error}</Alert>}
-        
-        {token ? (
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3, display: "flex", flexDirection: "column", gap: 2 }}>
-            <TextField label="Название блюда" name="name" value={formData.name} onChange={handleChange} fullWidth required />
-            <TextField label="Калории (ккал)" name="calories" type="number" value={formData.calories} onChange={handleChange} fullWidth required />
-            <TextField label="Белки (г)" name="protein" type="number" value={formData.protein} onChange={handleChange} fullWidth required />
-            <TextField label="Жиры (г)" name="fats" type="number" value={formData.fats} onChange={handleChange} fullWidth required />
-            <TextField label="Углеводы (г)" name="carbs" type="number" value={formData.carbs} onChange={handleChange} fullWidth required />
 
-            {/* Выбор аллергий */}
+        {token ? (
+          <Box
+            component="form"
+            onSubmit={handleSubmit}
+            sx={{ mt: 3, display: "flex", flexDirection: "column", gap: 2 }}
+          >
+            <TextField
+              label="Название блюда"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              fullWidth
+              required
+            />
+            <TextField
+              label="Калории (ккал)"
+              name="calories"
+              type="number"
+              value={formData.calories}
+              onChange={handleChange}
+              fullWidth
+              required
+            />
+            <TextField
+              label="Белки (г)"
+              name="protein"
+              type="number"
+              value={formData.protein}
+              onChange={handleChange}
+              fullWidth
+              required
+            />
+            <TextField
+              label="Жиры (г)"
+              name="fats"
+              type="number"
+              value={formData.fats}
+              onChange={handleChange}
+              fullWidth
+              required
+            />
+            <TextField
+              label="Углеводы (г)"
+              name="carbs"
+              type="number"
+              value={formData.carbs}
+              onChange={handleChange}
+              fullWidth
+              required
+            />
+
             <FormControl fullWidth>
               <InputLabel>Аллергии</InputLabel>
               <Select
@@ -133,7 +181,9 @@ const CreateMeal = () => {
                   <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
                     {selected.map((id) => {
                       const allergy = allergies.find((a) => a.id === id);
-                      return allergy ? <Chip key={id} label={allergy.name} /> : null;
+                      return allergy ? (
+                        <Chip key={id} label={allergy.name} />
+                      ) : null;
                     })}
                   </Box>
                 )}
@@ -146,10 +196,14 @@ const CreateMeal = () => {
               </Select>
             </FormControl>
 
-            <Button type="submit" variant="contained" color="primary" fullWidth>Добавить блюдо</Button>
+            <Button type="submit" variant="contained" color="primary" fullWidth>
+              Добавить блюдо
+            </Button>
           </Box>
         ) : (
-          <Typography textAlign="center" color="error">Токен не найден, перезайдите в систему.</Typography>
+          <Typography textAlign="center" color="error">
+            Токен не найден, перезайдите в систему.
+          </Typography>
         )}
       </Container>
     </>

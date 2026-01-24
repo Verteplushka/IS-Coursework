@@ -7,26 +7,20 @@ import {
   Box,
   Link,
 } from "@mui/material";
-import axios from "axios";
-import { useNavigate } from "react-router-dom"; // заменили useHistory на useNavigate
+import { useNavigate } from "react-router-dom";
+import { sendRegister } from "../api/auth/Auth";
 
 const RegistrationPage = () => {
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const navigate = useNavigate(); // используем useNavigate для навигации
+  const navigate = useNavigate();
 
   const handleRegister = async () => {
     try {
-      const response = await axios.post(
-        "http://localhost:8080/api/auth/register",
-        {
-          login,
-          password,
-        }
-      );
-      localStorage.setItem("access_token", response.data.access_token);
-      localStorage.setItem("refresh_token", response.data.refresh_token);
+      const response = await sendRegister(login, password);
+      localStorage.setItem("access_token", response.access_token);
+      localStorage.setItem("refresh_token", response.refresh_token);
       window.location.href = "/UserForm";
     } catch (err) {
       setError("Ошибка регистрации. Попробуйте снова.");
@@ -34,7 +28,7 @@ const RegistrationPage = () => {
   };
 
   const handleGoToLogin = () => {
-    navigate("/"); // заменили history.push на navigate
+    navigate("/");
   };
 
   return (

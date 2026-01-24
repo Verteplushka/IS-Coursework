@@ -1,11 +1,9 @@
 package progym2004.backend.mapper;
 
-import progym2004.backend.entity.Exercise;
 import progym2004.backend.entity.ExerciseTrainingDay;
 import progym2004.backend.user.ExerciseDto;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ExerciseMapper {

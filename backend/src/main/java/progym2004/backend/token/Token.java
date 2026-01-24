@@ -20,7 +20,6 @@ import progym2004.backend.entity.User;
 @AllArgsConstructor
 @Entity
 public class Token {
-
     @Id
     @GeneratedValue
     public Integer id;

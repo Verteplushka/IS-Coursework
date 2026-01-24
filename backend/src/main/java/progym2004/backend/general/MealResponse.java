@@ -1,10 +1,9 @@
-package progym2004.backend.user;
+package progym2004.backend.general;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import progym2004.backend.entity.MealPosition;
 
 @Getter
 @Setter

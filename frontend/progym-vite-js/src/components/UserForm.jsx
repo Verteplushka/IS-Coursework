@@ -19,7 +19,10 @@ import {
   Alert,
 } from "@mui/material";
 import axios from "axios";
-import Header from "./Header"; // Импортируем шапку
+import Header from "./Header";
+import { getAllAllergies } from "../api/general/Allergies";
+import { getDay } from "../api/general/General";
+import { getUserParams, sendUserForm } from "../api/user/User";
 
 const UserForm = () => {
   const [formData, setFormData] = useState({
@@ -49,9 +52,9 @@ const UserForm = () => {
     startTraining: "",
     dietPreference: "",
   });
-  const [isSubmitting, setIsSubmitting] = useState(false); // Для отслеживания загрузки
-  const [submitStatus, setSubmitStatus] = useState(null); // Для статуса отправки (success/error)
-  const [snackbarOpen, setSnackbarOpen] = useState(false); // Для управления Snackbar
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   useEffect(() => {
     // const today = new Date();
@@ -65,18 +68,13 @@ const UserForm = () => {
 
     const token = localStorage.getItem("access_token");
     if (token) {
-      axios
-        .get("api/general/get_all_allergies", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then((response) => {
+      getAllAllergies()
+        .then((data) => {
           setAllergies(
-            Object.entries(response.data.allergies).map(([id, name]) => ({
+            Object.entries(data.allergies).map(([id, name]) => ({
               id,
               name,
-            }))
+            })),
           );
         })
         .catch((err) => {
@@ -88,23 +86,14 @@ const UserForm = () => {
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     if (token) {
-      // Получаем дату начала тренировок с бэкенда
-      axios
-        .get("http://localhost:8080/api/general/get_day", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then((response) => {
-          const trainingStartDate = response.data; // Дата начала тренировок
-
+      getDay()
+        .then((data) => {
           setFormData((prevData) => ({
             ...prevData,
-            startTraining: trainingStartDate, // Устанавливаем дату начала тренировок
+            startTraining: data,
           }));
 
-          // Сохраняем сегодняшнюю дату в состоянии
-          setCurrentDay(response.data);
+          setCurrentDay(data);
         })
         .catch((err) => {
           console.error("Не удалось загрузить дату начала тренировок.", err);
@@ -115,20 +104,15 @@ const UserForm = () => {
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     if (token) {
-      axios
-        .get("http://localhost:8080/api/user/get_user_params", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then((response) => {
+      getUserParams()
+        .then((data) => {
           setFormData((prevData) => ({
             ...prevData,
-            ...response.data,
+            ...data,
           }));
 
-          if (response.data.allergiesIds) {
-            setSelectedAllergies(response.data.allergiesIds.map(String));
+          if (data.allergiesIds) {
+            setSelectedAllergies(data.allergiesIds.map(String));
           }
         })
         .catch((err) => {
@@ -156,7 +140,7 @@ const UserForm = () => {
   const handleAllergyChange = (e) => {
     const { value, checked } = e.target;
     setSelectedAllergies((prev) =>
-      checked ? [...prev, value] : prev.filter((id) => id !== value)
+      checked ? [...prev, value] : prev.filter((id) => id !== value),
     );
   };
 
@@ -176,7 +160,6 @@ const UserForm = () => {
 
     let errors = {};
 
-    // Проверка даты рождения
     const birthDateObj = new Date(birthDate);
     const currentDate = new Date(currentDay);
     currentDate.setHours(0, 0, 0, 0);
@@ -192,7 +175,6 @@ const UserForm = () => {
       errors.birthDate = "Дата рождения не может быть раньше 1900-01-01.";
     }
 
-    // Проверка роста
     const heightValue = parseInt(height);
     if (
       !Number.isInteger(heightValue) ||
@@ -203,7 +185,6 @@ const UserForm = () => {
         "Рост должен быть целым числом в пределах от 100 до 250 см.";
     }
 
-    // Проверка веса
     const weightValue = parseInt(currentWeight);
     if (
       !Number.isInteger(weightValue) ||
@@ -214,14 +195,12 @@ const UserForm = () => {
         "Вес должен быть целым числом в пределах от 0 до 400 кг.";
     }
 
-    // Проверка даты начала тренировок
     const oneWeeksFromNow = new Date(currentDay);
     oneWeeksFromNow.setDate(oneWeeksFromNow.getDate() + 6);
     oneWeeksFromNow.setHours(0, 0, 0, 0);
     const startTrainingObj = new Date(startTraining);
     startTrainingObj.setHours(0, 0, 0, 0);
 
-    // Проверка
     if (!startTraining) {
       errors.startTraining = "Пожалуйста, укажите дату начала тренировок.";
     } else if (startTrainingObj < currentDate) {
@@ -259,7 +238,6 @@ const UserForm = () => {
       errors.availableDays = "Пожалуйста, укажите количество доступных дней.";
     }
 
-    // Проверка на обязательность заполнения всех полей
     if (
       !birthDate ||
       !gender ||
@@ -274,12 +252,11 @@ const UserForm = () => {
       errors.general = "Пожалуйста, заполните все поля.";
     }
 
-    // Если есть ошибки, отображаем их
     setValidationErrors(errors);
 
     if (Object.keys(errors).length === 0) {
-      setIsSubmitting(true); // Начинаем загрузку
-      setSubmitStatus(null); // Сбрасываем статус отправки
+      setIsSubmitting(true);
+      setSubmitStatus(null);
 
       const requestData = {
         ...formData,
@@ -287,23 +264,18 @@ const UserForm = () => {
         dietPreference: "OMNIVORE",
       };
 
-      axios
-        .post("http://localhost:8080/api/user/sendForm", requestData, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-          },
-        })
+      sendUserForm(requestData)
         .then(() => {
-          setSubmitStatus("success"); // Устанавливаем статус успеха
-          setSnackbarOpen(true); // Открываем Snackbar
+          setSubmitStatus("success");
+          setSnackbarOpen(true);
         })
         .catch((err) => {
           console.error("Ошибка при сохранении данных.", err);
-          setSubmitStatus("error"); // Устанавливаем статус ошибки
-          setSnackbarOpen(true); // Открываем Snackbar
+          setSubmitStatus("error");
+          setSnackbarOpen(true);
         })
         .finally(() => {
-          setIsSubmitting(false); // Завершаем загрузку
+          setIsSubmitting(false);
         });
     }
   };
@@ -332,7 +304,6 @@ const UserForm = () => {
           <Typography variant="h4">Заполните данные</Typography>
         </Box>
         <Grid container spacing={20}>
-          {/* Левая колонка (форма) */}
           <Grid item xs={12} md={6}>
             <Box
               display="flex"
@@ -346,7 +317,6 @@ const UserForm = () => {
                 </Typography>
               )}
 
-              {/* Поле для даты рождения */}
               <TextField
                 label="Дата рождения"
                 variant="outlined"
@@ -361,7 +331,6 @@ const UserForm = () => {
                 helperText={validationErrors.birthDate}
               />
 
-              {/* Поле для роста */}
               <TextField
                 label="Рост (см)"
                 variant="outlined"
@@ -374,7 +343,6 @@ const UserForm = () => {
                 helperText={validationErrors.height}
               />
 
-              {/* Поле для веса */}
               <TextField
                 label="Вес (кг)"
                 variant="outlined"
@@ -387,7 +355,6 @@ const UserForm = () => {
                 helperText={validationErrors.currentWeight}
               />
 
-              {/* Поле для выбора пола */}
               <FormControl
                 fullWidth
                 margin="normal"
@@ -405,7 +372,6 @@ const UserForm = () => {
                 </Select>
               </FormControl>
 
-              {/* Поле для выбора цели */}
               <FormControl
                 fullWidth
                 margin="normal"
@@ -434,7 +400,6 @@ const UserForm = () => {
                   onChange={handleChange}
                   label="Уровень подготовки"
                 >
-                  {/* Низкий уровень */}
                   <MenuItem value="1">
                     <Box>
                       <Typography>Низкий</Typography>
@@ -447,7 +412,6 @@ const UserForm = () => {
                     </Box>
                   </MenuItem>
 
-                  {/* Средний уровень */}
                   <MenuItem value="2">
                     <Box>
                       <Typography>Средний</Typography>
@@ -460,7 +424,6 @@ const UserForm = () => {
                     </Box>
                   </MenuItem>
 
-                  {/* Высокий уровень */}
                   <MenuItem value="3">
                     <Box>
                       <Typography>Высокий</Typography>
@@ -474,7 +437,6 @@ const UserForm = () => {
                   </MenuItem>
                 </Select>
               </FormControl>
-              {/* Поле для выбора уровня активности */}
               <FormControl fullWidth margin="normal">
                 <InputLabel>Уровень активности</InputLabel>
                 <Select
@@ -483,7 +445,6 @@ const UserForm = () => {
                   onChange={handleChange}
                   label="Уровень активности"
                 >
-                  {/* Сидячий */}
                   <MenuItem value="1">
                     <Box>
                       <Typography>Сидячий</Typography>
@@ -496,7 +457,6 @@ const UserForm = () => {
                     </Box>
                   </MenuItem>
 
-                  {/* Лёгкий */}
                   <MenuItem value="2">
                     <Box>
                       <Typography>Лёгкий</Typography>
@@ -509,7 +469,6 @@ const UserForm = () => {
                     </Box>
                   </MenuItem>
 
-                  {/* Средний */}
                   <MenuItem value="3">
                     <Box>
                       <Typography>Средний</Typography>
@@ -522,7 +481,6 @@ const UserForm = () => {
                     </Box>
                   </MenuItem>
 
-                  {/* Активный */}
                   <MenuItem value="4">
                     <Box>
                       <Typography>Активный</Typography>
@@ -535,7 +493,6 @@ const UserForm = () => {
                     </Box>
                   </MenuItem>
 
-                  {/* Очень активный */}
                   <MenuItem value="5">
                     <Box>
                       <Typography>Очень активный</Typography>
@@ -550,7 +507,6 @@ const UserForm = () => {
                 </Select>
               </FormControl>
 
-              {/* Поле для выбора доступных дней */}
               <FormControl
                 fullWidth
                 margin="normal"
@@ -573,7 +529,6 @@ const UserForm = () => {
                 </Select>
               </FormControl>
 
-              {/* Поле для начала тренировок */}
               <TextField
                 label="Дата начала тренировок"
                 variant="outlined"
@@ -588,7 +543,6 @@ const UserForm = () => {
                 helperText={validationErrors.startTraining}
               />
 
-              {/* Переключатель для вегетарианца */}
               <Box
                 display="flex"
                 alignItems="center"
@@ -600,7 +554,7 @@ const UserForm = () => {
                 <FormControlLabel
                   control={
                     <Switch
-                      checked={formData.dietPreference === "VEGETARIAN"} // Проверяем, является ли текущий выбор "VEGETARIAN"
+                      checked={formData.dietPreference === "VEGETARIAN"}
                       onChange={handleCheckboxChange}
                       name="dietPreference"
                       color="primary"
@@ -616,7 +570,6 @@ const UserForm = () => {
             </Box>
           </Grid>
 
-          {/* Правая колонка (аллергии) */}
           <Grid item xs={12} md={6}>
             <Box
               display="flex"

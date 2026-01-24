@@ -9,8 +9,14 @@ import {
   Avatar,
   Box,
 } from "@mui/material";
-import { AccountCircle, ExitToApp, Home, CalendarToday } from "@mui/icons-material";
+import {
+  AccountCircle,
+  ExitToApp,
+  Home,
+  CalendarToday,
+} from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+import { getCurrentUser } from "../api/user/User";
 
 const Header = () => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -21,19 +27,7 @@ const Header = () => {
   useEffect(() => {
     if (!token) return;
 
-    fetch("http://localhost:8080/api/general/get_user", {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Ошибка ${response.status}`);
-        }
-        return response.json();
-      })
+    getCurrentUser()
       .then((data) => setUser(data))
       .catch((error) => console.error("Ошибка загрузки пользователя:", error));
   }, [token]);
@@ -46,20 +40,11 @@ const Header = () => {
     setAnchorEl(null);
   };
 
-  const handleProfileClick = () => {
-    navigate("/profile");
-    handleMenuClose();
-  };
-
   const handleLogoutClick = () => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
     navigate("/");
     handleMenuClose();
-  };
-
-  const handleHomeClick = () => {
-    navigate("/CreateExercise");
   };
 
   const handleCreateExerciseClick = () => {
@@ -86,7 +71,6 @@ const Header = () => {
           </Typography>
         </Box>
 
-        {/* Меню навигации */}
         <Box
           display="flex"
           alignItems="center"
@@ -96,24 +80,24 @@ const Header = () => {
         >
           <IconButton color="inherit" onClick={handleCreateExerciseClick}>
             <Typography variant="body1" color="inherit">
-             Упражнение
+              Упражнение
             </Typography>
           </IconButton>
 
           <IconButton color="inherit" onClick={handleCreateMealClick}>
             <Typography variant="body1" color="inherit">
-            Блюдо
+              Блюдо
             </Typography>
           </IconButton>
 
           <IconButton color="inherit" onClick={handleCreateDietDayClick}>
             <Typography variant="body1" color="inherit">
-            Диетический день
+              Диетический день
             </Typography>
           </IconButton>
           <IconButton color="inherit" onClick={handleCreateAllergyClick}>
             <Typography variant="body1" color="inherit">
-            Аллергия
+              Аллергия
             </Typography>
           </IconButton>
         </Box>

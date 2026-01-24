@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import AdminHeader from "./AdminHeader";
+import { addExercise } from "../api/general/Exercise";
 
 const CreateExercise = () => {
   const [formData, setFormData] = useState({
@@ -49,16 +50,7 @@ const CreateExercise = () => {
     }
 
     try {
-      const response = await axios.post(
-        "http://localhost:8080/api/admin/add_exercise",
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await addExercise(formData);
       setMessage("Упражнение успешно создано");
       setFormData({
         name: "",

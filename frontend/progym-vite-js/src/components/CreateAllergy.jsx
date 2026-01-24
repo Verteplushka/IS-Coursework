@@ -15,32 +15,30 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import AdminHeader from "./AdminHeader";
+import { getAllMeals } from "../api/general/Meals";
+import { addAllergy } from "../api/general/Allergies";
 
 const CreateAllergy = () => {
   const [formData, setFormData] = useState({
     name: "",
     allergyMealsIds: [],
   });
-  const [meals, setMeals] = useState([]); // Все блюда
-  const [searchQuery, setSearchQuery] = useState(""); // Поисковый запрос
+  const [meals, setMeals] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
   const token = localStorage.getItem("access_token");
 
-  // Загрузка всех блюд
   useEffect(() => {
-    axios
-      .get("http://localhost:8080/api/general/get_all_meals", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => setMeals(res.data.meals))
+    axios;
+    getAllMeals()
+      .then((data) => setMeals(data.meals))
       .catch((err) => console.error("Ошибка загрузки блюд", err));
   }, [token]);
 
-  // Фильтрация блюд по поисковому запросу
   const filteredMeals = meals.filter((meal) =>
-    meal.name.toLowerCase().includes(searchQuery.toLowerCase())
+    meal.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const handleChange = (e) => {
@@ -55,7 +53,7 @@ const CreateAllergy = () => {
     const { value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      allergyMealsIds: value, // Обновляем список выбранных блюд
+      allergyMealsIds: value,
     }));
   };
 
@@ -65,16 +63,7 @@ const CreateAllergy = () => {
     setError("");
 
     try {
-      const response = await axios.post(
-        "http://localhost:8080/api/admin/add_allergy",
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const result = await addAllergy(formData);
       setMessage("Аллергия успешно создана");
       setFormData({
         name: "",
@@ -112,7 +101,6 @@ const CreateAllergy = () => {
             required
           />
 
-          {/* Множественный выбор для блюд */}
           <FormControl fullWidth required>
             <InputLabel>Выберите блюда</InputLabel>
             <Select

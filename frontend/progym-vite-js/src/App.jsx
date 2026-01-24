@@ -1,17 +1,16 @@
-import logo from "./logo.svg";
 import "./App.css";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import LoginPage from "./components/LoginPage"; // Убедись, что путь правильный
-import RegistrationPage from "./components/RegistrationPage"; // Импортируем страницу регистрации
-import UserForm from "./components/UserForm"; // Импортируем страницу по заполнению данных пользователя
-import Home from "./components/Home"; // Импортируем страницу по заполнению данных пользователя
-import History from "./components/History"; // Импортируем страницу по заполнению данных пользователя
-import Profile from "./components/Profile"; // Импортируем страницу по заполнению данных пользователя
-import TrainingCalendar from "./components/TrainingCalendar"; // Импортируем страницу по заполнению данных пользователя
-import CreateExercise from "./components/CreateExercise"; // Импортируем страницу по заполнению данных пользователя
-import CreateMeal from "./components/CreateMeal"; // Импортируем страницу по заполнению данных пользователя
-import CreateAllergy from "./components/CreateAllergy"; // Импортируем страницу по заполнению данных пользователя
-import CreateDietDay from "./components/CreateDietDay"; // Импортируем страницу по заполнению данных пользователя
+import LoginPage from "./components/LoginPage";
+import RegistrationPage from "./components/RegistrationPage";
+import UserForm from "./components/UserForm";
+import Home from "./components/Home";
+import History from "./components/History";
+import Profile from "./components/Profile";
+import TrainingCalendar from "./components/TrainingCalendar";
+import CreateExercise from "./components/CreateExercise";
+import CreateMeal from "./components/CreateMeal";
+import CreateAllergy from "./components/CreateAllergy";
+import CreateDietDay from "./components/CreateDietDay";
 
 function App() {
   return (

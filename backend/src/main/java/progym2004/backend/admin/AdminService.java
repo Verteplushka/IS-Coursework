@@ -1,18 +1,14 @@
 package progym2004.backend.admin;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import progym2004.backend.config.JwtService;
 import progym2004.backend.entity.*;
 import progym2004.backend.repository.*;
 
 import java.time.Clock;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -72,7 +68,6 @@ public class AdminService {
     }
 
 
-//    @Transactional
     public Meal saveMeal(MealRequest mealRequest, String token) {
         String login = jwtService.extractUsername(token);
         User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
@@ -94,15 +89,12 @@ public class AdminService {
 
         DietDayAdmin dietDayAdmin = dietDayAdminRepository.save(new DietDayAdmin(user, dietDayRequest.getName(), LocalDate.now(clock), dietDayRequest.getDietType()));
 
-        // Собираем все Meal по их id
         List<Long> mealIds = dietDayRequest.getMeals().stream()
                 .map(MealDietDayDto::getId)
                 .collect(Collectors.toList());
 
-        // Получаем все соответствующие Meal из базы данных
         List<Meal> meals = mealRepository.findAllById(mealIds);
 
-        // Создаем MealDietDayAdmin для каждого MealDietDayDto
         for (MealDietDayDto dto : dietDayRequest.getMeals()) {
             Meal meal = meals.stream()
                     .filter(m -> m.getId().equals(dto.getId()))
@@ -110,13 +102,12 @@ public class AdminService {
                     .orElseThrow(() -> new RuntimeException("Meal with id = " + dto.getId() + " not found"));
 
             MealDietDayAdmin mealDietDayAdmin = new MealDietDayAdmin(
-                    dietDayAdmin,          // Связываем с DietDayAdmin
-                    meal,                  // Добавляем найденный Meal
-                    dto.getPortionSize(),   // Устанавливаем размер порции
+                    dietDayAdmin,
+                    meal,
+                    dto.getPortionSize(),
                     dto.getMealPosition()
             );
 
-            // Сохраняем MealDietDayAdmin в базе данных
             mealDietDayAdminRepository.save(mealDietDayAdmin);
         }
 

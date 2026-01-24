@@ -7,8 +7,6 @@ import lombok.Setter;
 import progym2004.backend.entity.DietType;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 @Getter
 @Setter
