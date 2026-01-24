@@ -10,10 +10,6 @@ export const getAllMeals = async () => {
 };
 
 export const addMeal = async (data) => {
-  try {
-    const res = await api.post("/admin/add_meal", data);
-    return res.data;
-  } catch (err) {
-    console.error(err);
-  }
+  const res = await api.post("/admin/add_meal", data);
+  return res;
 };

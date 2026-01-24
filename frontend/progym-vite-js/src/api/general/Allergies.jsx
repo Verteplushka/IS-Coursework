@@ -10,10 +10,6 @@ export const getAllAllergies = async () => {
 };
 
 export const addAllergy = async (allergyData) => {
-  try {
-    const res = await api.post("/admin/add_allergy", allergyData);
-    return res.data;
-  } catch (err) {
-    console.error(err);
-  }
+  const res = await api.post("/admin/add_allergy", allergyData);
+  return res;
 };
