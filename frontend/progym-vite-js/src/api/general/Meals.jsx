@@ -11,7 +11,7 @@ export const getAllMeals = async () => {
 
 export const addMeal = async (data) => {
   try {
-    const res = await api.post("/general/add_meal", data);
+    const res = await api.post("/admin/add_meal", data);
     return res.data;
   } catch (err) {
     console.error(err);
