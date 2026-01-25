@@ -34,6 +34,13 @@ const AddDietDay = () => {
   const [error, setError] = useState(null);
 
   const token = localStorage.getItem("access_token");
+  const [searches, setSearches] = useState({
+    BREAKFAST: "",
+    LUNCH: "",
+    DINNER: "",
+    SNACK: "",
+  });
+
 
   useEffect(() => {
     if (!token) return;
@@ -120,8 +127,7 @@ const AddDietDay = () => {
             </FormControl>
 
             {Object.keys(selectedMeals).map((position) => {
-              const [search, setSearch] = useState("");
-
+              const search = searches[position];
 
               const filteredMeals = meals.filter((meal) =>
                   meal.name.toLowerCase().includes(search.toLowerCase())
@@ -140,24 +146,28 @@ const AddDietDay = () => {
                               {selected.map((mealId) => {
                                 const meal = meals.find((m) => m.id === mealId);
                                 return meal ? (
-                                    <Chip key={mealId} label={`${meal.name} (${meal.calories} ккал)`} />
+                                    <Chip
+                                        key={mealId}
+                                        label={`${meal.name} (${meal.calories} ккал)`}
+                                    />
                                 ) : null;
                               })}
                             </Box>
                         )}
-                        MenuProps={{
-                          PaperProps: { sx: { maxHeight: 300 } },
-                        }}
+                        MenuProps={{ PaperProps: { sx: { maxHeight: 300 } } }}
                     >
                       <Box sx={{ p: 1 }}>
                         <TextField
                             placeholder="Поиск..."
                             value={search}
-                            onChange={(e) => setSearch(e.target.value)}
+                            onChange={(e) =>
+                                setSearches((prev) => ({ ...prev, [position]: e.target.value }))
+                            }
                             size="small"
                             fullWidth
                         />
                       </Box>
+
                       {filteredMeals.map((meal) => (
                           <MenuItem key={meal.id} value={meal.id}>
                             {meal.name} ({meal.calories} ккал)
@@ -167,6 +177,7 @@ const AddDietDay = () => {
                   </FormControl>
               );
             })}
+
 
 
             <Button type="submit" variant="contained" color="primary" fullWidth>
