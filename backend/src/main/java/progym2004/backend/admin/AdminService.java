@@ -1,5 +1,6 @@
 package progym2004.backend.admin;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import progym2004.backend.config.JwtService;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class AdminService {
     private final Clock clock;
@@ -48,6 +50,7 @@ public class AdminService {
         User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
 
         Exercise exercise = new Exercise(user, exerciseRequest.getName(), exerciseRequest.getMuscleGroup(), exerciseRequest.getDescription(), exerciseRequest.getExecutionInstructions(), exerciseRequest.isCompound(), LocalDate.now(clock), exerciseRequest.getRecommendedRepetitions());
+        log.info("Saved new exercise with id {}", exercise.getId());
         return exerciseRepository.save(exercise);
     }
 
@@ -64,6 +67,7 @@ public class AdminService {
             mealRepository.save(meal);
         }
 
+        log.info("Saved new exercise with id {}", allergy.getId());
         return allergy;
     }
 
@@ -80,6 +84,7 @@ public class AdminService {
         System.out.println("newMeal: "+meal);
         Meal savedMeal = mealRepository.save(meal);
         System.out.println("savedMeal: "+savedMeal);
+        log.info("Saved new exercise with id {}", savedMeal.getId());
         return savedMeal;
     }
 
@@ -110,7 +115,7 @@ public class AdminService {
 
             mealDietDayAdminRepository.save(mealDietDayAdmin);
         }
-
+        log.info("Saved new exercise with id {}", dietDayAdmin.getId());
         return dietDayAdmin;
     }
 }
