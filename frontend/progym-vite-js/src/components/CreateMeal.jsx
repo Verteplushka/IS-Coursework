@@ -13,7 +13,6 @@ import {
   OutlinedInput,
   Chip,
 } from "@mui/material";
-import axios from "axios";
 import AdminHeader from "./AdminHeader";
 import { getAllAllergies } from "../api/general/Allergies";
 import { addMeal } from "../api/general/Meals";
@@ -27,6 +26,15 @@ const CreateMeal = () => {
     carbs: "",
     allergiesIds: [],
   });
+
+  const [errors, setErrors] = useState({
+    name: "",
+    calories: "",
+    protein: "",
+    fats: "",
+    carbs: "",
+  });
+
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [token, setToken] = useState("");
@@ -44,9 +52,9 @@ const CreateMeal = () => {
 
   const fetchAllergies = async (token) => {
     try {
-      const response = await getAllAllergies();
-      if (response.data && response.data.allergies) {
-        const allergiesArray = Object.entries(response.data.allergies).map(
+      const data = await getAllAllergies();
+      if (data && data.allergies) {
+        const allergiesArray = Object.entries(data.allergies).map(
           ([id, name]) => ({
             id: parseInt(id),
             name,
@@ -60,12 +68,68 @@ const CreateMeal = () => {
     }
   };
 
+  const validateForm = () => {
+    let newErrors = {
+      name: "",
+      calories: "",
+      protein: "",
+      fats: "",
+      carbs: "",
+    };
+    let isValid = true;
+
+    if (!formData.name.trim()) {
+      newErrors.name = "Укажите название блюда";
+      isValid = false;
+    }
+
+    const cal = Number(formData.calories);
+    if (formData.calories === "") {
+      newErrors.calories = "Укажите калории";
+      isValid = false;
+    } else if (cal < 0) {
+      newErrors.calories = "Значение калорий должно быть неотрицательным";
+      isValid = false;
+    }
+
+    const prot = Number(formData.protein);
+    if (formData.protein === "") {
+      newErrors.protein = "Укажите белки";
+      isValid = false;
+    } else if (prot < 0) {
+      newErrors.protein = "Значение белков должно быть неотрицательным";
+      isValid = false;
+    }
+
+    const fat = Number(formData.fats);
+    if (formData.fats === "") {
+      newErrors.fats = "Укажите жиры";
+      isValid = false;
+    } else if (fat < 0) {
+      newErrors.fats = "Значение жиров должно быть неотрицательным";
+      isValid = false;
+    }
+
+    const carb = Number(formData.carbs);
+    if (formData.carbs === "") {
+      newErrors.carbs = "Укажите углеводы";
+      isValid = false;
+    } else if (carb < 0) {
+      newErrors.carbs = "Значение углеводов должно быть неотрицательным";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
+    setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
   const handleAllergyChange = (event) => {
@@ -85,8 +149,12 @@ const CreateMeal = () => {
       return;
     }
 
+    if (!validateForm()) {
+      return;
+    }
+
     try {
-      const response = await addMeal(formData);
+      await addMeal(formData);
       setMessage("Блюдо успешно добавлено");
       setFormData({
         name: "",
@@ -96,6 +164,7 @@ const CreateMeal = () => {
         carbs: "",
         allergiesIds: [],
       });
+      setErrors({});
     } catch (err) {
       if (err.response && err.response.status === 403) {
         setError("Ошибка 403: недостаточно прав для выполнения операции.");
@@ -116,8 +185,17 @@ const CreateMeal = () => {
         <Typography variant="h4" gutterBottom textAlign="center">
           Добавить блюдо
         </Typography>
-        {message && <Alert severity="success">{message}</Alert>}
-        {error && <Alert severity="error">{error}</Alert>}
+
+        {message && (
+          <Alert severity="success" sx={{ mb: 2 }}>
+            {message}
+          </Alert>
+        )}
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
 
         {token ? (
           <Box
@@ -131,8 +209,10 @@ const CreateMeal = () => {
               value={formData.name}
               onChange={handleChange}
               fullWidth
-              required
+              error={!!errors.name}
+              helperText={errors.name}
             />
+
             <TextField
               label="Калории (ккал)"
               name="calories"
@@ -140,8 +220,10 @@ const CreateMeal = () => {
               value={formData.calories}
               onChange={handleChange}
               fullWidth
-              required
+              error={!!errors.calories}
+              helperText={errors.calories}
             />
+
             <TextField
               label="Белки (г)"
               name="protein"
@@ -149,8 +231,10 @@ const CreateMeal = () => {
               value={formData.protein}
               onChange={handleChange}
               fullWidth
-              required
+              error={!!errors.protein}
+              helperText={errors.protein}
             />
+
             <TextField
               label="Жиры (г)"
               name="fats"
@@ -158,8 +242,10 @@ const CreateMeal = () => {
               value={formData.fats}
               onChange={handleChange}
               fullWidth
-              required
+              error={!!errors.fats}
+              helperText={errors.fats}
             />
+
             <TextField
               label="Углеводы (г)"
               name="carbs"
@@ -167,7 +253,8 @@ const CreateMeal = () => {
               value={formData.carbs}
               onChange={handleChange}
               fullWidth
-              required
+              error={!!errors.carbs}
+              helperText={errors.carbs}
             />
 
             <FormControl fullWidth>
