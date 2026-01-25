@@ -119,36 +119,55 @@ const AddDietDay = () => {
               </Select>
             </FormControl>
 
-            {Object.keys(selectedMeals).map((position) => (
-              <FormControl key={position} fullWidth>
-                <InputLabel>{position}</InputLabel>
-                <Select
-                  multiple
-                  value={selectedMeals[position].map((meal) => meal.id)}
-                  onChange={(e) => handleMealChange(position, e.target.value)}
-                  input={<OutlinedInput label={position} />}
-                  renderValue={(selected) => (
-                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                      {selected.map((mealId) => {
-                        const meal = meals.find((m) => m.id === mealId);
-                        return meal ? (
-                          <Chip
-                            key={mealId}
-                            label={`${meal.name} (${meal.calories} ккал)`}
-                          />
-                        ) : null;
-                      })}
-                    </Box>
-                  )}
-                >
-                  {meals.map((meal) => (
-                    <MenuItem key={meal.id} value={meal.id}>
-                      {meal.name} ({meal.calories} ккал)
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            ))}
+            {Object.keys(selectedMeals).map((position) => {
+              const [search, setSearch] = useState("");
+
+
+              const filteredMeals = meals.filter((meal) =>
+                  meal.name.toLowerCase().includes(search.toLowerCase())
+              );
+
+              return (
+                  <FormControl key={position} fullWidth>
+                    <InputLabel>{position}</InputLabel>
+                    <Select
+                        multiple
+                        value={selectedMeals[position].map((meal) => meal.id)}
+                        onChange={(e) => handleMealChange(position, e.target.value)}
+                        input={<OutlinedInput label={position} />}
+                        renderValue={(selected) => (
+                            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                              {selected.map((mealId) => {
+                                const meal = meals.find((m) => m.id === mealId);
+                                return meal ? (
+                                    <Chip key={mealId} label={`${meal.name} (${meal.calories} ккал)`} />
+                                ) : null;
+                              })}
+                            </Box>
+                        )}
+                        MenuProps={{
+                          PaperProps: { sx: { maxHeight: 300 } },
+                        }}
+                    >
+                      <Box sx={{ p: 1 }}>
+                        <TextField
+                            placeholder="Поиск..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            size="small"
+                            fullWidth
+                        />
+                      </Box>
+                      {filteredMeals.map((meal) => (
+                          <MenuItem key={meal.id} value={meal.id}>
+                            {meal.name} ({meal.calories} ккал)
+                          </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+              );
+            })}
+
 
             <Button type="submit" variant="contained" color="primary" fullWidth>
               Добавить
