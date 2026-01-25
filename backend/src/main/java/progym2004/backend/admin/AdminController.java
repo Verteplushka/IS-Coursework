@@ -2,8 +2,12 @@ package progym2004.backend.admin;
 
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import progym2004.backend.exception.InvalidMealDataException;
+
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/admin")
@@ -39,4 +43,14 @@ public class AdminController {
         return ResponseEntity.ok("Diet day saved successfully");
     }
 
+    @ExceptionHandler(InvalidMealDataException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidMealData(InvalidMealDataException ex) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Некорректные данные блюда",
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
 }
