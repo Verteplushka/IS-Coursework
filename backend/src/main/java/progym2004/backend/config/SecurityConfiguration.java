@@ -31,17 +31,7 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 public class SecurityConfiguration {
 
     private static final String[] WHITE_LIST_URL = {
-            "/api/auth/**",
-            "/v2/api-docs",
-            "/v3/api-docs",
-            "/v3/api-docs/**",
-            "/swagger-resources",
-            "/swagger-resources/**",
-            "/configuration/ui",
-            "/configuration/security",
-            "/swagger-ui/**",
-            "/webjars/**",
-            "/swagger-ui.html"
+            "/auth/**"
     };
 
     private final JwtAuthenticationFilter jwtAuthFilter;
@@ -56,7 +46,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(req -> req
                         .requestMatchers(WHITE_LIST_URL)
                         .permitAll()
-                        .requestMatchers("/api/admin/**")
+                        .requestMatchers("/admin/**")
                         .hasAuthority(ADMIN.name())
                         .anyRequest()
                         .authenticated()
@@ -65,7 +55,7 @@ public class SecurityConfiguration {
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .logout(logout ->
-                        logout.logoutUrl("/api/auth/logout")
+                        logout.logoutUrl("/auth/logout")
                                 .addLogoutHandler(logoutHandler)
                                 .logoutSuccessHandler((req, res, auth) -> SecurityContextHolder.clearContext())
                 );

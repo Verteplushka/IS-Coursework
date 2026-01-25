@@ -1,14 +1,14 @@
 import api from "../Axios";
 
 export const getTodayTraining = () =>
-  api.get("/user/get_today_training").then((res) => res.data);
+  api.get("/users/me/trainings/today").then((res) => res.data);
 
 export const regenerateTodayTraining = () =>
-  api.get("/user/regenerate_today_training");
+  api.get("/users/me/trainings/today/regenerate");
 
-export const completeTodayTraining = () => api.post("/user/complete_training");
+export const completeTodayTraining = () => api.post("/users/me/trainings/today/complete");
 
 export const uncompleteTodayTraining = () =>
-  api.post("/user/uncomplete_training");
+  api.post("/users/me/trainings/today/uncomplete");
 
-export const getTrainingProgram = () => api.get("/user/get_training_program");
+export const getTrainingProgram = () => api.get("/users/me/training-program");

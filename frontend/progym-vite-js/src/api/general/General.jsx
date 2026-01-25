@@ -2,7 +2,7 @@ import api from "../Axios";
 
 export const getDay = async () => {
   try {
-    const res = await api.get("/general/get_day");
+    const res = await api.get("/days");
     return res.data;
   } catch (err) {
     console.error(err);
@@ -11,7 +11,7 @@ export const getDay = async () => {
 
 export const getDietTypes = async () => {
   try {
-    const res = await api.get("/general/get_diet_types");
+    const res = await api.get("/diets");
     return res.data;
   } catch (err) {
     console.error(err);

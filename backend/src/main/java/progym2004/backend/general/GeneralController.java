@@ -10,33 +10,32 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/general")
 public class GeneralController {
 
     private final GeneralService generalService;
 
-    @GetMapping("/get_all_allergies")
+    @GetMapping("/allergies")
     public ResponseEntity<AllergiesResponse> getAllAllergies(){
         return ResponseEntity.ok(generalService.getAllAllergies());
     }
 
-    @GetMapping("/get_all_meals")
+    @GetMapping("/meals")
     public ResponseEntity<MealsResponse> getAllMeals(){
         return ResponseEntity.ok(generalService.getAllMeals());
     }
 
-    @GetMapping("/get_diet_types")
+    @GetMapping("/diets")
     public ResponseEntity<List<DietType>> getDietTypes(){
         return ResponseEntity.ok(generalService.getAllDietTypes());
     }
 
-    @GetMapping("/get_user")
+    @GetMapping("/users")
     public ResponseEntity<UserResponse> getUser(@RequestHeader("Authorization") String token){
         String jwtToken = token.substring(7);
         return ResponseEntity.ok(generalService.getUser(jwtToken));
     }
 
-    @GetMapping("/get_day")
+    @GetMapping("/days")
     public ResponseEntity<LocalDate> getDay(){
         return ResponseEntity.ok(generalService.getDay());
     }
