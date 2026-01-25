@@ -25,7 +25,7 @@ const LoginPage = () => {
       localStorage.setItem("access_token", accessToken);
       localStorage.setItem("refresh_token", response.refresh_token);
 
-      const userResponseData = getCurrentUser();
+      const userResponseData = await getCurrentUser();
       const userRole = userResponseData.role;
 
       if (userRole === "ADMIN") {

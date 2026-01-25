@@ -15,10 +15,10 @@ public class ClockConfig {
         return Clock.systemDefaultZone();
     }
 
-    @Primary
-    @Bean
-    public Clock fixedClock() {
-        return Clock.fixed(LocalDate.of(2025, 12, 19).atStartOfDay(ZoneId.systemDefault()).toInstant(), ZoneId.systemDefault());
-    }
+//    @Primary
+//    @Bean
+//    public Clock fixedClock() {
+//        return Clock.fixed(LocalDate.of(2025, 12, 19).atStartOfDay(ZoneId.systemDefault()).toInstant(), ZoneId.systemDefault());
+//    }
 }
 
