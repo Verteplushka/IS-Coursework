@@ -16,4 +16,5 @@ public class ExerciseRequest {
     private boolean isCompound;
     private String description;
     private String executionInstructions;
+    private Integer recommendedRepetitions;
 }

@@ -1,5 +1,6 @@
 .idea/
 *.pdf
+tmp.txt
 
 ### --- BACKEND --- ###
 backend/HELP.md

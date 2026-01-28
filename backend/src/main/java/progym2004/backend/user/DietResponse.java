@@ -5,7 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Set;
+import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -13,9 +14,10 @@ import java.util.Set;
 @NoArgsConstructor
 public class DietResponse {
     private String name;
-    private Set<MealDto> meals;
+    private List<MealDto> meals;
     private Double calories;
     private Double protein;
     private Double fats;
     private Double carbs;
+    private LocalDate dietDate;
 }

@@ -5,7 +5,7 @@ BEGIN
     -- Обновляем общее количество калорий для конкретного diet_day_admin_id
     UPDATE diet_day_admin
     SET calories = COALESCE((
-        SELECT SUM(m.calories * md.portion_size)
+        SELECT SUM((m.calories / 100) * md.portion_size)
         FROM meal_diet_day_admin md
         JOIN meals m ON md.meal_id = m.meal_id
         WHERE md.diet_day_admin_id = NEW.diet_day_admin_id

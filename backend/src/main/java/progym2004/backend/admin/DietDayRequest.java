@@ -4,9 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import progym2004.backend.entity.DietType;
 
-import java.util.Map;
-import java.util.Set;
+import java.util.List;
 
 @Getter
 @Setter
@@ -14,5 +14,6 @@ import java.util.Set;
 @NoArgsConstructor
 public class DietDayRequest {
     private String name;
-    private Map<Long, Double> MealPortions;
+    private DietType dietType;
+    private List<MealDietDayDto> meals;
 }

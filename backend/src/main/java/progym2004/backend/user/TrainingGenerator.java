@@ -2,56 +2,103 @@ package progym2004.backend.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import progym2004.backend.entity.*;
 import progym2004.backend.repository.ExerciseRepository;
+import progym2004.backend.repository.ExerciseTrainingDayRepository;
 import progym2004.backend.repository.TrainingDayRepository;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class TrainingGenerator {
+    private final Clock clock;
+    private final ExerciseRepository exerciseRepository;
+    private final TrainingDayRepository trainingDayRepository;
+    private final ExerciseTrainingDayRepository exerciseTrainingDayRepository;
 
     @Autowired
-    private ExerciseRepository exerciseRepository;  // Репозиторий для упражнений
+    public TrainingGenerator(Clock clock, ExerciseRepository exerciseRepository, TrainingDayRepository trainingDayRepository, ExerciseTrainingDayRepository exerciseTrainingDayRepository) {
+        this.clock = clock;
+        this.exerciseRepository = exerciseRepository;
+        this.trainingDayRepository = trainingDayRepository;
+        this.exerciseTrainingDayRepository = exerciseTrainingDayRepository;
+    }
 
-    @Autowired
-    private TrainingDayRepository trainingDayRepository;  // Репозиторий для тренировочных дней
-
+    @Transactional
     public void regenerateTrainingProgram(User user, LocalDate trainingStartDate) {
         int availableDaysPerWeek = user.getAvailableDays();
+        LocalDate startDate = trainingStartDate;
+        LocalDate endDate = startDate.plusMonths(1);
 
-        // Генерируем тренировочные дни для следующего месяца
-        LocalDate startDate = trainingStartDate;  // День начала тренировок
-        LocalDate endDate = startDate.plusMonths(1);  // Конец месяца
-
-        // Удаляем все существующие тренировочные дни пользователя в этом периоде
-        trainingDayRepository.deleteAllByUserAndTrainingDateGreaterThanEqual(user, LocalDate.now());
+        trainingDayRepository.deleteAllByUserAndTrainingDateGreaterThanEqual(user, LocalDate.now(clock));
 
         List<Integer> trainingDaysOfWeek = calculateTrainingDaysOfWeek(availableDaysPerWeek, trainingStartDate);
         int exercisesPerTraining = calculateExercisesPerTraining(user.getFitnessLevel(), user.getAvailableDays());
 
+        List<MuscleGroup> allMuscleGroups = Arrays.stream(MuscleGroup.values())
+                .filter(mg -> mg != MuscleGroup.CARDIO)
+                .toList();
+
+        int muscleGroupsPerTraining = Math.max(1, allMuscleGroups.size() / availableDaysPerWeek);
+
         int trainingDayCount = 0;
+        List<MuscleGroup> weeklyMuscleGroups = new ArrayList<>(allMuscleGroups); // Копируем список
 
         while (startDate.isBefore(endDate)) {
-            // Проверяем, попадает ли текущий день в список доступных дней недели
             if (trainingDaysOfWeek.contains(startDate.getDayOfWeek().getValue())) {
-                // Если да, создаем тренировочный день
                 if (trainingDayCount < availableDaysPerWeek) {
-                    TrainingDay trainingDay = generateTrainingDay(user, startDate, exercisesPerTraining);
+                    // Берем нужное количество мышечных групп
+                    List<MuscleGroup> selectedMuscleGroups = weeklyMuscleGroups
+                            .subList(0, Math.min(muscleGroupsPerTraining, weeklyMuscleGroups.size()));
+
+                    // Создаем тренировочный день с выбранными мышечными группами
+                    TrainingDay trainingDay = generateTrainingDay(user, startDate, exercisesPerTraining, selectedMuscleGroups);
                     trainingDayRepository.save(trainingDay);
+
                     trainingDayCount++;
+
+                    // Удаляем использованные группы, чтобы в следующий раз взять новые
+                    weeklyMuscleGroups.removeAll(selectedMuscleGroups);
+
+                    // Если прошла неделя, сбрасываем список мышечных групп
+                    if (trainingDayCount >= availableDaysPerWeek) {
+                        trainingDayCount = 0;
+                        weeklyMuscleGroups = new ArrayList<>(allMuscleGroups); // Сбрасываем список
+                    }
                 }
             }
             startDate = startDate.plusDays(1);
         }
     }
 
+    @Transactional
+    public void regenerateTodayTraining(User user) {
+        LocalDate today = LocalDate.now(clock);
+
+        // Удаляем тренировку за сегодняшний день
+        trainingDayRepository.deleteByUserAndTrainingDate(user, today);
+
+        int exercisesPerTraining = calculateExercisesPerTraining(user.getFitnessLevel(), user.getAvailableDays());
+
+        // Получаем список всех мышечных групп (изменяемый список!)
+        List<MuscleGroup> allMuscleGroups = new ArrayList<>(Arrays.asList(MuscleGroup.values()));
+        allMuscleGroups.remove(MuscleGroup.CARDIO); // Исключаем CARDIO
+
+        // Выбираем случайные мышечные группы для сегодняшней тренировки
+        Collections.shuffle(allMuscleGroups);
+        List<MuscleGroup> selectedMuscleGroups = allMuscleGroups.subList(0, Math.min(2, allMuscleGroups.size()));
+
+        TrainingDay trainingDay = generateTrainingDay(user, today, exercisesPerTraining, selectedMuscleGroups);
+        trainingDayRepository.save(trainingDay);
+    }
+
+
     private List<Integer> calculateTrainingDaysOfWeek(int availableDaysPerWeek, LocalDate trainingStartDate) {
         List<Integer> trainingDaysOfWeek = new ArrayList<>();
-
-        // День недели начала тренировок
         int startDayOfWeek = trainingStartDate.getDayOfWeek().getValue();
 
         // Конфигурации для разных дней недели (с учетом доступных дней)
@@ -111,48 +158,54 @@ public class TrainingGenerator {
         return trainingDaysOfWeek;
     }
 
-    private TrainingDay generateTrainingDay(User user, LocalDate trainingDate, int exercisesPerTraining) {
-        TrainingDay trainingDay = new TrainingDay();
-        trainingDay.setUser(user);
-        trainingDay.setTrainingDate(trainingDate);
-
+    private TrainingDay generateTrainingDay(User user, LocalDate trainingDate, int exercisesPerTraining, List<MuscleGroup> targetMuscleGroups) {
+        TrainingDay trainingDay = trainingDayRepository.save(new TrainingDay(user, trainingDate));
         Goal goal = user.getGoal();
-        Set<Exercise> selectedExercises = new LinkedHashSet<>();
 
         // Получаем все возможные упражнения для пользователя
         List<Exercise> availableExercises = exerciseRepository.findAll();
-        Collections.shuffle(availableExercises); // Перемешиваем список случайным образом
+        Collections.shuffle(availableExercises);
 
-        // Отбираем упражнения, исключая CARDIO
-        List<Exercise> nonCardioExercises = availableExercises.stream()
-                .filter(ex -> ex.getMuscleGroup() != MuscleGroup.CARDIO)
+        // Отбираем упражнения только из переданных групп и исключаем CARDIO
+        List<Exercise> exercisesWithMuscleGroups = availableExercises.stream()
+                .filter(ex -> targetMuscleGroups.contains(ex.getMuscleGroup()) && ex.getMuscleGroup() != MuscleGroup.CARDIO)
                 .collect(Collectors.toList());
 
+        int numberInTraining = 0;
+
         // Кардио в начале
-        selectedExercises.add(selectCardioExercise(availableExercises));
+        exerciseTrainingDayRepository.save(new ExerciseTrainingDay(trainingDay, selectCardioExercise(availableExercises), numberInTraining, null, null));
+        numberInTraining++;
 
-        // Добавляем упражнения так, чтобы задействовать максимум разных групп мышц за неделю
-        Set<MuscleGroup> usedMuscleGroups = new HashSet<>();
-        for (Exercise exercise : nonCardioExercises) {
-            if (selectedExercises.size() >= exercisesPerTraining - 1) break; // -1, так как кардио уже добавлено
-            if (usedMuscleGroups.add(exercise.getMuscleGroup())) { // Добавляем, если этой группы мышц еще не было
-                selectedExercises.add(exercise);
+        // Генерируем упражнения по кругу для каждой из мышечных групп
+        int muscleGroupIndex = 0;
+        while (numberInTraining < exercisesPerTraining && !exercisesWithMuscleGroups.isEmpty()) {
+            MuscleGroup currentMuscleGroup = targetMuscleGroups.get(muscleGroupIndex);
+            // Находим упражнения для текущей группы мышц
+            List<Exercise> exercisesForCurrentGroup = exercisesWithMuscleGroups.stream()
+                    .filter(ex -> ex.getMuscleGroup() == currentMuscleGroup)
+                    .collect(Collectors.toList());
+
+            // Если есть упражнения для этой группы, добавляем одно
+            if (!exercisesForCurrentGroup.isEmpty()) {
+                Exercise exercise = exercisesForCurrentGroup.remove(0); // Берем первое упражнение из списка
+                exercisesWithMuscleGroups.remove(exercise); // Удаляем его из общего списка
+                saveExerciseAndGenerateRepetitionsAndSets(exercise, trainingDay, numberInTraining, user.getFitnessLevel(), goal);
+                numberInTraining++;
             }
+
+            // Переходим к следующей мышечной группе по кругу
+            muscleGroupIndex = (muscleGroupIndex + 1) % targetMuscleGroups.size();
         }
 
-        // Если осталось место, заполняем случайными упражнениями
-        while (selectedExercises.size() < exercisesPerTraining - 1 && !nonCardioExercises.isEmpty()) {
-            selectedExercises.add(nonCardioExercises.remove(0));
-        }
-
-        // Если условия выполняются, добавляем кардио-тренировку в конце
+        // Добавляем кардио в конце, если цель позволяет
         if ((goal == Goal.MAINTENANCE || goal == Goal.WEIGHT_LOSS) && exercisesPerTraining >= 4) {
-            selectedExercises.add(selectCardioExercise(availableExercises));
+            exerciseTrainingDayRepository.save(new ExerciseTrainingDay(trainingDay, selectCardioExercise(availableExercises), numberInTraining, null, null));
         }
 
-        trainingDay.setExercises(selectedExercises);
         return trainingDay;
     }
+
 
     // Метод для выбора случайного упражнения по указанной группе мышц
     private Exercise selectCardioExercise(List<Exercise> exercises) {
@@ -162,8 +215,27 @@ public class TrainingGenerator {
         return filteredExercises.isEmpty() ? null : filteredExercises.get(new Random().nextInt(filteredExercises.size()));
     }
 
+    private void saveExerciseAndGenerateRepetitionsAndSets(Exercise exercise, TrainingDay trainingDay, int numberInTraining, Integer fitnessLevel, Goal goal) {
+        Integer sets = fitnessLevel == 1 ? 3 : 4;
+        if (exercise.getRecommendedRepetitions() != null) {
+            Integer amplifier = switch (fitnessLevel) {
+                case 1 -> -5;
+                case 2 -> 0;
+                case 3 -> 5;
+                default -> throw new IllegalStateException("Unexpected value for fitnessLevel: " + fitnessLevel);
+            };
+            exerciseTrainingDayRepository.save(new ExerciseTrainingDay(trainingDay, exercise, numberInTraining, sets, exercise.getRecommendedRepetitions() + amplifier));
+        } else {
+            Integer repetitions = switch (goal) {
+                case MUSCLE_GAIN -> 10;
+                case MAINTENANCE -> 12;
+                case WEIGHT_LOSS -> 15;
+            };
+            exerciseTrainingDayRepository.save(new ExerciseTrainingDay(trainingDay, exercise, numberInTraining, sets, repetitions));
+        }
+    }
 
-    public static int calculateExercisesPerTraining(int exp, int days) {
+    private static int calculateExercisesPerTraining(int exp, int days) {
         switch (exp) {
             case 1:
                 if (days <= 3) {

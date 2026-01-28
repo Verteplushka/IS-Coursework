@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Set;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -15,4 +17,5 @@ public class MealRequest {
     private Double protein;
     private Double fats;
     private Double carbs;
+    Set<Long> allergiesIds;
 }

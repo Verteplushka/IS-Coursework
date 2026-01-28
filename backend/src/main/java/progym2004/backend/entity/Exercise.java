@@ -26,11 +26,6 @@ public class Exercise {
     @Column(name = "when_created", columnDefinition = "DATE DEFAULT CURRENT_DATE")
     private LocalDate whenCreated;
 
-    @PrePersist
-    protected void onCreate() {
-        this.whenCreated = LocalDate.now();
-    }
-
     @NotNull
     @Size(max = 50)
     @Column(name = "name", nullable = false)
@@ -53,15 +48,20 @@ public class Exercise {
     @Column(name = "is_compound", nullable = false)
     private boolean isCompound;
 
-    @ManyToMany(mappedBy = "exercises")
-    private Set<TrainingDay> trainingDays;
+    @Column(name = "recommended_repetitions")
+    private Integer recommendedRepetitions;
 
-    public Exercise(User user, String name, MuscleGroup muscleGroup, String description, String executionInstructions, boolean isCompound) {
+    @OneToMany(mappedBy = "exercise")
+    private Set<ExerciseTrainingDay> exerciseTrainingDays;
+
+    public Exercise(User user, String name, MuscleGroup muscleGroup, String description, String executionInstructions, boolean isCompound, LocalDate whenCreated, Integer recommendedRepetitions) {
         this.createdBy = user;
         this.name = name;
         this.muscleGroup = muscleGroup;
         this.description = description;
         this.executionInstructions = executionInstructions;
         this.isCompound = isCompound;
+        this.whenCreated = whenCreated;
+        this.recommendedRepetitions = recommendedRepetitions;
     }
 }

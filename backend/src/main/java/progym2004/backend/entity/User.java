@@ -92,6 +92,10 @@ public class User implements UserDetails {
     )
     private Set<Achievement> achievements;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "diet_preference", nullable = false)
+    private DietPreference dietPreference = DietPreference.OMNIVORE;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));
@@ -146,6 +150,7 @@ public class User implements UserDetails {
         this.availableDays = other.availableDays;
         this.role = other.role;
         this.startTraining = other.startTraining;
+        this.dietPreference = other.dietPreference;
         this.allergies = other.allergies != null ? new HashSet<>(other.allergies) : null;
         this.achievements = other.achievements != null ? new HashSet<>(other.achievements) : null;
     }

@@ -25,13 +25,8 @@ public class DietDayAdmin {
     @Column(name = "when_created", columnDefinition = "DATE DEFAULT CURRENT_DATE")
     private LocalDate whenCreated;
 
-    @PrePersist
-    protected void onCreate() {
-        this.whenCreated = LocalDate.now();
-    }
-
     @DecimalMin("0")
-    @DecimalMax("5000")
+    @DecimalMax("10000")
     @Column(name = "calories", nullable = false)
     private Double calories;
 
@@ -40,10 +35,17 @@ public class DietDayAdmin {
     @Column(name = "name", nullable = false)
     private String name;
 
-    public DietDayAdmin(User user, String name){
+    @Enumerated(EnumType.STRING)
+    @Column(name = "diet_type", nullable = false)
+    private DietType dietType;
+
+
+    public DietDayAdmin(User user, String name, LocalDate whenCreated, DietType dietType){
         this.createdBy = user;
         this.name = name;
         this.calories = 0.0;
+        this.whenCreated = whenCreated;
+        this.dietType = dietType;
     }
 }
 

@@ -31,10 +31,10 @@ public class WeightJournal {
     @Column(name = "weight_date", columnDefinition = "DATE DEFAULT CURRENT_DATE")
     private LocalDate weightDate;
 
-    public WeightJournal(User user, Double weight){
+    public WeightJournal(User user, Double weight, LocalDate weightDate){
         this.user = user;
         this.weight = weight;
-        this.weightDate = LocalDate.now();
+        this.weightDate = weightDate;
     }
 }
 
